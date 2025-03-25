@@ -8,4 +8,9 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\RouteBeheerBL\RouteBeheerBL.csproj" />
+    <ProjectReference Include="..\RouteBeheerDL\RouteBeheerDL.csproj" />
+  </ItemGroup>
+
 </Project>
