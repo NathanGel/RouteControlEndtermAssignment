@@ -5,6 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace UnitTestsModelRouteBeheer {
-    internal class UnitTestsStretch {
+    public class UnitTestsStretch {
     }
 }
