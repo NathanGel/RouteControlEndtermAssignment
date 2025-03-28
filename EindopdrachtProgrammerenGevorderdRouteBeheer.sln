@@ -8,6 +8,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RouteBeheerDL", "RouteBehee
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPFRouteBeheerUI", "WPFRouteBeheerUI\WPFRouteBeheerUI.csproj", "{8515D5C0-5CC7-4710-9300-B9564B8C8F4E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPFNetwerkBeheerUI", "WPFNetwerkBeheerUI\WPFNetwerkBeheerUI.csproj", "{47F8FC2D-AEC6-4669-B0F3-9FBBA7655CE6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPFFaciliteitBeheerUI", "WPFFaciliteitBeheerUI\WPFFaciliteitBeheerUI.csproj", "{D340225B-32ED-47BF-8426-9236E0C02011}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestsModelRouteBeheer", "UnitTestsModelRouteBeheer\UnitTestsModelRouteBeheer.csproj", "{B3D149CF-DA54-43AC-8088-D3E8A9DAC948}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,6 +32,18 @@ Global
 		{8515D5C0-5CC7-4710-9300-B9564B8C8F4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8515D5C0-5CC7-4710-9300-B9564B8C8F4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8515D5C0-5CC7-4710-9300-B9564B8C8F4E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47F8FC2D-AEC6-4669-B0F3-9FBBA7655CE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47F8FC2D-AEC6-4669-B0F3-9FBBA7655CE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47F8FC2D-AEC6-4669-B0F3-9FBBA7655CE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47F8FC2D-AEC6-4669-B0F3-9FBBA7655CE6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D340225B-32ED-47BF-8426-9236E0C02011}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D340225B-32ED-47BF-8426-9236E0C02011}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D340225B-32ED-47BF-8426-9236E0C02011}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D340225B-32ED-47BF-8426-9236E0C02011}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3D149CF-DA54-43AC-8088-D3E8A9DAC948}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3D149CF-DA54-43AC-8088-D3E8A9DAC948}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3D149CF-DA54-43AC-8088-D3E8A9DAC948}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3D149CF-DA54-43AC-8088-D3E8A9DAC948}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
