@@ -1,12 +1,254 @@
 ﻿<Window x:Class="WPFNetwerkBeheerUI.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:WPFNetwerkBeheerUI"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+       xmlns:local="clr-namespace:WPFNetwerkBeheerUI"
+       mc:Ignorable="d"
+       Title="Network Management" Height="450" Width="800" WindowStyle="None" AllowsTransparency="True" Background="Transparent">
+    <Window.Resources>
+        <!-- Define custom button styles for window controls -->
+        <Style x:Key="WindowControlButton" TargetType="Button">
+            <Setter Property="Width" Value="46"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+    </Window.Resources>
 
-    </Grid>
+    <Border BorderBrush="#252836" BorderThickness="1" Background="#1F2129">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Custom Title Bar -->
+            <Grid Background="#252836" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                <!-- Application Title -->
+                <TextBlock Text="Network Management" Foreground="#F5F7FB" Margin="10,0,0,0" 
+                           VerticalAlignment="Center" HorizontalAlignment="Left" FontWeight="SemiBold"/>
+
+                <!-- Window Control Buttons -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Style="{StaticResource WindowControlButton}" 
+                            Content="&#xE921;" Click="MinimizeButton_Click"/>
+                    <Button Style="{StaticResource WindowControlButton}" 
+                            Content="&#xE922;" Click="MaximizeRestoreButton_Click" x:Name="MaxRestoreButton"/>
+                    <Button Style="{StaticResource WindowControlButton}" 
+                            Content="&#xE8BB;" Click="CloseButton_Click" 
+                            Background="Transparent">
+                        <Button.Triggers>
+                            <EventTrigger RoutedEvent="Button.MouseEnter">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"
+                                                        To="#E81123" Duration="0:0:0.1"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                            <EventTrigger RoutedEvent="Button.MouseLeave">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"
+                                                        To="Transparent" Duration="0:0:0.1"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Button.Triggers>
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <!-- Main Content -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="200" MinWidth="150" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- Left Panel with Buttons -->
+                <Grid Grid.Column="0" Grid.RowSpan="5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Button 
+                        Grid.Row="0"
+                        Content="Add NetworkPoint"
+                        Margin="10"
+                        Background="#6C5CE7"
+                        Foreground="#F5F7FB"
+                        VerticalAlignment="Stretch"
+                        HorizontalAlignment="Stretch"
+                        BorderBrush="Transparent"
+                        Click="AddNetworkPoint_Click"
+                        >
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="4"/>
+                            </Style>
+                        </Button.Resources>
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#7E74E7"/>
+                                    </Trigger>
+                                    <Trigger Property="IsPressed" Value="True">
+                                        <Setter Property="Background" Value="#5A4ED1"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <Button 
+                        Grid.Row="1"
+                        Content="Update NetworkPoint"
+                        Margin="10"
+                        Background="#6C5CE7"
+                        Foreground="#F5F7FB"
+                        VerticalAlignment="Stretch"
+                        HorizontalAlignment="Stretch"
+                        BorderBrush="Transparent"
+                        Click="UpdateNetworkPoint_Click"
+                        >
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="4"/>
+                            </Style>
+                        </Button.Resources>
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#7E74E7"/>
+                                    </Trigger>
+                                    <Trigger Property="IsPressed" Value="True">
+                                        <Setter Property="Background" Value="#5A4ED1"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <Button 
+                        Grid.Row="2"
+                        Content="Remove NetworkPoint"
+                        Margin="10"
+                        Background="#E63946"
+                        Foreground="#F5F7FB"
+                        VerticalAlignment="Stretch"
+                        HorizontalAlignment="Stretch"
+                        BorderBrush="Transparent"
+                        Click="RemoveNetworkPoint_Click"
+                        >
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="4"/>
+                            </Style>
+                        </Button.Resources>
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#FF4D58"/>
+                                    </Trigger>
+                                    <Trigger Property="IsPressed" Value="True">
+                                        <Setter Property="Background" Value="#C1121F"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <Button 
+                        Grid.Row="3" 
+                        Content="Add Connection" 
+                        Margin="10" 
+                        Background="#6C5CE7"
+                        Foreground="#F5F7FB"
+                        VerticalAlignment="Stretch"
+                        HorizontalAlignment="Stretch"
+                        BorderBrush="Transparent"
+                        Click="AddConnection_Click"
+                        >
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="4"/>
+                            </Style>
+                        </Button.Resources>
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#7E74E7"/>
+                                    </Trigger>
+                                    <Trigger Property="IsPressed" Value="True">
+                                        <Setter Property="Background" Value="#5A4ED1"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <Button 
+                        Grid.Row="4" 
+                        Content="Remove Connection"
+                        Margin="10"
+                        Background="#E63946"
+                        Foreground="#F5F7FB"
+                        VerticalAlignment="Stretch"
+                        HorizontalAlignment="Stretch"
+                        BorderBrush="Transparent"
+                        Click="RemoveConnection_Click"
+                        >
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="4"/>
+                            </Style>
+                        </Button.Resources>
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#FF4D58"/>
+                                    </Trigger>
+                                    <Trigger Property="IsPressed" Value="True">
+                                        <Setter Property="Background" Value="#C1121F"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </Grid>
+
+                <!-- Canvas Area -->
+                <Canvas Grid.RowSpan="5" Grid.Column="1" Background="#2A2D3E" Margin="10">
+                    <Canvas.Resources>
+                        <Style TargetType="Ellipse">
+                            <Setter Property="Fill" Value="#00B4D8"/>
+                            <Setter Property="Width" Value="20"/>
+                            <Setter Property="Height" Value="20"/>
+                        </Style>
+                    </Canvas.Resources>
+                </Canvas>
+            </Grid>
+        </Grid>
+    </Border>
 </Window>
