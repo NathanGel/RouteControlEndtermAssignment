@@ -1,13 +1,62 @@
-﻿using System;
+﻿using RouteBeheerBL.Exceptions;
+using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace RouteBeheerBL.Model {
     public class Route {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public List<Segment> Segments { get; set; } = new();
+        public Route(string name, List<Segment> segments, List<(NetworkPoint, bool)> stops) {
+            Name = name;
+            Segments = segments;
+            Stops = stops;
+        }
+
+        private int _id;
+        public int Id { 
+            get { return _id; }
+            set {
+                if (value <= 0) throw new RouteException("Id must be greater than 0");
+                _id = value;
+            }
+        }
+
+        private string _name;
+        public string Name { 
+            get { return _name; }
+            set {
+                if (string.IsNullOrWhiteSpace(value)) throw new RouteException("Name Invalid Null");
+                if (value.Length < 3) throw new RouteException("Name Invalid Length Must Be Longer Than 3 Characters");
+                _name = value;
+            }
+        }
+
+        private List<Segment> _segments = new();
+        public List<Segment> Segments { 
+            get { return _segments;}
+            set {
+                if (value == null || value.Count == 0) throw new RouteException("Segments Invalid Null");
+                if (value.Any(s => s == null)) throw new RouteException("Segments Invalid Null");
+                _segments = value;
+            }
+        }
+
+        private List<(NetworkPoint, bool)> _stops = new();
+        public List<(NetworkPoint, bool)> Stops {
+            get { return _stops; }
+            set {
+                if (value == null || value.Count == 0) throw new RouteException("Stops Invalid Null");
+                if (value.Any(s => s.Item1 == null)) throw new RouteException("Stops Invalid Null");
+                if (value.Count < 5) throw new RouteException("Stops Invalid Less Than 5");
+                if (value[0].Item2 == false || value[^1].Item2 == false) throw new RouteException("Stops Invalid StartPoint Not A Stop");
+                _stops = value;
+            }
+        }
+
+        public static double GetDistance(Point p1, Point p2) {
+            return Math.Sqrt(Math.Pow(p2.X - p1.X, 2) + Math.Pow(p2.Y - p1.Y, 2));
+        }
     }
 }

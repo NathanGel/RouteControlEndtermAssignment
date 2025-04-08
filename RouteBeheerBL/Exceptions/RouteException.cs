@@ -5,6 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace RouteBeheerBL.Exceptions {
-    internal class RouteException {
+    public class RouteException : Exception {
+        public RouteException(string message) : base(message) {
+        }
+        public RouteException(string message, Exception innerException) : base(message, innerException) {
+        }
     }
 }

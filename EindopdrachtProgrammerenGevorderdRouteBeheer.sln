@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPFFaciliteitBeheerUI", "WP
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestsModelRouteBeheer", "UnitTestsModelRouteBeheer\UnitTestsModelRouteBeheer.csproj", "{B3D149CF-DA54-43AC-8088-D3E8A9DAC948}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleAppImportGegevens", "ConsoleAppImportGegevens\ConsoleAppImportGegevens.csproj", "{B87BE8FB-A1D3-458B-8466-F1F4ADC76036}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,10 @@ Global
 		{B3D149CF-DA54-43AC-8088-D3E8A9DAC948}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B3D149CF-DA54-43AC-8088-D3E8A9DAC948}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B3D149CF-DA54-43AC-8088-D3E8A9DAC948}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B87BE8FB-A1D3-458B-8466-F1F4ADC76036}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B87BE8FB-A1D3-458B-8466-F1F4ADC76036}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B87BE8FB-A1D3-458B-8466-F1F4ADC76036}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B87BE8FB-A1D3-458B-8466-F1F4ADC76036}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
