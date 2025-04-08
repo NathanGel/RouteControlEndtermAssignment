@@ -67,7 +67,10 @@ namespace RouteBeheerDL {
         }
 
         public void RemoveFacility(int id) {
-            string query = "DELETE FROM Facilities WHERE id=@id";
+            string query = "DELETE FROM Facilities WHERE id=@id AND id IN" +
+                "(SELECT f.id FROM Facilities f " +
+                "LEFT JOIN NetworkPoint_Facilities npf ON f.id=npf.facility_id " +
+                "WHERE id=@id AND npf.facility_id IS NULL)";
             using (SqlConnection connection = new(connectionString))
             using (SqlCommand cmd = connection.CreateCommand()) {
                 try {
