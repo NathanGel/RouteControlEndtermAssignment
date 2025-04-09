@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RouteBeheerBL.Model;
+using RouteBeheerBL.Exceptions;
 
 namespace RouteBeheerBL.Managers {
     public class NetworkManager {
@@ -15,5 +16,41 @@ namespace RouteBeheerBL.Managers {
             this.repo = repo;
         }
 
+        public void AddNetworkPoint(NetworkPoint point) {
+            if (point == null) throw new NetworkException("Network point cannot be null");
+            if(point.X == default || point.Y == default) throw new NetworkException("Network point coordinates cannot be default");
+            repo.AddNetworkPoint(point);
+        }
+
+        public void RemoveNetworkPoint(NetworkPoint point) {
+            if (point == null) throw new NetworkException("Network point cannot be null");
+            repo.RemoveNetworkPoint(point);
+        }
+
+        public void ConnectNetworkPoint(NetworkPoint p1, NetworkPoint p2) {
+            if (p1 == null || p2 == null) throw new NetworkException("Network points cannot be null");
+            if (p1.X == default || p1.Y == default || p2.X == default || p2.Y == default) throw new NetworkException("Network point coordinates cannot be default");
+            repo.ConnectNetworkPoint(p1, p2);
+        }
+
+        public void DisconnectNetworkPoint(NetworkPoint p1, NetworkPoint p2) {
+            if (p1 == null || p2 == null) throw new NetworkException("Network points cannot be null");
+            if (p1.X == default || p1.Y == default || p2.X == default || p2.Y == default) throw new NetworkException("Network point coordinates cannot be default");
+            repo.DisconnectNetworkPoint(p1, p2);
+        }
+
+        public void UpdateNetworkPoint(NetworkPoint point) {
+            if (point == null) throw new NetworkException("Network point cannot be null");
+            if (point.X == default || point.Y == default) throw new NetworkException("Network point coordinates cannot be default");
+            repo.UpdateNetworkPoint(point);
+        }
+
+        public List<NetworkPoint> GetNetworkPoints() {
+            return repo.GetNetworkPoints();
+        }
+
+        public List<Segment> GetSegments() {
+            return repo.GetSegments();
+        }
     }
 }

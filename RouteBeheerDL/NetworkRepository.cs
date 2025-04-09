@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
 using RouteBeheerBL.Interfaces;
 using RouteBeheerBL.Model;
 
@@ -15,11 +16,25 @@ namespace RouteBeheerDL {
         }
 
         public void AddNetworkPoint(NetworkPoint point) {
-            throw new NotImplementedException();
+            string query = "INSERT INTO NetworkPoints(x_coordinate, y_coordinate) VALUES(@x, @y)";
+            using (SqlConnection connection = new(connectionString))
+            using (SqlCommand cmd = connection.CreateCommand()) {
+                try {
+                    cmd.CommandText = query;
+                    cmd.Parameters.AddWithValue("@x", point.X);
+                    cmd.Parameters.AddWithValue("@y", point.Y);
+                    connection.Open();
+                    cmd.ExecuteNonQuery();
+                } catch (SqlException ex) {
+                    throw new Exception("Error adding network point", ex);
+                }
+            }
         }
 
         public void ConnectNetworkPoint(NetworkPoint p1, NetworkPoint p2) {
-            throw new NotImplementedException();
+            string queryStretch = "INSERT INTO Stretches OUTPUT INSERTED.id";
+            string queryStretchNetworkPoint = "INSERT INTO StretchNetworkPoints(stretch_id, networkpoint_id) VALUES(@stretchId, @networkPointId)";
+
         }
 
         public void DisconnectNetworkPoint(NetworkPoint p1, NetworkPoint p2) {
