@@ -15,8 +15,9 @@ namespace RouteBeheerDL {
             this.connectionString = connectionString;
         }
 
-        public void AddNetworkPoint(NetworkPoint point) {
-            string query = "INSERT INTO NetworkPoints(x_coordinate, y_coordinate) VALUES(@x, @y)";
+        public int AddNetworkPoint(NetworkPoint point) {
+            int id;
+            string query = "INSERT INTO NetworkPoints(x_coordinate, y_coordinate) OUTPUT INSERTED.ID VALUES(@x, @y)";
             using (SqlConnection connection = new(connectionString))
             using (SqlCommand cmd = connection.CreateCommand()) {
                 try {
@@ -24,11 +25,12 @@ namespace RouteBeheerDL {
                     cmd.Parameters.AddWithValue("@x", point.X);
                     cmd.Parameters.AddWithValue("@y", point.Y);
                     connection.Open();
-                    cmd.ExecuteNonQuery();
+                    id = (int)cmd.ExecuteScalar();
                 } catch (SqlException ex) {
                     throw new Exception("Error adding network point", ex);
                 }
             }
+            return id;
         }
 
         public void ConnectNetworkPoint(NetworkPoint p1, NetworkPoint p2) {
