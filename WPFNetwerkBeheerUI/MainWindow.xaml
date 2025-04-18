@@ -232,7 +232,7 @@
                     </Button>
                 </Grid>
 
-                <Canvas Width="1000" Height="1000"  Grid.RowSpan="5" Grid.Column="1" Background="#2A2D3E" Margin="10">
+                <Canvas Name="canvas" Width="1000" Height="1000"  Grid.RowSpan="5" Grid.Column="1" Background="#2A2D3E" Margin="10">
                     <Canvas.Resources>
                         <Style TargetType="Ellipse">
                             <Setter Property="Fill" Value="#00B4D8"/>

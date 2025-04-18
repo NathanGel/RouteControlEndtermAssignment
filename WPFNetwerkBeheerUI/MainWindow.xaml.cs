@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Net;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -18,10 +19,43 @@ namespace WPFNetwerkBeheerUI {
         double minY = 0;
         double maxX = 1000;
         double maxY = 1000;
+        List<Point> points = new();
         private Point selectedPoint;
         
         public MainWindow() {
             InitializeComponent();
+            ReadFromDatabase();
+        }
+
+        public void ReadFromDatabase() {
+            points.Add(new Point(100, 100));
+            points.Add(new Point(200, 200));
+            points.Add(new Point(300, 300));
+            points.Add(new Point(400, 400));
+            points.Add(new Point(500, 500));
+            DrawPoints(points);
+
+        }
+
+        public void DrawPoints(List<Point> points) {
+            foreach (var point in points) {
+                Ellipse ellipse = new Ellipse {
+                    Fill = Brushes.MediumTurquoise,
+                    Width = 10,
+                    Height = 10,
+                    Stroke = Brushes.Black,
+                    StrokeThickness = 1
+                };
+                Canvas.SetLeft(ellipse, point.X);
+                Canvas.SetTop(ellipse, point.Y);
+
+                // Fix: Ensure that the Canvas object is referenced correctly
+                if (this.FindName("canvas") is Canvas canvas) {
+                    canvas.Children.Add(ellipse);
+                } else {
+                    throw new InvalidOperationException("Canvas not found in the current context.");
+                }
+            }
         }
 
         private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
