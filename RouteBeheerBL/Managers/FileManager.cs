@@ -14,6 +14,7 @@ namespace RouteBeheerBL.Managers {
         private readonly string _pathFacilities;
         private readonly string _pathNetworkPoints;
         private readonly string _pathStretches;
+        private readonly string _pathFacilitiesLocations;
         private readonly string _connectionString;
 
         private List<Facility> _facilities;
@@ -23,11 +24,13 @@ namespace RouteBeheerBL.Managers {
 
         private IFacilityRepository _facilityRepository;
         private INetworkRepository _networkPointRepository;
-        public FileManager(string pathFacilities, string pathNetworkPoints, string pathStretches, string connectionString) {
+        public FileManager(string pathFacilities, string pathNetworkPoints, string pathStretches, string connectionString, IFacilityRepository facilityrepo, INetworkRepository networkRepo) {
             _pathFacilities = pathFacilities;
             _pathNetworkPoints = pathNetworkPoints;
             _pathStretches = pathStretches;
             _connectionString = connectionString;
+            _facilityRepository = facilityrepo;
+            _networkPointRepository = networkRepo;
         }
         
         public void ReadFacilities() {
@@ -38,13 +41,30 @@ namespace RouteBeheerBL.Managers {
                     Facility f = new(parts[1]);
                     _facilities.Add(f);
                 }
-                foreach (var facility in _facilities) {
-                    _facilityRepository.AddFacility(facility);
+            }
+            WriteFacilities();
+        }
+
+        public void WriteFacilities() {
+            foreach (var facility in _facilities) {
+                _facilityRepository.AddFacility(facility);
+            }
+        }
+
+        public void ReadFacilitiesLocations() {
+            using (StreamReader sr = new("")) {
+                string line;
+                while ((line = sr.ReadLine()) != null) {
+                    
                 }
             }
         }
 
-        public List<NetworkPoint> ReadNetworkPoints() {
+        public void WriteFacilitiesLocations() {
+            
+        }
+
+        public void ReadNetworkPoints() {
             using (StreamReader sr = new(_pathNetworkPoints)) {
                 string line;
                 while ((line = sr.ReadLine()) != null) {
@@ -54,16 +74,20 @@ namespace RouteBeheerBL.Managers {
                     NetworkPoint np = new(x, y);
                     _networkPoints.Add(np);
                 }
-                foreach (var networkPoint in _networkPoints) {
-                    int id = _networkPointRepository.AddNetworkPoint(networkPoint);
-                    networkPoint.Id = id;
-                    _networkPoints.Add(networkPoint);
-                }
+            }
+            WriteNetworkPoints();
+        }
+
+        public List<NetworkPoint> WriteNetworkPoints() {
+            foreach (var networkPoint in _networkPoints) {
+                int id = _networkPointRepository.AddNetworkPoint(networkPoint);
+                networkPoint.Id = id;
+                _networkPoints.Add(networkPoint);
             }
             return _networkPoints;
         }
 
-        public void ReadStretches(List<int> ids) {
+        public void ReadStretches() {
             int currentId = 0;
             using (StreamReader sr = new(_pathStretches)) {
                 string line;
@@ -80,13 +104,19 @@ namespace RouteBeheerBL.Managers {
                             currentId++;
                         }
                         stretch = new(points);
-                        for(int i = 0; i<stretch.NetworkPoints.Count; i++) {
-                            if (i == stretch.NetworkPoints.Count - 1)
-                                return;
-                            else {
-                                _networkPointRepository.ConnectNetworkPoint(stretch.NetworkPoints[i], stretch.NetworkPoints[i + 1]);
-                            }
-                        }
+                        _stretches.Add(stretch);
+                    }
+                }
+            }
+        }
+
+        public void WriteStretches() {
+            foreach (var stretch in _stretches) {
+                for (int i = 0; i < stretch.NetworkPoints.Count; i++) {
+                    if (i == stretch.NetworkPoints.Count - 1)
+                        return;
+                    else {
+                        _networkPointRepository.ConnectNetworkPoint(stretch.NetworkPoints[i], stretch.NetworkPoints[i + 1]);
                     }
                 }
             }
