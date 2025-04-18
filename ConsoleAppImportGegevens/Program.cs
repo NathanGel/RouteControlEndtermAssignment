@@ -7,24 +7,15 @@ using System.Net;
 namespace ConsoleAppImportGegevens {
     public class Program {
         static void Main() {
-            string connectionString = @"Data Source=NATHAN\SQLExpress;Initial Catalog=NetworkControl;Integrated Security=True;Trust Server Certificate=True";
-            string pathFacilities = @"C:\Users\natha\Downloads\faciliteiten.txt";
-            string pathNetworkPoints = @"C:\Users\natha\Downloads\network_points.txt";
-            string pathStretches = @"C:\Users\natha\Downloads\network_stretches.txt";
-            string pathFacilitiesLocations = @"C:\Users\natha\Downloads\faciliteiten_locaties.txt";
-            Program p = new Program();
-            //p.ImportFacilities(pathFacilities, connectionString);
-            p.InitializeNetwork(pathFacilities ,pathNetworkPoints, pathStretches, pathFacilitiesLocations, connectionString);
-        }
+            const string connectionString = @"Data Source=NATHAN\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
+            const string pathFacilities = @"C:\Users\natha\programmerenGevorderd\EindopdrachtProgrammerenGevorderdRouteBeheer\InitializationFiles\faciliteiten.txt";
+            const string pathNetworkPoints = @"C:\Users\natha\programmerenGevorderd\EindopdrachtProgrammerenGevorderdRouteBeheer\InitializationFiles\network_points.txt";
+            const string pathStretches = @"C:\Users\natha\programmerenGevorderd\EindopdrachtProgrammerenGevorderdRouteBeheer\InitializationFiles\network_stretches.txt";
+            const string pathFacilitiesLocations = @"C:\Users\natha\programmerenGevorderd\EindopdrachtProgrammerenGevorderdRouteBeheer\InitializationFiles\faciliteiten_locaties.txt";
 
-        public void InitializeNetwork(string pathFacilities, string pathNetworkPoints, string pathStretches, string pathFacilitiesLocaties, string connectionString) {
-            IFacilityRepository facilityRepository = new FaciltyRepository(connectionString);
             INetworkRepository networkRepository = new NetworkRepository(connectionString);
-            FileManager fileManager = new FileManager(pathFacilities, pathNetworkPoints, pathStretches, connectionString, facilityRepository, networkRepository);
-            fileManager.ReadFacilities();
-            fileManager.ReadFacilitiesLocations();
-            fileManager.ReadNetworkPoints();
-            fileManager.ReadStretches();
+            FileManager fm = new(pathFacilities, pathNetworkPoints, pathStretches, pathFacilitiesLocations, networkRepository);
+            fm.InitializeNetwork();
         }
     }
 }

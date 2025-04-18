@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace RouteBeheerBL.Interfaces {
     public interface INetworkRepository {
+        void InitializeNetwork(List<Facility> fs, List<NetworkPoint> nps, List<Stretch> ss, Dictionary<int, int> npMappings, Dictionary<int, int> fMappings);
         int AddNetworkPoint(NetworkPoint point);
         void RemoveNetworkPoint(NetworkPoint point);
         void ConnectNetworkPoint(NetworkPoint p1, NetworkPoint p2);
@@ -14,5 +15,10 @@ namespace RouteBeheerBL.Interfaces {
         void UpdateNetworkPoint(NetworkPoint point);
         List<NetworkPoint> GetNetworkPoints();
         List<Segment> GetSegments();
+        void AddFacility(Facility facility);
+        void RemoveFacility(int id);
+        Facility GetFacility(int id);
+        void UpdateFacility(Facility facility);
+        List<Facility> GetAllFacilities();
     }
 }

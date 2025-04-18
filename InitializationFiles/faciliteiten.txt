@@ -1,0 +1,15 @@
+1,Sanitair
+2,Bar
+3,Eetgelegenheid
+4,Verkooppunt
+5,Infopunt
+6,WiFi
+7,Werkplekken
+8,Park en Ride
+9,Geldautomaat
+10,Taxi
+11,Winkels
+12,Bagagekluis
+13,Fietsenstalling
+14,Parking
+15,EHBO & AED
