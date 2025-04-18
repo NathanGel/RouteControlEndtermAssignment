@@ -18,7 +18,7 @@ namespace RouteBeheerDL {
         public void InitializeNetwork(List<Facility> fs, List<NetworkPoint> nps, List<Stretch> ss, Dictionary<int, int> npMappings, Dictionary<int, int> fMappings) {
             string queryFacility = "INSERT INTO Facilities(name) OUTPUT INSERTED.id VALUES(@name)";
             string queryNetworkPoint = "INSERT INTO NetworkPoints(x_coordinate, y_coordinate) OUTPUT INSERTED.id VALUES(@x, @y)";
-            string queryStretch = "INSERT INTO Stretches DEFAULT VALUES OUTPUT INSERTED.id";
+            string queryStretch = "INSERT INTO Stretches OUTPUT INSERTED.id DEFAULT VALUES";
             string queryStretchNetworkPoint = "INSERT INTO Stretch_NetworkPoints(stretch_id, networkpoint_id) VALUES(@stretchId, @networkpointId)";
             string queryNetworkPointFacility = "INSERT INTO NetworkPoint_Facilities(networkpoint_id, facility_id) VALUES(@networkpointId, @facilityId)";
             using (SqlConnection connection = new(connectionString))
@@ -32,7 +32,7 @@ namespace RouteBeheerDL {
                         cmd.Parameters.Clear();
                         cmd.Parameters.AddWithValue("@name", f.Name);
                         int id = (int)cmd.ExecuteScalar();
-                        fMappings[f.Id]); // write away facility and map the new id to the old one in the dictionary
+                        fMappings[f.Id] = id; // write away facility and map the new id to the old one in the dictionary
                     }
                     cmd.CommandText = queryNetworkPoint;
                     foreach (NetworkPoint np in nps) {
@@ -40,13 +40,14 @@ namespace RouteBeheerDL {
                         cmd.Parameters.AddWithValue("@x", np.X);
                         cmd.Parameters.AddWithValue("@y", np.Y);
                         int id = (int)cmd.ExecuteScalar();
-                        npMappings.Add(np.Id, id); // write away networkpoint and map the new id to the old one in the dictionary
+                        npMappings[np.Id] = id; // write away networkpoint and map the new id to the old one in the dictionary
                     }
-                    cmd.CommandText = queryStretch;
                     foreach (Stretch s in ss) {
+                        cmd.CommandText = queryStretch;
                         cmd.Parameters.Clear();
                         int id = (int)cmd.ExecuteScalar();
                         foreach (NetworkPoint np in s.NetworkPoints) {
+                            Console.WriteLine(id);
                             cmd.CommandText = queryStretchNetworkPoint;
                             cmd.Parameters.Clear();
                             cmd.Parameters.AddWithValue("@stretchId", id);
