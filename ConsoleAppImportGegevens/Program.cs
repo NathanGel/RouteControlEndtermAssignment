@@ -13,9 +13,9 @@ namespace ConsoleAppImportGegevens {
             const string pathStretches = @"C:\Users\natha\programmerenGevorderd\EindopdrachtProgrammerenGevorderdRouteBeheer\InitializationFiles\network_stretches.txt";
             const string pathFacilitiesLocations = @"C:\Users\natha\programmerenGevorderd\EindopdrachtProgrammerenGevorderdRouteBeheer\InitializationFiles\faciliteiten_locaties.txt";
 
-            INetworkRepository networkRepository = new NetworkRepository(connectionString);
-            FileManager fm = new(pathFacilities, pathNetworkPoints, pathStretches, pathFacilitiesLocations, networkRepository);
-            fm.InitializeNetwork();
+            //INetworkRepository networkRepository = new NetworkRepository(connectionString);
+            //FileManager fm = new(pathFacilities, pathNetworkPoints, pathStretches, pathFacilitiesLocations, networkRepository);
+            //fm.InitializeNetwork();
         }
     }
 }

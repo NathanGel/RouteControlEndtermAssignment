@@ -14,6 +14,10 @@ namespace WPFNetwerkBeheerUI {
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window {
+        double minX = 0;
+        double minY = 0;
+        double maxX = 1000;
+        double maxY = 1000;
         private Point selectedPoint;
         
         public MainWindow() {
