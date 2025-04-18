@@ -60,6 +60,7 @@ namespace RouteBeheerBL.Managers {
                 throw new NetworkInitializationException("Error reading facilities file", ex);
             }
         }
+
         public void ReadNetworkPoints() {
             using (StreamReader sr = new(_pathNetworkPoints)) {
                 string line;
@@ -90,7 +91,6 @@ namespace RouteBeheerBL.Managers {
                 }
             }
         }
-
 
         public void ReadStretches() {
             using (StreamReader sr = new(_pathStretches)) {
