@@ -28,11 +28,11 @@ namespace ConsoleAppImportGegevens {
             NetworkManager nm = new(networkRepository);
             List<Stretch> stretches = nm.ReadNetwork();
             foreach (var stretch in stretches) {
-                Console.WriteLine(stretch.Id);
+                Console.WriteLine($"stretch id:{stretch.Id}");
                 foreach(var point in stretch.NetworkPoints) {
-                    Console.WriteLine($"    id:{point.Id} X:{point.X} Y:{point.Y}");
+                    Console.WriteLine($"    networkpoint id:{point.Id} X:{point.X} Y:{point.Y}");
                     foreach(var facility in point.Facilities) {
-                        Console.WriteLine($"        id:{facility.Id} name:{facility.Name}");
+                        Console.WriteLine($"        facility id:{facility.Id} name:{facility.Name}");
                     }
                 }
             }
