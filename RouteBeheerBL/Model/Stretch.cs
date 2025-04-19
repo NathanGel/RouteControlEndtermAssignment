@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace RouteBeheerBL.Model {
     public class Stretch {
+        public Stretch(int id) {
+            this.Id = id;
+        }
+
         public Stretch(List<NetworkPoint> points) {
             NetworkPoints = points;
         }

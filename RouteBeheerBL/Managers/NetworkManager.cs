@@ -16,6 +16,9 @@ namespace RouteBeheerBL.Managers {
             this.repo = repo;
         }
 
+        public List<Stretch> ReadNetwork() {
+            return repo.ReadNetwork();
+        } 
         public void AddNetworkPoint(NetworkPoint point) {
             if (point == null) throw new NetworkException("Network point cannot be null");
             if(point.X == default || point.Y == default) throw new NetworkException("Network point coordinates cannot be default");

@@ -17,6 +17,12 @@ namespace RouteBeheerBL.Model {
             Facilities = facilities;
         }
 
+        public NetworkPoint(int id, double x, double y) {
+            Id = id;
+            X = x;
+            Y = y;
+        }
+
         public NetworkPoint(int id, double x, double y, List<Facility> facilities) {
             Id = id;
             X = x;
