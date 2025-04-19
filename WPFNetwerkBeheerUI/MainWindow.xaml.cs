@@ -9,6 +9,10 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using RouteBeheerBL.Interfaces;
+using RouteBeheerBL.Managers;
+using RouteBeheerBL.Model;
+using RouteBeheerDL;
 
 namespace WPFNetwerkBeheerUI {
     /// <summary>
@@ -21,6 +25,7 @@ namespace WPFNetwerkBeheerUI {
         double maxY = 1000;
         List<Point> points = new();
         private Point selectedPoint;
+        private readonly string connectionString = "Data Source=nathans-laptop\\sqlexpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
         
         public MainWindow() {
             InitializeComponent();
@@ -28,23 +33,26 @@ namespace WPFNetwerkBeheerUI {
         }
 
         public void ReadFromDatabase() {
-            points.Add(new Point(100, 100));
-            points.Add(new Point(200, 200));
-            points.Add(new Point(300, 300));
-            points.Add(new Point(400, 400));
-            points.Add(new Point(500, 500));
+            INetworkRepository repo = new NetworkRepository(connectionString);
+            NetworkManager nm = new(repo);
+            List<RouteBeheerBL.Model.Stretch> stretches = nm.ReadNetwork();
+            foreach(var stretch in stretches) {
+                foreach(var point in stretch.NetworkPoints){
+                    points.Add(new(point.X*0.75, point.Y*0.75));
+                }
+            }
+            DrawAllLines(stretches);
             DrawPoints(points);
-
         }
 
         public void DrawPoints(List<Point> points) {
             foreach (var point in points) {
                 Ellipse ellipse = new Ellipse {
                     Fill = Brushes.MediumTurquoise,
-                    Width = 10,
-                    Height = 10,
+                    Width = 4,
+                    Height = 4,
                     Stroke = Brushes.Black,
-                    StrokeThickness = 1
+                    StrokeThickness = 0.5
                 };
                 Canvas.SetLeft(ellipse, point.X);
                 Canvas.SetTop(ellipse, point.Y);
@@ -54,6 +62,34 @@ namespace WPFNetwerkBeheerUI {
                     canvas.Children.Add(ellipse);
                 } else {
                     throw new InvalidOperationException("Canvas not found in the current context.");
+                }
+            }
+        }
+
+        public void DrawLine(Point p1, Point p2) {
+            // Create a new Line
+            Line line = new Line {
+                Stroke = Brushes.OrangeRed,
+                StrokeThickness = 1,
+                X1 = p1.X,                // Start at the left of the canvas
+                Y1 = p1.Y,                // Start at the top of the canvas
+                X2 = p2.X,      // End at the right of the canvas
+                Y2 = p2.Y      // End at the bottom of the canvas
+            };
+
+            // Add the line to the canvas
+            if (this.FindName("canvas") is Canvas canvas) {
+                canvas.Children.Add(line);
+            } else {
+                throw new InvalidOperationException("Canvas not found in the current context.");
+            }
+        }
+        public void DrawAllLines(List<RouteBeheerBL.Model.Stretch> stretches) {
+            foreach (var stretch in stretches) {
+                for (int i = 1; i < stretch.NetworkPoints.Count; i++) {
+                    Point p1 = new(stretch.NetworkPoints[i - 1].X*0.75, stretch.NetworkPoints[i - 1].Y*0.75);
+                    Point p2 = new(stretch.NetworkPoints[i].X * 0.75, stretch.NetworkPoints[i].Y*0.75);
+                    DrawLine(p1, p2);
                 }
             }
         }

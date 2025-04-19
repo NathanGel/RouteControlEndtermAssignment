@@ -5,7 +5,7 @@
        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
        xmlns:local="clr-namespace:WPFNetwerkBeheerUI"
        mc:Ignorable="d"
-       Title="Network Management" Height="auto" Width="auto" WindowStyle="None" AllowsTransparency="True" Background="Transparent">
+       Title="Network Management" Height="1000" Width="auto" WindowStyle="None" AllowsTransparency="True" Background="Transparent">
     <Window.Resources>
         <Style x:Key="WindowControlButton" TargetType="Button">
             <Setter Property="Width" Value="46"/>
@@ -232,7 +232,7 @@
                     </Button>
                 </Grid>
 
-                <Canvas Name="canvas" Width="500" Height="500"  Grid.RowSpan="5" Grid.Column="1" Background="#2A2D3E" Margin="10">
+                <Canvas Name="canvas" Width="750" Height="750"  Grid.RowSpan="5" Grid.Column="1" Background="#2A2D3E" Margin="10">
                     <Canvas.Resources>
                         <Style TargetType="Ellipse">
                             <Setter Property="Fill" Value="#00B4D8"/>
