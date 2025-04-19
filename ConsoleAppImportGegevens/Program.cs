@@ -31,9 +31,9 @@ namespace ConsoleAppImportGegevens {
                 Console.WriteLine($"stretch id:{stretch.Id}");
                 foreach(var point in stretch.NetworkPoints) {
                     Console.WriteLine($"    networkpoint id:{point.Id} X:{point.X} Y:{point.Y}");
-                    foreach(var facility in point.Facilities) {
-                        Console.WriteLine($"        facility id:{facility.Id} name:{facility.Name}");
-                    }
+                    //foreach(var facility in point.Facilities) {
+                    //    Console.WriteLine($"        facility id:{facility.Id} name:{facility.Name}");
+                    //}
                 }
             }
         }
