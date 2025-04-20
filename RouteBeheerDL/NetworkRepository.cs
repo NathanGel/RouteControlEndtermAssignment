@@ -19,7 +19,7 @@ namespace RouteBeheerDL {
             string queryFacility = "INSERT INTO Facilities(name) OUTPUT INSERTED.id VALUES(@name)";
             string queryNetworkPoint = "INSERT INTO NetworkPoints(x_coordinate, y_coordinate) OUTPUT INSERTED.id VALUES(@x, @y)";
             string queryStretch = "INSERT INTO Stretches OUTPUT INSERTED.id DEFAULT VALUES";
-            string queryStretchNetworkPoint = "INSERT INTO Stretch_NetworkPoints(stretch_id, networkpoint_id) VALUES(@stretchId, @networkpointId)";
+            string queryStretchNetworkPoint = "INSERT INTO Stretch_NetworkPoints(stretch_id, networkpoint_id, sequenceNr) VALUES(@stretchId, @networkpointId, @sequenceNr)";
             string queryNetworkPointFacility = "INSERT INTO NetworkPoint_Facilities(networkpoint_id, facility_id) VALUES(@networkpointId, @facilityId)";
             using (SqlConnection connection = new(connectionString))
             using (SqlCommand cmd = connection.CreateCommand()) {
@@ -46,12 +46,13 @@ namespace RouteBeheerDL {
                         cmd.CommandText = queryStretch;
                         cmd.Parameters.Clear();
                         int id = (int)cmd.ExecuteScalar();
-                        foreach(var np in s.NetworkPoints) {
-                            Console.WriteLine(np.Id);
+                        foreach(var np in s.NetworkPointSequence) {
+                            //Console.WriteLine(np.Id);
                             cmd.CommandText = queryStretchNetworkPoint;
                             cmd.Parameters.Clear();
                             cmd.Parameters.AddWithValue("@stretchId", id);
-                            cmd.Parameters.AddWithValue("@networkpointId", npMappings[np.Id]); // use the new id of the networkpoint
+                            cmd.Parameters.AddWithValue("@networkpointId", npMappings[np.Value.Id]); // use the new id of the networkpoint
+                            cmd.Parameters.AddWithValue("@sequenceNr", np.Key);
                             cmd.ExecuteNonQuery();
                         }
                     }
@@ -136,7 +137,7 @@ namespace RouteBeheerDL {
                             stretchIndex = stretches.FindIndex( st => st.Id == stretchId);
 
                         int networkpointIndex = points.FindIndex( p => p.Id == networkPointId); //index van point zoeken op basis van id
-                        stretches[stretchIndex].NetworkPoints.Add(points[networkpointIndex]); // point toevoegen aan stretch
+                        stretches[stretchIndex].NetworkPointSequence.Add((int)reader["sequenceNr"], points[networkpointIndex]); // point toevoegen aan stretch
                     }
                 }
             }

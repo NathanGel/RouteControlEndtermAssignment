@@ -127,13 +127,15 @@ namespace RouteBeheerBL.Managers {
             try {
                 using (StreamReader sr = new(_pathStretches)) {
                     string line;
-                    List<NetworkPoint> points = null; // Initialize as null to avoid shared reference issues
+                    int current = 0;
+                    Dictionary<int, NetworkPoint> points = null; // Initialize as null to avoid shared reference issues
                     while ((line = sr.ReadLine()) != null) {
                         if (line.StartsWith("Network")) {
                             if (points != null && points.Count > 0) { // Ensure points is not null before adding
-                                _stretches.Add(new Stretch(new List<NetworkPoint>(points)));
+                                _stretches.Add(new Stretch(new Dictionary<int, NetworkPoint>(points)));
                             }// Create a new list to avoid shared references
-                            points = new List<NetworkPoint>(); // Reinitialize points for the next stretch
+                            points = new Dictionary<int, NetworkPoint>(); // Reinitialize points for the next stretch
+                            current = 0; // Reset current for the new stretch
                             continue;
                         }
                         
@@ -144,20 +146,21 @@ namespace RouteBeheerBL.Managers {
                                 int indexOfNetworkPoint = _networkPoints.FindIndex(np =>
                                     np.X == double.Parse(splitPart[1]) &&
                                     np.Y == double.Parse(splitPart[2].Replace(")", "")));
-                                points.Add(_networkPoints[indexOfNetworkPoint]);
+                                points.Add(current++ ,_networkPoints[indexOfNetworkPoint]);
+                                //Console.WriteLine($"{current} {_networkPoints[indexOfNetworkPoint].X}");
                             }
                         }
                     }
                     // Add the last stretch if points are not empty
                     if (points != null && points.Count > 0)
-                        _stretches.Add(new Stretch(new List<NetworkPoint>(points)));
+                        _stretches.Add(new Stretch(new Dictionary<int, NetworkPoint>(points)));
                 }
-                foreach (var stretch in _stretches) {
-                    Console.WriteLine(stretch);
-                    foreach (var point in stretch.NetworkPoints) {
-                        Console.WriteLine($"({point.Id}|X:{point.X}|Y:{point.Y})");
-                    }
-                }
+                //foreach (var stretch in _stretches) {
+                //    Console.WriteLine(stretch);
+                //    foreach (var point in stretch.NetworkPoints) {
+                //        Console.WriteLine($"({point.Id}|X:{point.X}|Y:{point.Y})");
+                //    }
+                //}
             } catch (Exception ex) {
                 throw new NetworkInitializationException("Error reading stretches file", ex);
             }
