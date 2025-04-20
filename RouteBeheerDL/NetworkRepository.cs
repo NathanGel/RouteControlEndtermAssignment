@@ -46,7 +46,8 @@ namespace RouteBeheerDL {
                         cmd.CommandText = queryStretch;
                         cmd.Parameters.Clear();
                         int id = (int)cmd.ExecuteScalar();
-                        foreach (NetworkPoint np in s.NetworkPoints) {
+                        foreach(var np in s.NetworkPoints) {
+                            Console.WriteLine(np.Id);
                             cmd.CommandText = queryStretchNetworkPoint;
                             cmd.Parameters.Clear();
                             cmd.Parameters.AddWithValue("@stretchId", id);

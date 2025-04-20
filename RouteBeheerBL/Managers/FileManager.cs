@@ -32,7 +32,7 @@ namespace RouteBeheerBL.Managers {
         private List<Stretch> _stretches = new();
 
         private INetworkRepository _networkPointRepository;
-        
+
         public void InitializeNetwork() {
             try {
                 ReadFacilities();
@@ -62,59 +62,105 @@ namespace RouteBeheerBL.Managers {
         }
 
         public void ReadNetworkPoints() {
-            using (StreamReader sr = new(_pathNetworkPoints)) {
-                string line;
-                while ((line = sr.ReadLine()) != null) {
-                    string[] parts = line.Split('|');
-                    int id = int.Parse(parts[0]);
-                    double x = double.Parse(parts[1]);
-                    double y = double.Parse(parts[2]);
-                    NetworkPoint np = new(x, y);
-                    np.Id = id;
-                    _networkPoints.Add(np);
-                    _networkPointMapping.Add(id, id); //dictionary die de id van de networkpoint koppelt aan de id van de networkpoint in de database
+            try {
+                using (StreamReader sr = new(_pathNetworkPoints)) {
+                    string line;
+                    while ((line = sr.ReadLine()) != null) {
+                        string[] parts = line.Split('|');
+                        int id = int.Parse(parts[0]);
+                        double x = double.Parse(parts[1]);
+                        double y = double.Parse(parts[2]);
+                        NetworkPoint np = new(x, y);
+                        np.Id = id;
+                        _networkPoints.Add(np);
+                        _networkPointMapping.Add(id, id); //dictionary die de id van de networkpoint koppelt aan de id van de networkpoint in de database
+                    }
                 }
+            } catch (Exception ex) {
+                throw new NetworkInitializationException("Error reading network points file", ex);
             }
         }
 
         public void ReadFacilitiesLocations() {
-            using (StreamReader sr = new(_pathFacilitiesLocations)) {
-                string line;
-                int npId = 1;
-                while ((line = sr.ReadLine()) != null) {
-                    string[] parts = line.Split(',');
-                    if (int.Parse(parts[0]) != npId)//check om te kijken of het nog steeds over hetzellfde networkpoint gaat
-                        npId = int.Parse(parts[0]);
-                    int indexNp = _networkPoints.FindIndex(np => np.Id == npId);
-                    int indexFacility = _facilities.FindIndex(f => f.Id == int.Parse(parts[1]));
-                    _networkPoints[indexNp].Facilities.Add(_facilities[indexFacility]);
-                }
-            }
-        }
-
-        public void ReadStretches() {
-            using (StreamReader sr = new(_pathStretches)) {
-                string line;
-                while ((line = sr.ReadLine()) != null) {
-                    if (line.StartsWith("stretch")) {
-                        continue;
-                    } else {
-                        line.Trim();
-                        Stretch stretch;
-                        List<NetworkPoint> points = new();
-                        string[] parts = line.Split(")");
-                        for (int i = 0; i < parts.Length; i++) {
-                            parts[i] = parts[i].Replace("(", "");
-                            if (string.IsNullOrWhiteSpace(parts[i])) continue;
-                            int indexOfNetworkPoint = _networkPoints.FindIndex(np => np.Id == int.Parse(parts[i]));
-                            points.Add(_networkPoints[indexOfNetworkPoint]);
-                        }
-                        stretch = new(points);
-                        _stretches.Add(stretch);
+            try {
+                using (StreamReader sr = new(_pathFacilitiesLocations)) {
+                    string line;
+                    int npId = 1;
+                    while ((line = sr.ReadLine()) != null) {
+                        string[] parts = line.Split(',');
+                        if (int.Parse(parts[0]) != npId)//check om te kijken of het nog steeds over hetzellfde networkpoint gaat
+                            npId = int.Parse(parts[0]);
+                        int indexNp = _networkPoints.FindIndex(np => np.Id == npId);
+                        int indexFacility = _facilities.FindIndex(f => f.Id == int.Parse(parts[1]));
+                        _networkPoints[indexNp].Facilities.Add(_facilities[indexFacility]);
                     }
                 }
+            } catch (Exception ex) {
+                throw new NetworkInitializationException("Error reading facilities locations file", ex);
             }
         }
 
+        //public void ReadStretches() {
+        //    using (StreamReader sr = new(_pathStretches)) {
+        //        string line;
+        //        while ((line = sr.ReadLine()) != null) {
+        //            if (line.StartsWith("stretch")) {
+        //                continue;
+        //            } else {
+        //                line.Trim();
+        //                Stretch stretch;
+        //                List<NetworkPoint> points = new();
+        //                string[] parts = line.Split(")");
+        //                for (int i = 0; i < parts.Length; i++) {
+        //                    parts[i] = parts[i].Replace("(", "");
+        //                    if (string.IsNullOrWhiteSpace(parts[i])) continue;
+        //                    int indexOfNetworkPoint = _networkPoints.FindIndex(np => np.Id == int.Parse(parts[i]));
+        //                    points.Add(_networkPoints[indexOfNetworkPoint]);
+        //                }
+        //                stretch = new(points);
+        //                _stretches.Add(stretch);
+        //            }
+        //        }
+        //    }
+        //}
+        public void ReadStretches() {
+            try {
+                using (StreamReader sr = new(_pathStretches)) {
+                    string line;
+                    List<NetworkPoint> points = null; // Initialize as null to avoid shared reference issues
+                    while ((line = sr.ReadLine()) != null) {
+                        if (line.StartsWith("Network")) {
+                            if (points != null && points.Count > 0) { // Ensure points is not null before adding
+                                _stretches.Add(new Stretch(new List<NetworkPoint>(points)));
+                            }// Create a new list to avoid shared references
+                            points = new List<NetworkPoint>(); // Reinitialize points for the next stretch
+                            continue;
+                        }
+                        
+                        string[] parts = line.Split(')');
+                        foreach (var part in parts) {
+                            string[] splitPart = part.Replace(" ", "").Split('|');
+                            if (!string.IsNullOrWhiteSpace(part)) {
+                                int indexOfNetworkPoint = _networkPoints.FindIndex(np =>
+                                    np.X == double.Parse(splitPart[1]) &&
+                                    np.Y == double.Parse(splitPart[2].Replace(")", "")));
+                                points.Add(_networkPoints[indexOfNetworkPoint]);
+                            }
+                        }
+                    }
+                    // Add the last stretch if points are not empty
+                    if (points != null && points.Count > 0)
+                        _stretches.Add(new Stretch(new List<NetworkPoint>(points)));
+                }
+                foreach (var stretch in _stretches) {
+                    Console.WriteLine(stretch);
+                    foreach (var point in stretch.NetworkPoints) {
+                        Console.WriteLine($"({point.Id}|X:{point.X}|Y:{point.Y})");
+                    }
+                }
+            } catch (Exception ex) {
+                throw new NetworkInitializationException("Error reading stretches file", ex);
+            }
+        }
     }
 }

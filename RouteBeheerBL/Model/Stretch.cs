@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace RouteBeheerBL.Model {
     public class Stretch {
+        public Stretch() {
+        }
+
         public Stretch(int id) {
             this.Id = id;
         }
