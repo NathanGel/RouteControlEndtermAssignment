@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Drawing;
+using System.Net;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,6 +14,8 @@ using RouteBeheerBL.Interfaces;
 using RouteBeheerBL.Managers;
 using RouteBeheerBL.Model;
 using RouteBeheerDL;
+using Point = System.Windows.Point;
+// Or remove using System.Drawing; if you have it
 
 namespace WPFNetwerkBeheerUI {
     /// <summary>
@@ -96,6 +99,54 @@ namespace WPFNetwerkBeheerUI {
             }
         }
 
+        private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
+            Point mousePos = e.GetPosition(canvas);
+            Point nearbyPoint = FindNearbyPoint(mousePos);
+
+            if (nearbyPoint != default) {
+                HighlightPoint(selectedPoint);
+            }
+        }
+
+        private Point FindNearbyPoint(Point p) {
+            double tolerance = 5; 
+            foreach(var point in points) {
+                if (Math.Abs(point.X - p.X) < tolerance && Math.Abs(point.Y - p.Y) < tolerance) {
+                    selectedPoint = point;
+                    //MessageBox.Show($"Selected Point: {selectedPoint}");
+                    return selectedPoint;
+                }
+            }
+            return default;
+        }
+
+        private void HighlightPoint(Point p) {
+            Ellipse highlightCircle = new Ellipse {
+                Width = 10,
+                Height = 10,
+                Fill = Brushes.Red,
+                Stroke = Brushes.Red,
+                StrokeThickness = 2
+            };
+
+            Canvas.SetLeft(highlightCircle, p.X - highlightCircle.Width / 2);
+            Canvas.SetTop(highlightCircle, p.Y - highlightCircle.Height / 2);
+
+            // Remove any previous highlight
+            RemovePreviousHighlight();
+
+            // Add the highlight to canvas
+            canvas.Children.Add(highlightCircle);
+            highlightElement = highlightCircle;
+        }
+
+        private UIElement highlightElement;
+
+        private void RemovePreviousHighlight() {
+            if (highlightElement != null && canvas.Children.Contains(highlightElement)) {
+                canvas.Children.Remove(highlightElement);
+            }
+        }
         private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
             if (e.ClickCount == 2) {
                 if (WindowState == WindowState.Maximized) {
