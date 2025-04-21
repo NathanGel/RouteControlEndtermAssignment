@@ -28,6 +28,7 @@ namespace WPFNetwerkBeheerUI {
         double maxY = 1000;
         List<Point> points = new();
         private Point selectedPoint;
+        private Point clickedLocation;
         private readonly string connectionString = @"Data Source=NATHAN\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
         
         public MainWindow() {
@@ -105,6 +106,9 @@ namespace WPFNetwerkBeheerUI {
 
             if (nearbyPoint != default) {
                 HighlightPoint(selectedPoint);
+            } else {
+                clickedLocation = mousePos;
+                HighlightPoint(clickedLocation);
             }
         }
 
@@ -184,7 +188,12 @@ namespace WPFNetwerkBeheerUI {
         }
 
         private void AddNetworkPoint_Click(object sender, RoutedEventArgs e) {
-            MessageBox.Show("Add Network Point clicked");
+            if (clickedLocation != default) {
+                MessageBox.Show($"Add Network Point clicked at {clickedLocation}");
+                clickedLocation = default;
+            } else {
+                MessageBox.Show("No location selected for new network point");
+            }
         }
 
         private void AddConnection_Click(object sender, RoutedEventArgs e) {
