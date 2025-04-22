@@ -29,7 +29,6 @@ namespace RouteBeheerBL.Managers {
         private Dictionary<int, int> _facilityMapping = new();
         private List<NetworkPoint> _networkPoints = new();
         private Dictionary<int, int> _networkPointMapping = new();
-        private List<Stretch> _stretches = new();
 
         private INetworkRepository _networkPointRepository;
 
@@ -39,7 +38,7 @@ namespace RouteBeheerBL.Managers {
                 ReadNetworkPoints();
                 ReadFacilitiesLocations();
                 ReadStretches();
-                _networkPointRepository.InitializeNetwork(_facilities, _networkPoints, _stretches, _networkPointMapping, _facilityMapping);
+                //_networkPointRepository.InitializeNetwork(_facilities, _networkPoints, _stretches, _networkPointMapping, _facilityMapping);
             } catch (Exception ex) {
                 throw new NetworkInitializationException("Error initializing network", ex);
             }
@@ -123,47 +122,47 @@ namespace RouteBeheerBL.Managers {
         //        }
         //    }
         //}
-        public void ReadStretches() {
-            try {
-                using (StreamReader sr = new(_pathStretches)) {
-                    string line;
-                    int current = 0;
-                    Dictionary<int, NetworkPoint> points = null; // Initialize as null to avoid shared reference issues
-                    while ((line = sr.ReadLine()) != null) {
-                        if (line.StartsWith("Network")) {
-                            if (points != null && points.Count > 0) { // Ensure points is not null before adding
-                                _stretches.Add(new Stretch(new Dictionary<int, NetworkPoint>(points)));
-                            }// Create a new list to avoid shared references
-                            points = new Dictionary<int, NetworkPoint>(); // Reinitialize points for the next stretch
-                            current = 0; // Reset current for the new stretch
-                            continue;
-                        }
+        //public void ReadStretches() {
+        //    try {
+        //        using (StreamReader sr = new(_pathStretches)) {
+        //            string line;
+        //            int current = 0;
+        //            Dictionary<int, NetworkPoint> points = null; // Initialize as null to avoid shared reference issues
+        //            while ((line = sr.ReadLine()) != null) {
+        //                if (line.StartsWith("Network")) {
+        //                    if (points != null && points.Count > 0) { // Ensure points is not null before adding
+        //                        _stretches.Add(new Stretch(new Dictionary<int, NetworkPoint>(points)));
+        //                    }// Create a new list to avoid shared references
+        //                    points = new Dictionary<int, NetworkPoint>(); // Reinitialize points for the next stretch
+        //                    current = 0; // Reset current for the new stretch
+        //                    continue;
+        //                }
                         
-                        string[] parts = line.Split(')');
-                        foreach (var part in parts) {
-                            string[] splitPart = part.Replace(" ", "").Split('|');
-                            if (!string.IsNullOrWhiteSpace(part)) {
-                                int indexOfNetworkPoint = _networkPoints.FindIndex(np =>
-                                    np.X == double.Parse(splitPart[1]) &&
-                                    np.Y == double.Parse(splitPart[2].Replace(")", "")));
-                                points.Add(current++ ,_networkPoints[indexOfNetworkPoint]);
-                                //Console.WriteLine($"{current} {_networkPoints[indexOfNetworkPoint].X}");
-                            }
-                        }
-                    }
-                    // Add the last stretch if points are not empty
-                    if (points != null && points.Count > 0)
-                        _stretches.Add(new Stretch(new Dictionary<int, NetworkPoint>(points)));
-                }
-                //foreach (var stretch in _stretches) {
-                //    Console.WriteLine(stretch);
-                //    foreach (var point in stretch.NetworkPoints) {
-                //        Console.WriteLine($"({point.Id}|X:{point.X}|Y:{point.Y})");
-                //    }
-                //}
-            } catch (Exception ex) {
-                throw new NetworkInitializationException("Error reading stretches file", ex);
-            }
-        }
+        //                string[] parts = line.Split(')');
+        //                foreach (var part in parts) {
+        //                    string[] splitPart = part.Replace(" ", "").Split('|');
+        //                    if (!string.IsNullOrWhiteSpace(part)) {
+        //                        int indexOfNetworkPoint = _networkPoints.FindIndex(np =>
+        //                            np.X == double.Parse(splitPart[1]) &&
+        //                            np.Y == double.Parse(splitPart[2].Replace(")", "")));
+        //                        points.Add(current++ ,_networkPoints[indexOfNetworkPoint]);
+        //                        //Console.WriteLine($"{current} {_networkPoints[indexOfNetworkPoint].X}");
+        //                    }
+        //                }
+        //            }
+        //            // Add the last stretch if points are not empty
+        //            if (points != null && points.Count > 0)
+        //                _stretches.Add(new Stretch(new Dictionary<int, NetworkPoint>(points)));
+        //        }
+        //        //foreach (var stretch in _stretches) {
+        //        //    Console.WriteLine(stretch);
+        //        //    foreach (var point in stretch.NetworkPoints) {
+        //        //        Console.WriteLine($"({point.Id}|X:{point.X}|Y:{point.Y})");
+        //        //    }
+        //        //}
+        //    } catch (Exception ex) {
+        //        throw new NetworkInitializationException("Error reading stretches file", ex);
+        //    }
+        //}
     }
 }

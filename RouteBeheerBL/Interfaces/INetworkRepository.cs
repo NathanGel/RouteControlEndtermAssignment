@@ -7,8 +7,6 @@ using System.Threading.Tasks;
 
 namespace RouteBeheerBL.Interfaces {
     public interface INetworkRepository {
-        void InitializeNetwork(List<Facility> fs, List<NetworkPoint> nps, List<Stretch> ss, Dictionary<int, int> npMappings, Dictionary<int, int> fMappings);
-        List<Stretch> ReadNetwork();
         int AddNetworkPoint(NetworkPoint point);
         void RemoveNetworkPoint(NetworkPoint point);
         void ConnectNetworkPoint(NetworkPoint p1, NetworkPoint p2);

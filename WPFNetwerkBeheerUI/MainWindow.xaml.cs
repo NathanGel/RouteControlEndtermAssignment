@@ -39,13 +39,17 @@ namespace WPFNetwerkBeheerUI {
         public void ReadFromDatabase() {
             INetworkRepository repo = new NetworkRepository(connectionString);
             NetworkManager nm = new(repo);
-            List<RouteBeheerBL.Model.Stretch> stretches = nm.ReadNetwork();
-            foreach(var stretch in stretches) {
-                foreach(var point in stretch.NetworkPointSequence){
-                    points.Add(new(point.Value.X, point.Value.Y));
-                }
+            List<Segment> segments = nm.GetSegments();
+
+            foreach(var segment in segments) {
+                Point startPoint = new Point(segment.StartPoint.X, segment.StartPoint.Y);
+                Point endPoint = new Point(segment.EndPoint.X, segment.EndPoint.Y);
+                if (!points.Contains(startPoint))
+                    points.Add(startPoint);
+                if (!points.Contains(endPoint))
+                    points.Add(endPoint);
             }
-            DrawAllLines(stretches);
+            DrawAllLines(segments);
             DrawPoints(points);
         }
 
@@ -90,13 +94,11 @@ namespace WPFNetwerkBeheerUI {
                 throw new InvalidOperationException("Canvas not found in the current context.");
             }
         }
-        public void DrawAllLines(List<RouteBeheerBL.Model.Stretch> stretches) {
-            foreach (var stretch in stretches) {
-                for(int i = 1; i<stretch.NetworkPointSequence.Count; i++) {
-                    Point p1 = new(stretch.NetworkPointSequence[i - 1].X, stretch.NetworkPointSequence[i-1].Y);
-                    Point p2 = new(stretch.NetworkPointSequence[i].X, stretch.NetworkPointSequence[i].Y);
-                    DrawLine(p1, p2);
-                }
+        public void DrawAllLines(List<Segment> segments) {
+            foreach (var segment in segments) {
+                Point p1 = new(segment.StartPoint.X, segment.StartPoint.Y);
+                Point p2 = new(segment.EndPoint.X, segment.EndPoint.Y);
+                DrawLine(p1, p2);
             }
         }
 

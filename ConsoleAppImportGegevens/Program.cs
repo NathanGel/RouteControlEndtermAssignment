@@ -26,18 +26,6 @@ namespace ConsoleAppImportGegevens {
             fm.InitializeNetwork();
 
             NetworkManager nm = new(networkRepository);
-            List<Stretch> stretches = nm.ReadNetwork();
-            foreach (var stretch in stretches) {
-                Console.WriteLine($"stretch :{stretch.Id}");
-                foreach (var point in stretch.NetworkPoints) {
-                    Console.WriteLine($"({point.Id}|X:{point.X}|Y:{point.Y})");
-
-
-                    //foreach(var facility in point.Facilities) {
-                    //    Console.WriteLine($"        facility id:{facility.Id} name:{facility.Name}");
-                    //}
-                }
-            }
         }
     }
 }
