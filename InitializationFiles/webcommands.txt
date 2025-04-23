@@ -1,0 +1,10 @@
+yarn create vite
+name
+typescript
+
+
+yarn
+yarn add vite
+yarn router-dom
+yarn add react-dom
+yarn dev

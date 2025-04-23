@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.Pkcs;
 using System.Text;
 using System.Threading.Tasks;
+using System.Transactions;
 using Microsoft.Data.SqlClient;
 using RouteBeheerBL.Interfaces;
 using RouteBeheerBL.Model;
@@ -15,66 +17,65 @@ namespace RouteBeheerDL {
             this.connectionString = connectionString;
         }
 
-        //public void InitializeNetwork(List<Facility> fs, List<NetworkPoint> nps, List<Stretch> ss, Dictionary<int, int> npMappings, Dictionary<int, int> fMappings) {
-        //    string queryFacility = "INSERT INTO Facilities(name) OUTPUT INSERTED.id VALUES(@name)";
-        //    string queryNetworkPoint = "INSERT INTO NetworkPoints(x_coordinate, y_coordinate) OUTPUT INSERTED.id VALUES(@x, @y)";
-        //    string queryStretch = "INSERT INTO Stretches OUTPUT INSERTED.id DEFAULT VALUES";
-        //    string queryStretchNetworkPoint = "INSERT INTO Stretch_NetworkPoints(stretch_id, networkpoint_id, sequenceNr) VALUES(@stretchId, @networkpointId, @sequenceNr)";
-        //    string queryNetworkPointFacility = "INSERT INTO NetworkPoint_Facilities(networkpoint_id, facility_id) VALUES(@networkpointId, @facilityId)";
-        //    using (SqlConnection connection = new(connectionString))
-        //    using (SqlCommand cmd = connection.CreateCommand()) {
-        //        connection.Open();
-        //        SqlTransaction transaction = connection.BeginTransaction();
-        //        cmd.Transaction = transaction;
-        //        try {
-        //            cmd.CommandText = queryFacility;
-        //            foreach (Facility f in fs) {
-        //                cmd.Parameters.Clear();
-        //                cmd.Parameters.AddWithValue("@name", f.Name);
-        //                int id = (int)cmd.ExecuteScalar();
-        //                fMappings[f.Id] = id; // write away facility and map the new id to the old one in the dictionary
-        //            }
-        //            cmd.CommandText = queryNetworkPoint;
-        //            foreach (NetworkPoint np in nps) {
-        //                cmd.Parameters.Clear();
-        //                cmd.Parameters.AddWithValue("@x", np.X);
-        //                cmd.Parameters.AddWithValue("@y", np.Y);
-        //                int id = (int)cmd.ExecuteScalar();
-        //                npMappings[np.Id] = id; // write away networkpoint and map the new id to the old one in the dictionary
-        //            }
-        //            foreach (Stretch s in ss) {
-        //                cmd.CommandText = queryStretch;
-        //                cmd.Parameters.Clear();
-        //                int id = (int)cmd.ExecuteScalar();
-        //                foreach(var np in s.NetworkPointSequence) {
-        //                    //Console.WriteLine(np.Id);
-        //                    cmd.CommandText = queryStretchNetworkPoint;
-        //                    cmd.Parameters.Clear();
-        //                    cmd.Parameters.AddWithValue("@stretchId", id);
-        //                    cmd.Parameters.AddWithValue("@networkpointId", npMappings[np.Value.Id]); // use the new id of the networkpoint
-        //                    cmd.Parameters.AddWithValue("@sequenceNr", np.Key);
-        //                    cmd.ExecuteNonQuery();
-        //                }
-        //            }
-        //            foreach (NetworkPoint np in nps) {
-        //                cmd.CommandText = queryNetworkPointFacility;
-        //                foreach (Facility f in np.Facilities) {
-        //                    cmd.Parameters.Clear();
-        //                    cmd.Parameters.AddWithValue("@networkpointId", npMappings[np.Id]); // use the new id of the networkpoint
-        //                    cmd.Parameters.AddWithValue("@facilityId", fMappings[f.Id]); // use the new id of the facility
-        //                    cmd.ExecuteNonQuery();
-        //                }
-        //            }
-        //            transaction.Commit();
-        //        } catch (Exception ex) {
-        //            transaction.Rollback();
-        //            throw new Exception("InitializeNetwork", ex);
-        //        }
-        //    }
-        //}
+        public void InitializeNetwork(Dictionary<int, NetworkPoint> networkPoints, Dictionary<int, Facility> facilities, List<Segment> segmenten) {
+            string queryNetworkPoints = "INSERT INTO NetworkPoints(x_coordinate, y_coordinate) OUTPUT INSERTED.id VALUES(@X, @Y)";
+            string queryFacilities = "INSERT INTO Facilities(name) OUTPUT INSERTED.id VALUES(@name)";
+            string queryNetworkPointFacilities = "INSERT INTO NetworkPoint_Facilities(networkpoint_id, facility_id) VALUES(@npId, @fId)";
+            string querySegments = "INSERT INTO Segments(start_id, stop_id) VALUES(@startId, @stopId)";
+            using (SqlConnection connection = new(connectionString))
+            using (SqlCommand cmd = connection.CreateCommand()) {
+                connection.Open();
+                SqlTransaction transaction = connection.BeginTransaction();
+                cmd.Transaction = transaction;
+                try {
+                    cmd.CommandText = queryNetworkPoints;
+                    for(int i = 1; i<=networkPoints.Count; i++) { // start vanaf 1 want de keys starten vanaf 1
+                        cmd.Parameters.Clear();
+                        cmd.Parameters.AddWithValue("@X", networkPoints[i].X);
+                        cmd.Parameters.AddWithValue("@Y", networkPoints[i].Y);
+                        int id = (int)cmd.ExecuteScalar();
+                        networkPoints[i].Id = id; // de door de databank gegenereerde id opslaan in het networkpoint voor NetworkPoint_Facilities en Segmenten
+                    }
+
+                    cmd.CommandText = queryFacilities;
+                    cmd.Parameters.Clear();
+                    for(int i = 1; i<=facilities.Count; i++) { // start vanaf 1 want de keys starten vanaf 1
+                        cmd.Parameters.Clear();
+                        cmd.Parameters.AddWithValue("@name", facilities[i].Name);
+                        int id = (int)cmd.ExecuteScalar();
+                        facilities[i].Id = id; // de door de databank gegenereerde id opslaan in de facility voor NetworkPoint_Facilities
+                    }
+
+                    cmd.CommandText = queryNetworkPointFacilities;
+                    cmd.Parameters.Clear();
+                    foreach(var networkpoint in networkPoints.Values) {
+                        foreach(var facility in networkpoint.Facilities) {
+                            cmd.Parameters.Clear();
+                            cmd.Parameters.AddWithValue("@npId", networkpoint.Id);
+                            cmd.Parameters.AddWithValue("@fId", facility.Id);
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+
+                    cmd.CommandText = querySegments;
+                    cmd.Parameters.Clear();
+                    foreach (var segment in segmenten) {
+                        cmd.Parameters.Clear();
+                        cmd.Parameters.AddWithValue("@startId", segment.StartPoint.Id);
+                        cmd.Parameters.AddWithValue("@stopId", segment.EndPoint.Id);
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    transaction.Commit();
+                } catch (Exception ex) {
+                    transaction.Rollback();
+                    throw new Exception("InitializeNetwork Invalid Transaction Rolled Back", ex);
+                }
+            }
+        }
 
         public List<Segment> GetSegments() {
-            string query = "SELECT * FROM Stretches";
+            string query = "SELECT s.start_id, s.stop_id, nStart.x_coordinate AS startX, nStart.y_coordinate AS startY, nStop.x_coordinate AS stopX, nStop.y_coordinate AS stopY FROM Segments s JOIN NetworkPoints nStart ON s.start_id=nStart.id JOIN NetworkPoints nStop  ON s.stop_id=nStop.id;";
             using (SqlConnection connection = new(connectionString))
             using (SqlCommand cmd = connection.CreateCommand()) {
                 List<Segment> segments = new();
@@ -83,7 +84,7 @@ namespace RouteBeheerDL {
                     connection.Open();
                     SqlDataReader reader = cmd.ExecuteReader();
                     while (reader.Read()) {
-                        //segments.Add(new((int)reader["id"]));
+                        segments.Add(new(new((int)reader["start_id"], (double)reader["startX"], (double)reader["startY"]), new((int)reader["stop_id"], (double)reader["stopX"], (double)reader["stopY"])));
                     }
                     return segments;
                 } catch (Exception ex) {
@@ -92,7 +93,22 @@ namespace RouteBeheerDL {
             }
         }
         public List<NetworkPoint> GetNetworkPoints() {
-            throw new NotImplementedException();
+            string query = "SELECT * FROM NetworkPoints";
+            using (SqlConnection connection = new(connectionString))
+            using(SqlCommand cmd = connection.CreateCommand()) {
+                List<NetworkPoint> networkPoints = new();
+                try {
+                    cmd.CommandText = query;
+                    connection.Open();
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read()) {
+                        networkPoints.Add(new((int)reader["id"], (double)reader["x_coordinate"], (double)reader["y_coordinate"]));
+                    }
+                    return networkPoints;
+                } catch (Exception ex) {
+                    throw new Exception("GetNetworkPoints", ex);
+                }
+            }
         }
 
         public int AddNetworkPoint(NetworkPoint point) {
@@ -125,7 +141,20 @@ namespace RouteBeheerDL {
 
 
         public void RemoveNetworkPoint(NetworkPoint point) {
-            throw new NotImplementedException();
+            string query = "DELETE FROM NetworkPoints WHERE x_coordinate=@X AND y_coordinate=@Y";
+            using (SqlConnection connection = new(connectionString))
+            using (SqlCommand cmd = connection.CreateCommand()) {
+                try {
+                    cmd.CommandText = query;
+                    cmd.Parameters.AddWithValue("@X", point.X);
+                    cmd.Parameters.AddWithValue("@Y", point.Y);
+                    connection.Open();
+                    cmd.ExecuteNonQuery();
+                } catch (Exception ex) {
+                    throw new Exception("RemoveNetworkPoint", ex);
+                }
+            }
+
         }
 
         public void UpdateNetworkPoint(NetworkPoint point) {

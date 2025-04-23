@@ -11,7 +11,7 @@ namespace ConsoleAppImportGegevens {
             const string connectionString = @"Data Source=NATHAN\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
             const string pathFacilities = @"C:\Users\natha\programmerenGevorderd\EindopdrachtProgrammerenGevorderdRouteBeheer\InitializationFiles\faciliteiten.txt";
             const string pathNetworkPoints = @"C:\Users\natha\programmerenGevorderd\EindopdrachtProgrammerenGevorderdRouteBeheer\InitializationFiles\network_points.txt";
-            const string pathStretches = @"C:\Users\natha\programmerenGevorderd\EindopdrachtProgrammerenGevorderdRouteBeheer\InitializationFiles\network.txt";
+            const string pathStretches = @"C:\Users\natha\programmerenGevorderd\EindopdrachtProgrammerenGevorderdRouteBeheer\InitializationFiles\network_stretches.txt";
             const string pathFacilitiesLocations = @"C:\Users\natha\programmerenGevorderd\EindopdrachtProgrammerenGevorderdRouteBeheer\InitializationFiles\faciliteiten_locaties.txt";
 
             //strings for laptop

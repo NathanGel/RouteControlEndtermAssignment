@@ -1,0 +1,19 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using RouteBeheerBL.Model;
+using WPFNetwerkBeheerUI.Model;
+
+namespace WPFNetwerkBeheerUI.Mappers {
+    public static class SegmentMapper {
+        public static Segment MapToDomain(SegmentUI segment) {
+            return new(segment.Id, NetworkPointMapper.MapToDomain(segment.StartPoint), NetworkPointMapper.MapToDomain(segment.EndPoint));
+        }
+
+        public static SegmentUI MapFromDomain(Segment segment) {
+            return new(segment.Id, NetworkPointMapper.MapFromDomain(segment.StartPoint), NetworkPointMapper.MapFromDomain(segment.EndPoint));
+        }
+    }
+}
