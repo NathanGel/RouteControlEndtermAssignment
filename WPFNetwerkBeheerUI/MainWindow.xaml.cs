@@ -25,14 +25,23 @@ namespace WPFNetwerkBeheerUI {
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window {
-        private ObservableCollection<Point> points = new(); 
-        private ObservableCollection<SegmentUI> segments;
+        private ObservableCollection<Point> points = new(); // de lijst van punten die ik gebruik om op het canvas te tekenen.
+                                                            // Observable collection omdat ik de UI wil updaten wanneer er iets
+                                                            // veranderd in de lijst
+
+        private ObservableCollection<SegmentUI> segments; // de lijst van segmenten die ik gebruik om op het canvas te tekenen
+                                                          // Observable collection idem met points
+
         private Dictionary<Point, UIElement> pointElements = new Dictionary<Point, UIElement>(); // dictionary om de punten te koppelen aan hun UI elementen
                                                                                                  // om ze makkelijk te kunnen verwijderen zonder dat ik telkens
                                                                                                  // na elke verandering het hele canvas opnieuw moet tekenen
 
-        private Point selectedPoint;
-        private Point clickedLocation;
+        private Point selectedPoint; //ik sla dit punt op om in de RemoveLocation/UpdateLocation en RemoveConnection/AddConnection
+                                     // dit punt te gebruiken en vast te stellen of er wel een punt geselecteerd is na de click events op de knoppen
+
+        private Point clickedLocation; // dit punt sla ik op om te gebruiken in de AddLocation  en om te
+                                       // kijken of er wel een locatie geselecteerd is na het click event op de knop
+
         private readonly string connectionString = @"Data Source=NATHAN\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
         private NetworkManager nm;
 
@@ -86,7 +95,7 @@ namespace WPFNetwerkBeheerUI {
             
             Canvas.SetLeft(ellipse, point.X - (ellipse.Width / 2)); // de berekening die hier in plaats vind zorgt ervoor dat
             Canvas.SetTop(ellipse, point.Y - (ellipse.Width /2));   // het midden van de ellipse overeenstemt met de exacte coordinaten
-                                                                        // van het punt eerder zorgde dit voor problemen met de lijnen 
+                                                                    // van het punt eerder zorgde dit voor problemen met de lijnen 
             canvas.Children.Add(ellipse);
             pointElements[point] = ellipse;
         }
@@ -124,6 +133,9 @@ namespace WPFNetwerkBeheerUI {
                 HighlightPoint(clickedLocation);
             }
         }
+        private void Canvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e) {
+
+        }
 
         private Point FindNearbyPoint(Point p) {
             double tolerance = 5; 
@@ -157,7 +169,7 @@ namespace WPFNetwerkBeheerUI {
             highlightElement = highlightCircle;
         }
 
-        private UIElement highlightElement;
+        private UIElement highlightElement; // Ik gebruik hier UIElement om het highlight punt op te slaan en achteraf makkelijk te kunnen verwijderen
 
         private void RemovePreviousHighlight() {
             if (highlightElement != null && canvas.Children.Contains(highlightElement)) {
@@ -246,5 +258,6 @@ namespace WPFNetwerkBeheerUI {
                 DragMove();
             }
         }
+
     }
 }
