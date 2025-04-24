@@ -25,22 +25,27 @@ namespace WPFNetwerkBeheerUI {
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window {
-        private ObservableCollection<Point> points = new(); // de lijst van punten die ik gebruik om op het canvas te tekenen.
-                                                            // Observable collection omdat ik de UI wil updaten wanneer er iets
-                                                            // veranderd in de lijst
+        private ObservableCollection<Point> points = new();
+        // de lijst van punten die ik gebruik om op het canvas te tekenen.
+        // Observable collection omdat ik de UI wil updaten wanneer er iets
+        // veranderd in de lijst
 
-        private ObservableCollection<SegmentUI> segments; // de lijst van segmenten die ik gebruik om op het canvas te tekenen
-                                                          // Observable collection idem met points
+        private ObservableCollection<SegmentUI> segments; 
+        // de lijst van segmenten die ik gebruik om op het canvas te tekenen
+        // Observable collection idem met points
 
-        private Dictionary<Point, UIElement> pointElements = new Dictionary<Point, UIElement>(); // dictionary om de punten te koppelen aan hun UI elementen
-                                                                                                 // om ze makkelijk te kunnen verwijderen zonder dat ik telkens
-                                                                                                 // na elke verandering het hele canvas opnieuw moet tekenen
+        private Dictionary<Point, UIElement> pointElements = new Dictionary<Point, UIElement>(); 
+        // dictionary om de punten te koppelen aan hun UI elementen
+        // om ze makkelijk te kunnen verwijderen zonder dat ik telkens
+        // na elke verandering het hele canvas opnieuw moet tekenen
 
-        private Point selectedPoint; //ik sla dit punt op om in de RemoveLocation/UpdateLocation en RemoveConnection/AddConnection
-                                     // dit punt te gebruiken en vast te stellen of er wel een punt geselecteerd is na de click events op de knoppen
+        private Point selectedPoint; 
+        //ik sla dit punt op om in de RemoveLocation/UpdateLocation en RemoveConnection/AddConnection
+        // dit punt te gebruiken en vast te stellen of er wel een punt geselecteerd is na de click events op de knoppen
 
-        private Point clickedLocation; // dit punt sla ik op om te gebruiken in de AddLocation  en om te
-                                       // kijken of er wel een locatie geselecteerd is na het click event op de knop
+        private Point clickedLocation; 
+        // dit punt sla ik op om te gebruiken in de AddLocation  en om te
+        // kijken of er wel een locatie geselecteerd is na het click event op de knop
 
         private readonly string connectionString = @"Data Source=NATHAN\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
         private NetworkManager nm;
@@ -84,6 +89,7 @@ namespace WPFNetwerkBeheerUI {
                 }
             }
         }
+
         public void DrawPoint(Point point) {
             Ellipse ellipse = new Ellipse {
                 Fill = Brushes.MediumTurquoise,
@@ -133,8 +139,23 @@ namespace WPFNetwerkBeheerUI {
                 HighlightPoint(clickedLocation);
             }
         }
-        private void Canvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e) {
 
+        private void Canvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e) {
+            Point mousePos = e.GetPosition(canvas);
+            Point nearbyPoint = FindNearbyPoint(mousePos);
+            if(nearbyPoint != default) {
+                selectedPoint = nearbyPoint;
+                HighlightPoint(selectedPoint);
+                MenuItemAddNetworkPoint.Visibility = Visibility.Collapsed;
+                MenuItemRemoveNetworkPoint.Visibility = Visibility.Visible;
+                MenuItemUpdateNetworkPoint.Visibility = Visibility.Visible;
+            } else {
+                clickedLocation = mousePos;
+                HighlightPoint(clickedLocation);
+                MenuItemRemoveNetworkPoint.Visibility = Visibility.Collapsed;
+                MenuItemUpdateNetworkPoint.Visibility = Visibility.Collapsed;
+                MenuItemAddNetworkPoint.Visibility = Visibility.Visible;
+            }
         }
 
         private Point FindNearbyPoint(Point p) {
@@ -179,7 +200,6 @@ namespace WPFNetwerkBeheerUI {
 
         private void AddNetworkPoint_Click(object sender, RoutedEventArgs e) {
             if (clickedLocation != default) {
-                MessageBox.Show($"Add Network Point clicked at {clickedLocation}");
                 NetworkPointUI newPoint = new(clickedLocation.X, clickedLocation.Y);
                 nm.AddNetworkPoint(NetworkPointMapper.MapToDomain(newPoint));
                 points.Add(clickedLocation);
@@ -189,9 +209,9 @@ namespace WPFNetwerkBeheerUI {
                 MessageBox.Show("No location selected for new network point");
             }
         }
+
         private void RemoveNetworkPoint_Click(object sender, RoutedEventArgs e) {
             if (selectedPoint != default) {
-                MessageBox.Show("Remove Network Point clicked");
                 nm.RemoveNetworkPoint(NetworkPointMapper.MapToDomain(new NetworkPointUI(selectedPoint.X, selectedPoint.Y)));
                 points.Remove(selectedPoint);
                 RemovePreviousHighlight();
@@ -214,7 +234,6 @@ namespace WPFNetwerkBeheerUI {
             }
         }
 
-
         private void RemoveConnection_Click(object sender, RoutedEventArgs e) {
             if (selectedPoint != default) {
                 MessageBox.Show("Remove Connection clicked");
@@ -223,6 +242,7 @@ namespace WPFNetwerkBeheerUI {
                 MessageBox.Show("No network point selected");
             }
         }
+
         private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
             if (e.ClickCount == 2) {
                 if (WindowState == WindowState.Maximized) {
@@ -258,6 +278,5 @@ namespace WPFNetwerkBeheerUI {
                 DragMove();
             }
         }
-
     }
 }
