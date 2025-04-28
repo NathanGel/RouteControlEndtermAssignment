@@ -160,15 +160,16 @@ namespace RouteBeheerDL {
         public void UpdateNetworkPoint(NetworkPoint point) {
             throw new NotImplementedException();
         }
-        public void AddFacility(Facility facility) {
-            string query = "INSERT INTO Facilities(name) VALUES(@name)";
+        public int AddFacility(Facility facility) {
+            string query = "INSERT INTO Facilities(name) OUTPUT INSERTED.id VALUES(@name)";
             using (SqlConnection connection = new(connectionString))
             using (SqlCommand cmd = connection.CreateCommand()) {
                 try {
                     cmd.CommandText = query;
                     cmd.Parameters.AddWithValue("@name", facility.Name);
                     connection.Open();
-                    cmd.ExecuteNonQuery();
+                    int id = (int)cmd.ExecuteScalar();
+                    return id;
                 } catch (Exception ex) {
                     throw new Exception("AddFacility", ex);
                 }
@@ -212,18 +213,16 @@ namespace RouteBeheerDL {
             }
         }
 
-        public void RemoveFacility(int id) {
-            string query = "DELETE FROM Facilities WHERE id=@id AND id IN" +
-                "(SELECT f.id FROM Facilities f " +
-                "LEFT JOIN NetworkPoint_Facilities npf ON f.id=npf.facility_id " +
-                "WHERE id=@id AND npf.facility_id IS NULL)";
+        public void RemoveFacility(Facility facility) {
+            string query = "DELETE FROM Facilities WHERE id=@id";
             using (SqlConnection connection = new(connectionString))
             using (SqlCommand cmd = connection.CreateCommand()) {
                 try {
                     cmd.CommandText = query;
-                    cmd.Parameters.AddWithValue("@id", id);
+                    cmd.Parameters.AddWithValue("@id", facility.Id);
                     connection.Open();
                     cmd.ExecuteNonQuery();
+
                 } catch (Exception ex) {
                     throw new Exception("RemoveFacility", ex);
                 }
@@ -247,5 +246,20 @@ namespace RouteBeheerDL {
             }
         }
 
+        public bool CheckForExistingConnectionsFacility(Facility facility) {
+            string query = "SELECT COUNT(*) FROM NetworkPoint_Facilities WHERE facility_id=@id";
+            using (SqlConnection connection = new(connectionString))
+            using (SqlCommand cmd = connection.CreateCommand()) {
+                try {
+                    cmd.CommandText = query;
+                    cmd.Parameters.AddWithValue("@id", facility.Id);
+                    connection.Open();
+                    int count = (int)cmd.ExecuteScalar();
+                    return count > 0;
+                } catch (Exception ex) {
+                    throw new Exception("CheckForExistingConnectionsFacility", ex);
+                }
+            }
+        }
     }
 }

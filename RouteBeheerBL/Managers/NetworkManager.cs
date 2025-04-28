@@ -52,21 +52,22 @@ namespace RouteBeheerBL.Managers {
         public List<Segment> GetSegments() {
             return repo.GetSegments();
         }
-        public void AddFacility(Facility facility) {
+
+        public int AddFacility(Facility facility) {
             if (facility == null) throw new NetworkException("AddFacility Invalid Null");
-            repo.AddFacility(facility);
+            return repo.AddFacility(facility);
         }
 
-        public void RemoveFacility(int id) {
-            if (id <= 0) throw new NetworkException("RemoveFacility Invalid Id ");
-            repo.RemoveFacility(id);
+        public void RemoveFacility(Facility facility) {
+            if (facility == null) throw new NetworkException("RemoveFacility Invalid Null");
+            repo.RemoveFacility(facility);
         }
-
 
         public void UpdateFacility(Facility facility) {
             if (facility == null) throw new NetworkException("UpdateFacility Invalid Null");
             repo.UpdateFacility(facility);
         }
+
         public void GetFacility(int id) {
             if (id <= 0) throw new NetworkException("UpdateFacility Invalid Null");
             repo.GetFacility(id);
@@ -74,6 +75,11 @@ namespace RouteBeheerBL.Managers {
 
         public List<Facility> GetAllFacilities() {
             return repo.GetAllFacilities();
+        }
+
+        public bool CheckForExistingConnectionsFacility(Facility facility) {
+            if (facility == null) throw new NetworkException("CheckForExistingConnectionsFacility Invalid Null");
+            return repo.CheckForExistingConnectionsFacility(facility);
         }
     }
 }

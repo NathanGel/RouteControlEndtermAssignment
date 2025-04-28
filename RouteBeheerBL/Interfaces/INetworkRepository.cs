@@ -15,10 +15,11 @@ namespace RouteBeheerBL.Interfaces {
         void UpdateNetworkPoint(NetworkPoint point);
         List<NetworkPoint> GetNetworkPoints();
         List<Segment> GetSegments();
-        void AddFacility(Facility facility);
-        void RemoveFacility(int id);
+        int AddFacility(Facility facility);
+        void RemoveFacility(Facility facility);
         Facility GetFacility(int id);
         void UpdateFacility(Facility facility);
         List<Facility> GetAllFacilities();
+        bool CheckForExistingConnectionsFacility(Facility facility);
     }
 }

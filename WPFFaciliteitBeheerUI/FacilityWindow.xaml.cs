@@ -25,14 +25,19 @@ namespace WPFFaciliteitBeheerUI {
             this.Facility = facility;
             this.isUpdate = isUpdate;
             TopBarTitle.Text = isUpdate ? "Update Facility" : "Add Facility"; // dit bepaald de inhoud van de TopBar volgens de property isUpdate
+            if (isUpdate) {
+                textBoxId.Text = Facility.Id.ToString();
+                textBoxName.Text = Facility.Name;
+            }
         }
 
         private void BtnSave_Click(object sender, RoutedEventArgs e) {
             if (isUpdate) {
-                Facility = new(textBoxName.Text);
+                Facility.Name = textBoxName.Text;
                 DialogResult = true;
             } else {
-
+                Facility = new FacilityUI(textBoxName.Text);
+                DialogResult = true;
             }
         }
 

@@ -32,16 +32,29 @@ namespace WPFFaciliteitBeheerUI {
 
         private void UpdateFacility_Click(object sender, RoutedEventArgs e) {
             FacilityWindow window = new((FacilityUI)DataGridFacilities.SelectedItem, true);
-            window.ShowDialog();
+            bool? result = window.ShowDialog();
+            if (result == true) {
+                networkManager.UpdateFacility(FacilityMapper.MapToDomain(window.Facility));
+            }
         }
 
         private void AddFacility_Click(object sender, RoutedEventArgs e) {
             FacilityWindow window = new(null, false);
-            window.ShowDialog();
+            bool? result = window.ShowDialog();
+            if (result == true) {
+                FacilityUI newFacility = window.Facility;
+                int id = networkManager.AddFacility(FacilityMapper.MapToDomain(newFacility));
+                newFacility.Id = id;
+                Facilities.Add(newFacility);
+            }
         }
 
-        private void DeleteFacility_Click(object sender, RoutedEventArgs e) {
-            
+        private void RemoveFacility_Click(object sender, RoutedEventArgs e) {
+            bool result = networkManager.CheckForExistingConnectionsFacility(FacilityMapper.MapToDomain((FacilityUI)DataGridFacilities.SelectedItem));
+            if (!result) {
+                networkManager.RemoveFacility(FacilityMapper.MapToDomain((FacilityUI)DataGridFacilities.SelectedItem));
+                Facilities.Remove((FacilityUI)DataGridFacilities.SelectedItem);
+            } else MessageBox.Show("Facility could not be removed. \nThere are existing connections to points.");
         }
 
         private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {

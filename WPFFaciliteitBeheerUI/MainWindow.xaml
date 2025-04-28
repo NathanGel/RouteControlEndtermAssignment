@@ -101,7 +101,7 @@
                 <ContextMenu>
                     <MenuItem Header="Add Facility" Click="AddFacility_Click"/>
                     <MenuItem Header="Update Facility" Click="UpdateFacility_Click"/>
-                    <MenuItem Header="Delete Facility" Click="DeleteFacility_Click"/>
+                    <MenuItem Header="Remove Facility" Click="RemoveFacility_Click"/>
                 </ContextMenu>
             </DataGrid.ContextMenu>
         </DataGrid>
