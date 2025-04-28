@@ -1,0 +1,74 @@
+% Stamboom feiten
+% Ouder relaties: parent(kind, ouder)
+parent(charles_i, james_i).
+parent(elizabeth, james_i).
+parent(catherine, charles_i).
+parent(james_ii, charles_i).
+parent(charles_ii, charles_i).
+parent(sophia, elizabeth).
+parent(george_i, sophia).
+
+% Geslachts feiten
+male(james_i).
+male(charles_i).
+male(james_ii).
+male(charles_ii).
+male(george_i).
+female(elizabeth).
+female(catherine).
+female(sophia).
+
+% Ancestor relaties
+ancestor(A, B) :- parent(A, B).
+ancestor(A, B) :- parent(A, X), ancestor(X, B).
+
+% broer/zus relaties
+sibling(A, B) :- parent(A, P), parent(B, P), A \= B.
+
+% Sister regel
+sister(A, B) :- sibling(A, B), female(A).
+
+% Brother regel
+brother(A, B) :- sibling(A, B), male(A).
+
+% Brothers regel
+brothers(Person, Brothers) :- 
+    findall(Brother, brother(Brother, Person), Brothers).
+
+% Grandparent regel
+grandparent(A, B) :- parent(A, P), parent(P, B).
+
+% Uncle regel
+uncle(A, B) :- parent(B, P), brother(A, P).
+
+% Aunt regel
+aunt(A, B) :- parent(B, P), sister(A, P).
+
+% Cousin regel
+cousin(A, B) :- parent(A, PA), parent(B, PB), sibling(PA, PB).
+
+:- initialization(main).
+main :-
+    write('Sisters:'),
+    nl,
+    forall(sister(X, Y), (write(X), write(' is sister of '), write(Y), nl)),
+    nl,
+    write('Brothers:'),
+    nl,
+    forall(brother(X, Y), (write(X), write(' is brother of '), write(Y), nl)),
+    nl,
+    write('Grandparents:'),
+    nl, 
+    forall(grandparent(X, Y), (write(X), write(' is grandparent of '), write(Y), nl)),
+    nl,
+    write('Uncles:'),
+    nl,
+    forall(uncle(X, Y), (write(X), write(' is uncle of '), write(Y), nl)),
+    nl,
+    write('Aunts:'),
+    nl,
+    forall(aunt(X, Y), (write(X), write(' is aunt of '), write(Y), nl)),
+    nl,
+    write('Cousins:'),
+    nl,
+    forall(cousin(X, Y), (write(X), write(' is cousin of '), write(Y), nl)).

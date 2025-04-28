@@ -16,10 +16,10 @@ namespace RouteBeheerBL.Managers {
             this.repo = repo;
         }
 
-        public void AddNetworkPoint(NetworkPoint point) {
+        public int AddNetworkPoint(NetworkPoint point) {
             if (point == null) throw new NetworkException("Network point cannot be null");
             if(point.X == default || point.Y == default) throw new NetworkException("Network point coordinates cannot be default");
-            repo.AddNetworkPoint(point);
+            return repo.AddNetworkPoint(point);
         }
 
         public void RemoveNetworkPoint(NetworkPoint point) {

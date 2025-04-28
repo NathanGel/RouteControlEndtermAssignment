@@ -70,7 +70,7 @@ namespace WPFNetwerkBeheerUI {
 
             List<NetworkPointUI> pointsUI = new(nm.GetNetworkPoints().Select( np => NetworkPointMapper.MapFromDomain(np)));
             foreach (var point in pointsUI) {
-                this.points.Add(new Point(point.X, point.Y));
+                points.Add(new Point(point.X, point.Y));
             }
         }
 
@@ -143,6 +143,7 @@ namespace WPFNetwerkBeheerUI {
         private void Canvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e) {
             Point mousePos = e.GetPosition(canvas);
             Point nearbyPoint = FindNearbyPoint(mousePos);
+            // deze checks bepalen of er een bestaand punt geselescteerd is. Dit bepaald dan weer welke opties er zichtbaar zijn het contextmenu
             if(nearbyPoint != default) {
                 selectedPoint = nearbyPoint;
                 HighlightPoint(selectedPoint);
@@ -201,7 +202,7 @@ namespace WPFNetwerkBeheerUI {
         private void AddNetworkPoint_Click(object sender, RoutedEventArgs e) {
             if (clickedLocation != default) {
                 NetworkPointUI newPoint = new(clickedLocation.X, clickedLocation.Y);
-                nm.AddNetworkPoint(NetworkPointMapper.MapToDomain(newPoint));
+                newPoint.Id = nm.AddNetworkPoint(NetworkPointMapper.MapToDomain(newPoint));
                 points.Add(clickedLocation);
                 RemovePreviousHighlight();
                 clickedLocation = default;
