@@ -1,24 +1,15 @@
-﻿using System.Collections.ObjectModel;
-using System.Drawing;
-using System.Net;
-using System.Text;
+﻿using RouteBeheerBL.Managers;
+using RouteBeheerDL;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
-using RouteBeheerBL.Interfaces;
-using RouteBeheerBL.Managers;
-using RouteBeheerBL.Model;
-using RouteBeheerDL;
-using Point = System.Windows.Point;
 using WPFNetwerkBeheerUI.Mappers;
 using WPFNetwerkBeheerUI.Model;
-using System.Collections.Specialized;
+using Point = System.Windows.Point;
 
 namespace WPFNetwerkBeheerUI {
     /// <summary>
@@ -47,7 +38,7 @@ namespace WPFNetwerkBeheerUI {
         // dit punt sla ik op om te gebruiken in de AddLocation  en om te
         // kijken of er wel een locatie geselecteerd is na het click event op de knop
 
-        private readonly string connectionString = @"Data Source=NATHAN\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
+        private readonly string connectionString = @"Data Source=nathans-laptop\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
         private NetworkManager nm;
 
         public MainWindow() {
@@ -62,15 +53,15 @@ namespace WPFNetwerkBeheerUI {
             segments = new ObservableCollection<SegmentUI>(nm.GetSegments().Select(sm => SegmentMapper.MapFromDomain(sm)));
 
             foreach (var segment in segments) {
-                Point p1 = new(segment.StartPoint.X, segment.StartPoint.Y);
-                Point p2 = new(segment.EndPoint.X, segment.EndPoint.Y);
+                Point p1 = new(segment.StartPoint.X/2, segment.StartPoint.Y / 2);
+                Point p2 = new(segment.EndPoint.X/2, segment.EndPoint.Y / 2);
                 DrawLine(p1, p2);
             }
             DrawAllLines();
 
             List<NetworkPointUI> pointsUI = new(nm.GetNetworkPoints().Select( np => NetworkPointMapper.MapFromDomain(np)));
             foreach (var point in pointsUI) {
-                points.Add(new Point(point.X, point.Y));
+                points.Add(new Point(point.X /2, point.Y/2));
             }
         }
 
@@ -122,8 +113,8 @@ namespace WPFNetwerkBeheerUI {
 
         private void DrawAllLines() {
             foreach (var segment in segments) {
-                Point p1 = new(segment.StartPoint.X, segment.StartPoint.Y);
-                Point p2 = new(segment.EndPoint.X, segment.EndPoint.Y);
+                Point p1 = new(segment.StartPoint.X / 2, segment.StartPoint.Y / 2);
+                Point p2 = new(segment.EndPoint.X / 2, segment.EndPoint.Y / 2);
                 DrawLine(p1, p2);
             }
         }
