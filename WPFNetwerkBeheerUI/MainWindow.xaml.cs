@@ -38,7 +38,8 @@ namespace WPFNetwerkBeheerUI {
         // dit punt sla ik op om te gebruiken in de AddLocation  en om te
         // kijken of er wel een locatie geselecteerd is na het click event op de knop
 
-        private readonly string connectionString = @"Data Source=nathans-laptop\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
+        private readonly string connectionString = @"Data Source=NATHAN\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
+
         private NetworkManager nm;
 
         public MainWindow() {
@@ -78,7 +79,7 @@ namespace WPFNetwerkBeheerUI {
             }
         }
 
-        public void DrawPoint(NetworkPointUI point) {
+        private void DrawPoint(NetworkPointUI point) {
             Ellipse ellipse = new Ellipse {
                 Fill = Brushes.MediumTurquoise,
                 Width = 8,
@@ -88,7 +89,7 @@ namespace WPFNetwerkBeheerUI {
                 };
             
             Canvas.SetLeft(ellipse, point.X - (ellipse.Width / 2)); // de berekening die hier in plaats vind zorgt ervoor dat
-            Canvas.SetTop(ellipse, point.Y - (ellipse.Width /2));   // het midden van de ellipse overeenstemt met de exacte coordinaten
+            Canvas.SetTop(ellipse, point.Y - (ellipse.Width / 2));   // het midden van de ellipse overeenstemt met de exacte coordinaten
                                                                     // van het punt eerder zorgde dit voor problemen met de lijnen 
             canvas.Children.Add(ellipse);
             pointElements[point] = ellipse;
@@ -114,19 +115,6 @@ namespace WPFNetwerkBeheerUI {
             }
         }
 
-        private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
-            Point mousePosPoint = e.GetPosition(canvas);
-            NetworkPointUI mousePos = new(mousePosPoint.X, mousePosPoint.Y);
-            NetworkPointUI nearbyPoint = FindNearbyPoint(mousePos);
-
-            if (nearbyPoint != default) {
-                HighlightPoint(selectedPoint);
-            } else {
-                clickedLocation = mousePos;
-                HighlightPoint(clickedLocation);
-            }
-        }
-
         private void Canvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e) {
             Point mousePosPoint = e.GetPosition(canvas);
             NetworkPointUI mousePos = new(mousePosPoint.X, mousePosPoint.Y);
@@ -138,6 +126,7 @@ namespace WPFNetwerkBeheerUI {
                 MenuItemAddNetworkPoint.Visibility = Visibility.Collapsed;
                 MenuItemRemoveNetworkPoint.Visibility = Visibility.Visible;
                 MenuItemUpdateNetworkPoint.Visibility = Visibility.Visible;
+
             } else {
                 clickedLocation = mousePos;
                 HighlightPoint(clickedLocation);
