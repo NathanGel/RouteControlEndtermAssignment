@@ -1,24 +1,15 @@
-﻿using System.Collections.ObjectModel;
-using System.Drawing;
-using System.Net;
-using System.Text;
+﻿using RouteBeheerBL.Managers;
+using RouteBeheerDL;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
-using RouteBeheerBL.Interfaces;
-using RouteBeheerBL.Managers;
-using RouteBeheerBL.Model;
-using RouteBeheerDL;
-using Point = System.Windows.Point;
 using WPFNetwerkBeheerUI.Mappers;
 using WPFNetwerkBeheerUI.Model;
-using System.Collections.Specialized;
+using Point = System.Windows.Point;
 
 namespace WPFNetwerkBeheerUI {
     /// <summary>
@@ -47,7 +38,7 @@ namespace WPFNetwerkBeheerUI {
         // dit punt sla ik op om te gebruiken in de AddLocation  en om te
         // kijken of er wel een locatie geselecteerd is na het click event op de knop
 
-        private readonly string connectionString = @"Data Source=NATHAN\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
+        private readonly string connectionString = @"Data Source=nathans-laptop\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
         private NetworkManager nm;
 
         public MainWindow() {

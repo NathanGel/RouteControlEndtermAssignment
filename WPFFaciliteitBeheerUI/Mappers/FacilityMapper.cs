@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using RouteBeheerBL.Model;
 using WPFFaciliteitBeheerUI.Model;
-using RouteBeheerBL.Model;
 
 namespace WPFFaciliteitBeheerUI.Mappers {
     public static class FacilityMapper {
