@@ -70,7 +70,8 @@
                   CanUserAddRows="False"
                   SelectionMode="Single"
                   SelectionUnit="FullRow"
-                  AutoGenerateColumns="True">
+                  AutoGenerateColumns="True"
+                  IsReadOnly="true">
 
             <DataGrid.Resources>
                 <Style TargetType="DataGridRow">

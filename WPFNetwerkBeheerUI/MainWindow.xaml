@@ -5,7 +5,7 @@
        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
        xmlns:local="clr-namespace:WPFNetwerkBeheerUI"
        mc:Ignorable="d"
-       Title="Network Management" Height="552" Width="522" WindowStyle="None" AllowsTransparency="True" Background="Transparent">
+       Title="Network Management" Height="1050" Width="1050" WindowStyle="None" AllowsTransparency="True" Background="Transparent">
     <Window.Resources>
         <Style x:Key="WindowControlButton" TargetType="Button">
             <Setter Property="Width" Value="46"/>
@@ -60,7 +60,7 @@
             </Grid>
 
             <Grid Grid.Row="1">
-                <Canvas Name="canvas" Width="500" Height="500"  Grid.RowSpan="5" Grid.Column="1" Background="#2A2D3E" Margin="10" MouseLeftButtonDown="Canvas_MouseLeftButtonDown" MouseRightButtonDown="Canvas_MouseRightButtonDown">
+                <Canvas Name="canvas" Width="1000" Height="1000"  Grid.RowSpan="5" Grid.Column="1" Background="#2A2D3E" Margin="10" MouseLeftButtonDown="Canvas_MouseLeftButtonDown" MouseRightButtonDown="Canvas_MouseRightButtonDown">
                     <Canvas.ContextMenu>
                         <ContextMenu Name="contextMenu">
                             <MenuItem Name="MenuItemAddNetworkPoint" Header="Add NetworkPoint" Click="AddNetworkPoint_Click"/>

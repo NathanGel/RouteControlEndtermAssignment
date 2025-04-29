@@ -92,6 +92,7 @@ namespace RouteBeheerDL {
                 }
             }
         }
+
         public List<NetworkPoint> GetNetworkPoints() {
             string query = "SELECT * FROM NetworkPoints";
             using (SqlConnection connection = new(connectionString))
@@ -138,7 +139,6 @@ namespace RouteBeheerDL {
         public void DisconnectNetworkPoint(NetworkPoint p1, NetworkPoint p2) {
             throw new NotImplementedException();
         }
-
 
         public void RemoveNetworkPoint(NetworkPoint point) {
             string query = "DELETE FROM NetworkPoints WHERE x_coordinate=@X AND y_coordinate=@Y";
