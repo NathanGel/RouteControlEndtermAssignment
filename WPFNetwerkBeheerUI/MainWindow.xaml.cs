@@ -149,7 +149,7 @@ namespace WPFNetwerkBeheerUI {
             coordinateElement = bl;
         }
 
-        private UIElement coordinateElement;
+        private UIElement coordinateElement; // UIElement om het coordinaat makkelijk achteraf te verwijderen
 
         private void RemovePreviousCoordinate() {
             if (coordinateElement != null && canvas.Children.Contains(coordinateElement)) {
