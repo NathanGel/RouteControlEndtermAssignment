@@ -42,6 +42,10 @@ namespace WPFNetwerkBeheerUI {
 
         private NetworkManager nm;
 
+        private bool connectionClicked = false; // deze boolean gebruik ik om te kijken of er al een connectie is gemaakt tussen 2 punten
+
+        private (NetworkPointUI, NetworkPointUI) selectedConnection; // deze tuple gebruik ik om de connectie tussen 2 punten op te slaan
+
         public MainWindow() {
             InitializeComponent();
             points.CollectionChanged += Points_CollectionChanged; // de points collection abboneren op de CollectionChanged event
@@ -242,10 +246,6 @@ namespace WPFNetwerkBeheerUI {
             }
         }
 
-        private void AddConnection_Click(object sender, RoutedEventArgs e) {
-            MessageBox.Show("Add Connection clicked");
-        }
-
         private void UpdateNetworkPoint_Click(object sender, RoutedEventArgs e) {
             if (selectedPoint != default) {
                 MessageBox.Show("Update Network Point clicked");
@@ -255,12 +255,42 @@ namespace WPFNetwerkBeheerUI {
             }
         }
 
+        private void AddConnection_Click(object sender, RoutedEventArgs e) {
+            /*
+             * als hierop gelikt wordt is het de bedoeling dat het originele punt dat geselecteerd is getoond word en 
+             * er dan gewacht wordt op een ander klik event. Dit ander klik event moet dan het initiele punt verbinden
+             * met het tweede wanneer er op een tweede punt geklikt wordt. Indien er dan niet meteen op een tweede punt
+             * gedrukt wordt is het de bedoeling dat deze sequentie wordt afgesloten.
+             * TO DO: dit moet nog verder uitgewerkt worden
+            */
+        }
         private void RemoveConnection_Click(object sender, RoutedEventArgs e) {
+            /*
+             * Wanneer hierop gelkikt wordt is het de bedoeling dat de bestaande connecties opgelicht worden op het canvas.
+             * Dan wordt er gewacht op een tweede klik event. Dit tweede klik event moet dan de connectie verbreken maar enkel
+             * wanneer dit Segment niet in een route voorkomt. Nu uiteraard de vraag hoe ik dit ga implementeren.
+             * TO DO: dit moet nog verder uitgewerkt worden
+            */
+
+
             if (selectedPoint != default) {
                 MessageBox.Show("Remove Connection clicked");
                 selectedPoint = default;
             } else {
                 MessageBox.Show("No network point selected");
+            }
+        }
+
+        private void HighlightConnectingPoints(bool isNewConnection, NetworkPointUI point) {
+           foreach(var segment in segments) {
+                if (segment.StartPoint == point || segment.EndPoint == point) {
+                    if (isNewConnection) {
+                        selectedConnection = (point, segment.EndPoint);
+                    } else {
+                        selectedConnection = (point, segment.StartPoint);
+                    }
+                    DrawLine(selectedConnection.Item1, selectedConnection.Item2);
+                }
             }
         }
 

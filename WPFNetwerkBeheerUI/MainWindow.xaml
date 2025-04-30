@@ -66,6 +66,8 @@
                             <MenuItem Name="MenuItemAddNetworkPoint" Header="Add NetworkPoint" Click="AddNetworkPoint_Click"/>
                             <MenuItem Name="MenuItemRemoveNetworkPoint" Header="Remove NetworkPoint" Click="RemoveNetworkPoint_Click"/>
                             <MenuItem Name="MenuItemUpdateNetworkPoint" Header="Update NetworkPoint" Click="UpdateNetworkPoint_Click"/>
+                            <MenuItem Name="MenuItemAddConnection" Header="Add Connection" Click="AddConnection_Click"/>
+                            <MenuItem Name="MenuItemRemoveConnection" Header="Remove Connection" Click="RemoveConnection_Click"/>
                         </ContextMenu>
                     </Canvas.ContextMenu>
                 </Canvas>
