@@ -38,7 +38,7 @@ namespace WPFNetwerkBeheerUI {
         // dit punt sla ik op om te gebruiken in de AddLocation  en om te
         // kijken of er wel een locatie geselecteerd is na het click event op de knop
 
-        private readonly string connectionString = @"Data Source=NATHAN\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
+        private readonly string connectionString = @"Data Source=nathans-laptop\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
 
         private NetworkManager nm;
 
@@ -115,7 +115,50 @@ namespace WPFNetwerkBeheerUI {
             }
         }
 
+        private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
+            RemovePreviousHighlight();
+            RemovePreviousCoordinate();
+            Point mousePosPoint = e.GetPosition(canvas);
+            NetworkPointUI mousePos = new(mousePosPoint.X, mousePosPoint.Y);
+            NetworkPointUI nearbyPoint = FindNearbyPoint(mousePos);
+
+            if (nearbyPoint != default) {
+                ShowCoordinatesOnConvas(nearbyPoint);
+            }
+        }
+
+        private void ShowCoordinatesOnConvas(NetworkPointUI selectedPoint) {
+            var myBrush = (SolidColorBrush)new BrushConverter().ConvertFromString("#1F2129");
+            TextBlock bl = new() {
+                Text = $"X:{selectedPoint.X}   Y:{selectedPoint.Y}",
+                Foreground = Brushes.White,
+                Background = myBrush,
+                FontSize = 12
+            };
+
+            double canvasWidth = canvas.ActualWidth;
+            double canvasHeight = canvas.ActualHeight;
+            bool isLeft = selectedPoint.X < canvasWidth / 2;
+            bool isTop = selectedPoint.Y < canvasHeight / 2;
+            double textX = isLeft ? selectedPoint.X + 10 : selectedPoint.X - 220; // textblock verschuiven naar links als het punt zich rechts bevindt. Anders valt die van het canvas af
+            double textY = isTop ? selectedPoint.Y + 10 : selectedPoint.Y - 30; // textblock verschuiven naar boven als het punt zich onder het midden bevindt. Anders valt die van het canvas af bij de onderste punten
+
+            Canvas.SetLeft(bl, textX);
+            Canvas.SetTop(bl, textY);
+            canvas.Children.Add(bl);
+            coordinateElement = bl;
+        }
+
+        private UIElement coordinateElement;
+
+        private void RemovePreviousCoordinate() {
+            if (coordinateElement != null && canvas.Children.Contains(coordinateElement)) {
+                canvas.Children.Remove(coordinateElement);
+            }
+        }
+
         private void Canvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e) {
+            RemovePreviousCoordinate();
             Point mousePosPoint = e.GetPosition(canvas);
             NetworkPointUI mousePos = new(mousePosPoint.X, mousePosPoint.Y);
             NetworkPointUI nearbyPoint = FindNearbyPoint(mousePos);
