@@ -128,7 +128,11 @@ namespace WPFNetwerkBeheerUI {
 
             if (nearbyPoint != default) {
                 ShowCoordinatesOnConvas(nearbyPoint);
+                selectedPoint = nearbyPoint;
+                HighlightPoint(selectedPoint);
             }
+
+
         }
 
         private void ShowCoordinatesOnConvas(NetworkPointUI selectedPoint) {
