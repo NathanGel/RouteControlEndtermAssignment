@@ -65,7 +65,7 @@ namespace WPFNetwerkBeheerUI {
 
             List<NetworkPointUI> pointsUI = new(nm.GetNetworkPoints().Select( np => NetworkPointMapper.MapFromDomain(np)));
             foreach (var point in pointsUI) {
-                points.Add(new NetworkPointUI(point.X, point.Y));
+                points.Add(new NetworkPointUI(point.Id, point.X, point.Y));
             }
         }
 
@@ -131,25 +131,25 @@ namespace WPFNetwerkBeheerUI {
         }
 
         private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
+            RemovePreviousHighlight();
             Point mousePos = e.GetPosition(canvas);
             NetworkPointUI clickLocation = new(mousePos.X, mousePos.Y);
             NetworkPointUI nearbyPoint = FindNearbyPoint(clickLocation);
             if (nearbyPoint != default && !addConnectionClicked) {
                 ShowCoordinates(nearbyPoint);
             } else if(nearbyPoint != default && addConnectionClicked) {
-                selectedPoint = nearbyPoint;
                 HighlightPoint(selectedPoint);
                 AddConnection(nearbyPoint);
             }
         }
 
         private void Canvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e) {
+            RemovePreviousCoordinates();
             Point mousePosPoint = e.GetPosition(canvas);
             NetworkPointUI mousePos = new(mousePosPoint.X, mousePosPoint.Y);
             NetworkPointUI nearbyPoint = FindNearbyPoint(mousePos);
             // deze checks bepalen of er een bestaand punt geselescteerd is. Dit bepaald dan weer welke opties er zichtbaar zijn het contextmenu
             if(nearbyPoint != default) {
-                selectedPoint = nearbyPoint;
                 HighlightPoint(selectedPoint);
                 MenuItemAddNetworkPoint.Visibility = Visibility.Collapsed;
                 MenuItemRemoveNetworkPoint.Visibility = Visibility.Visible;
@@ -188,8 +188,8 @@ namespace WPFNetwerkBeheerUI {
             double tolerance = 5; 
             foreach(var point in points) {
                 if (Math.Abs(point.X - p.X) < tolerance && Math.Abs(point.Y - p.Y) < tolerance) {
-                    selectedPoint = point;
-                    //MessageBox.Show($"Selected Point: {selectedPoint}");
+                    var selected = points.Where(p => p.X == point.X && p.Y == point.Y).ToList().First(); // zoek het punt in de points collection zodat ik daarna dit op id kan verwijderen bij segmenten of gewoon het punt zelf
+                    selectedPoint = selected;
                     return selectedPoint;
                 }
             }
@@ -237,7 +237,7 @@ namespace WPFNetwerkBeheerUI {
 
         private void RemoveNetworkPoint_Click(object sender, RoutedEventArgs e) {
             if (selectedPoint != default) {
-                nm.RemoveNetworkPoint(NetworkPointMapper.MapToDomain(new NetworkPointUI(selectedPoint.X, selectedPoint.Y)));
+                nm.RemoveNetworkPoint(NetworkPointMapper.MapToDomain(new NetworkPointUI(selectedPoint.Id, selectedPoint.X, selectedPoint.Y)));
                 points.Remove(selectedPoint);
                 RemovePreviousHighlight();
                 selectedPoint = default;
@@ -248,10 +248,18 @@ namespace WPFNetwerkBeheerUI {
 
         private void AddConnection_Click(object sender, RoutedEventArgs e) {
             RemovePreviousHighlight();
+            RemovePreviousCoordinates();
             newConnection = new();
             addConnectionClicked = true;
-            MessageBox.Show("Please select a start and endpoint for the new connection");
+            connectionInfo = new() {
+                Text = "Please select a start and endpoint",
+                Foreground = new SolidColorBrush(Colors.Red),
+                FontSize = 20
+            };
+            canvas.Children.Add(connectionInfo);
         }
+
+        private TextBlock connectionInfo;
 
         private void AddConnection(NetworkPointUI point) {
             if(newConnection.StartPoint == default) {
@@ -267,6 +275,8 @@ namespace WPFNetwerkBeheerUI {
                 newConnection.Id = id;
                 segments.Add(newConnection);
                 newConnection = default;
+                canvas.Children.Remove(connectionInfo);
+                //zou nog graag beide punten achteraf hertekenen om te vermijden dat de lijn overlapt
             }
         }
 

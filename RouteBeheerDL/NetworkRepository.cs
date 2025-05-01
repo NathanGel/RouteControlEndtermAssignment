@@ -131,9 +131,20 @@ namespace RouteBeheerDL {
         }
 
         public int AddConnection(Segment segment) {
-            string queryStretch = "INSERT INTO Stretches OUTPUT INSERTED.id";
-            string queryStretchNetworkPoint = "INSERT INTO StretchNetworkPoints(stretch_id, networkpoint_id) VALUES(@stretchId, @networkPointId)";
-            return default;
+            string querySegment = "INSERT INTO Segments(start_id, stop_id) OUTPUT INSERTED.id VALUES(@startId, @endId)";
+            using (SqlConnection connection = new(connectionString))
+            using (SqlCommand cmd = connection.CreateCommand()) {
+                try {
+                    cmd.CommandText = querySegment;
+                    cmd.Parameters.AddWithValue("@startId", segment.StartPoint.Id);
+                    cmd.Parameters.AddWithValue("@endId", segment.EndPoint.Id);
+                    connection.Open();
+                    int id = (int)cmd.ExecuteScalar();
+                    return id;
+                } catch (SqlException ex) {
+                    throw new Exception("AddConnection", ex);
+                }
+            }
         }
 
         public void DisconnectNetworkPoint(NetworkPoint p1, NetworkPoint p2) {
@@ -141,13 +152,12 @@ namespace RouteBeheerDL {
         }
 
         public void RemoveNetworkPoint(NetworkPoint point) {
-            string query = "DELETE FROM NetworkPoints WHERE x_coordinate=@X AND y_coordinate=@Y";
+            string query = "DELETE FROM NetworkPoints WHERE id=@id";
             using (SqlConnection connection = new(connectionString))
             using (SqlCommand cmd = connection.CreateCommand()) {
                 try {
                     cmd.CommandText = query;
-                    cmd.Parameters.AddWithValue("@X", point.X);
-                    cmd.Parameters.AddWithValue("@Y", point.Y);
+                    cmd.Parameters.AddWithValue("@id", point.Id);
                     connection.Open();
                     cmd.ExecuteNonQuery();
                 } catch (Exception ex) {
