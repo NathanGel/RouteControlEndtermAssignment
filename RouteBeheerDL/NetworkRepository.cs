@@ -130,10 +130,10 @@ namespace RouteBeheerDL {
             return id;
         }
 
-        public void ConnectNetworkPoint(NetworkPoint p1, NetworkPoint p2) {
+        public int AddConnection(Segment segment) {
             string queryStretch = "INSERT INTO Stretches OUTPUT INSERTED.id";
             string queryStretchNetworkPoint = "INSERT INTO StretchNetworkPoints(stretch_id, networkpoint_id) VALUES(@stretchId, @networkPointId)";
-
+            return default;
         }
 
         public void DisconnectNetworkPoint(NetworkPoint p1, NetworkPoint p2) {

@@ -21,10 +21,9 @@ namespace RouteBeheerBL.Managers {
             repo.RemoveNetworkPoint(point);
         }
 
-        public void ConnectNetworkPoint(NetworkPoint p1, NetworkPoint p2) {
-            if (p1 == null || p2 == null) throw new NetworkException("Network points cannot be null");
-            if (p1.X == default || p1.Y == default || p2.X == default || p2.Y == default) throw new NetworkException("Network point coordinates cannot be default");
-            repo.ConnectNetworkPoint(p1, p2);
+        public int AddConnection(Segment segment) {
+           
+            return repo.AddConnection(segment);
         }
 
         public void DisconnectNetworkPoint(NetworkPoint p1, NetworkPoint p2) {

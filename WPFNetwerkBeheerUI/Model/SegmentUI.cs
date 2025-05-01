@@ -19,6 +19,9 @@ namespace WPFNetwerkBeheerUI.Model {
             EndPoint = endPoint;
         }
 
+        public SegmentUI() {
+        }
+
         public int Id { get; set; }
 
         private NetworkPointUI _startPoint;

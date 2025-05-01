@@ -5,7 +5,7 @@ namespace RouteBeheerBL.Interfaces {
         void InitializeNetwork(Dictionary<int, NetworkPoint> networkPoints, Dictionary<int, Facility> facilities, List<Segment> segmenten);
         int AddNetworkPoint(NetworkPoint point);
         void RemoveNetworkPoint(NetworkPoint point);
-        void ConnectNetworkPoint(NetworkPoint p1, NetworkPoint p2);
+        int AddConnection(Segment segment);
         void DisconnectNetworkPoint(NetworkPoint p1, NetworkPoint p2);
         void UpdateNetworkPoint(NetworkPoint point);
         List<NetworkPoint> GetNetworkPoints();
