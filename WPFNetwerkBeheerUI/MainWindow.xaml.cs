@@ -120,19 +120,28 @@ namespace WPFNetwerkBeheerUI {
         }
 
         private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
-            RemovePreviousHighlight();
-            RemovePreviousCoordinate();
             Point mousePosPoint = e.GetPosition(canvas);
             NetworkPointUI mousePos = new(mousePosPoint.X, mousePosPoint.Y);
             NetworkPointUI nearbyPoint = FindNearbyPoint(mousePos);
+            if (connectionClicked) {
+                if (nearbyPoint != default) {
+                    selectedConnection.Item2 = nearbyPoint;
+                    DrawLine(selectedConnection.Item1, selectedConnection.Item2);
+                    AddConnection();
+                    connectionClicked = false;
+                } else {
+                    MessageBox.Show("No point selected for connection");
+                }
+            } else {
+                RemovePreviousHighlight();
+                RemovePreviousCoordinate();
 
-            if (nearbyPoint != default) {
-                ShowCoordinatesOnConvas(nearbyPoint);
-                selectedPoint = nearbyPoint;
-                HighlightPoint(selectedPoint);
+                if (nearbyPoint != default) {
+                    ShowCoordinatesOnConvas(nearbyPoint);
+                    selectedPoint = nearbyPoint;
+                    HighlightPoint(selectedPoint);
+                }
             }
-
-
         }
 
         private void ShowCoordinatesOnConvas(NetworkPointUI selectedPoint) {
@@ -239,6 +248,10 @@ namespace WPFNetwerkBeheerUI {
             }
         }
 
+        private void AddConnection() {
+            nm.ConnectNetworkPoint(NetworkPointMapper.MapToDomain(selectedConnection.Item1), NetworkPointMapper.MapToDomain(selectedConnection.Item2));
+        }
+
         private void RemoveNetworkPoint_Click(object sender, RoutedEventArgs e) {
             if (selectedPoint != default) {
                 nm.RemoveNetworkPoint(NetworkPointMapper.MapToDomain(new NetworkPointUI(selectedPoint.X, selectedPoint.Y)));
@@ -260,14 +273,19 @@ namespace WPFNetwerkBeheerUI {
         }
 
         private void AddConnection_Click(object sender, RoutedEventArgs e) {
-            /*
-             * als hierop gelikt wordt is het de bedoeling dat het originele punt dat geselecteerd is getoond word en 
-             * er dan gewacht wordt op een ander klik event. Dit ander klik event moet dan het initiele punt verbinden
-             * met het tweede wanneer er op een tweede punt geklikt wordt. Indien er dan niet meteen op een tweede punt
-             * gedrukt wordt is het de bedoeling dat deze sequentie wordt afgesloten.
-             * TO DO: dit moet nog verder uitgewerkt worden
-            */
+            if (selectedConnection.Item1 == null && selectedPoint != null) {
+                selectedConnection.Item1 = selectedPoint;
+                connectionClicked = true;
+                HighlightConnectingPoints(true, selectedPoint);
+            } else if (selectedConnection.Item2 == null && selectedPoint != null) {
+                selectedConnection.Item2 = selectedPoint;
+                connectionClicked = false;
+                HighlightConnectingPoints(false, selectedPoint);
+            } else {
+                MessageBox.Show("No network point selected for connection");
+            }
         }
+
         private void RemoveConnection_Click(object sender, RoutedEventArgs e) {
             /*
              * Wanneer hierop gelkikt wordt is het de bedoeling dat de bestaande connecties opgelicht worden op het canvas.
