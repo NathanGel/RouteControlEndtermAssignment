@@ -38,13 +38,9 @@ namespace WPFNetwerkBeheerUI {
         // dit punt sla ik op om te gebruiken in de AddLocation  en om te
         // kijken of er wel een locatie geselecteerd is na het click event op de knop
 
-        private readonly string connectionString = @"Data Source=nathans-laptop\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
+        private readonly string connectionString = @"Data Source=NATHAN\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
 
         private NetworkManager nm;
-
-        private bool connectionClicked = false; // deze boolean gebruik ik om te kijken of er al een connectie is gemaakt tussen 2 punten
-
-        private (NetworkPointUI, NetworkPointUI) selectedConnection; // deze tuple gebruik ik om de connectie tussen 2 punten op te slaan
 
         public MainWindow() {
             InitializeComponent();
@@ -113,14 +109,13 @@ namespace WPFNetwerkBeheerUI {
             canvas.Children.Add(line);
         }
 
-        private void DrawAllLines() {
+        private void DrawAllLines()  {
             foreach (var segment in segments) {
                 DrawLine(segment.StartPoint, segment.EndPoint);
             }
         }
 
         private void Canvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e) {
-            RemovePreviousCoordinate();
             Point mousePosPoint = e.GetPosition(canvas);
             NetworkPointUI mousePos = new(mousePosPoint.X, mousePosPoint.Y);
             NetworkPointUI nearbyPoint = FindNearbyPoint(mousePos);
@@ -193,10 +188,6 @@ namespace WPFNetwerkBeheerUI {
             }
         }
 
-        private void AddConnection() {
-            nm.ConnectNetworkPoint(NetworkPointMapper.MapToDomain(selectedConnection.Item1), NetworkPointMapper.MapToDomain(selectedConnection.Item2));
-        }
-
         private void RemoveNetworkPoint_Click(object sender, RoutedEventArgs e) {
             if (selectedPoint != default) {
                 nm.RemoveNetworkPoint(NetworkPointMapper.MapToDomain(new NetworkPointUI(selectedPoint.X, selectedPoint.Y)));
@@ -206,6 +197,10 @@ namespace WPFNetwerkBeheerUI {
             } else {
                 MessageBox.Show("No network point selected");
             }
+        }
+
+        private void AddConnection_Click(object sender, RoutedEventArgs e) {
+            MessageBox.Show("Add Connection clicked");
         }
 
         private void UpdateNetworkPoint_Click(object sender, RoutedEventArgs e) {
@@ -218,14 +213,6 @@ namespace WPFNetwerkBeheerUI {
         }
 
         private void RemoveConnection_Click(object sender, RoutedEventArgs e) {
-            /*
-             * Wanneer hierop gelkikt wordt is het de bedoeling dat de bestaande connecties opgelicht worden op het canvas.
-             * Dan wordt er gewacht op een tweede klik event. Dit tweede klik event moet dan de connectie verbreken maar enkel
-             * wanneer dit Segment niet in een route voorkomt. Nu uiteraard de vraag hoe ik dit ga implementeren.
-             * TO DO: dit moet nog verder uitgewerkt worden
-            */
-
-
             if (selectedPoint != default) {
                 MessageBox.Show("Remove Connection clicked");
                 selectedPoint = default;
