@@ -119,61 +119,6 @@ namespace WPFNetwerkBeheerUI {
             }
         }
 
-        private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
-            Point mousePosPoint = e.GetPosition(canvas);
-            NetworkPointUI mousePos = new(mousePosPoint.X, mousePosPoint.Y);
-            NetworkPointUI nearbyPoint = FindNearbyPoint(mousePos);
-            if (connectionClicked) {
-                if (nearbyPoint != default) {
-                    selectedConnection.Item2 = nearbyPoint;
-                    DrawLine(selectedConnection.Item1, selectedConnection.Item2);
-                    AddConnection();
-                    connectionClicked = false;
-                } else {
-                    MessageBox.Show("No point selected for connection");
-                }
-            } else {
-                RemovePreviousHighlight();
-                RemovePreviousCoordinate();
-
-                if (nearbyPoint != default) {
-                    ShowCoordinatesOnConvas(nearbyPoint);
-                    selectedPoint = nearbyPoint;
-                    HighlightPoint(selectedPoint);
-                }
-            }
-        }
-
-        private void ShowCoordinatesOnConvas(NetworkPointUI selectedPoint) {
-            var myBrush = (SolidColorBrush)new BrushConverter().ConvertFromString("#1F2129");
-            TextBlock bl = new() {
-                Text = $"X:{selectedPoint.X}   Y:{selectedPoint.Y}",
-                Foreground = Brushes.White,
-                Background = myBrush,
-                FontSize = 12
-            };
-
-            double canvasWidth = canvas.ActualWidth;
-            double canvasHeight = canvas.ActualHeight;
-            bool isLeft = selectedPoint.X < canvasWidth / 2;
-            bool isTop = selectedPoint.Y < canvasHeight / 2;
-            double textX = isLeft ? selectedPoint.X + 10 : selectedPoint.X - 220; // textblock verschuiven naar links als het punt zich rechts bevindt. Anders valt die van het canvas af
-            double textY = isTop ? selectedPoint.Y + 10 : selectedPoint.Y - 30; // textblock verschuiven naar boven als het punt zich onder het midden bevindt. Anders valt die van het canvas af bij de onderste punten
-
-            Canvas.SetLeft(bl, textX);
-            Canvas.SetTop(bl, textY);
-            canvas.Children.Add(bl);
-            coordinateElement = bl;
-        }
-
-        private UIElement coordinateElement; // UIElement om het coordinaat makkelijk achteraf te verwijderen
-
-        private void RemovePreviousCoordinate() {
-            if (coordinateElement != null && canvas.Children.Contains(coordinateElement)) {
-                canvas.Children.Remove(coordinateElement);
-            }
-        }
-
         private void Canvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e) {
             RemovePreviousCoordinate();
             Point mousePosPoint = e.GetPosition(canvas);
@@ -272,20 +217,6 @@ namespace WPFNetwerkBeheerUI {
             }
         }
 
-        private void AddConnection_Click(object sender, RoutedEventArgs e) {
-            if (selectedConnection.Item1 == null && selectedPoint != null) {
-                selectedConnection.Item1 = selectedPoint;
-                connectionClicked = true;
-                HighlightConnectingPoints(true, selectedPoint);
-            } else if (selectedConnection.Item2 == null && selectedPoint != null) {
-                selectedConnection.Item2 = selectedPoint;
-                connectionClicked = false;
-                HighlightConnectingPoints(false, selectedPoint);
-            } else {
-                MessageBox.Show("No network point selected for connection");
-            }
-        }
-
         private void RemoveConnection_Click(object sender, RoutedEventArgs e) {
             /*
              * Wanneer hierop gelkikt wordt is het de bedoeling dat de bestaande connecties opgelicht worden op het canvas.
@@ -300,19 +231,6 @@ namespace WPFNetwerkBeheerUI {
                 selectedPoint = default;
             } else {
                 MessageBox.Show("No network point selected");
-            }
-        }
-
-        private void HighlightConnectingPoints(bool isNewConnection, NetworkPointUI point) {
-           foreach(var segment in segments) {
-                if (segment.StartPoint == point || segment.EndPoint == point) {
-                    if (isNewConnection) {
-                        selectedConnection = (point, segment.EndPoint);
-                    } else {
-                        selectedConnection = (point, segment.StartPoint);
-                    }
-                    DrawLine(selectedConnection.Item1, selectedConnection.Item2);
-                }
             }
         }
 
