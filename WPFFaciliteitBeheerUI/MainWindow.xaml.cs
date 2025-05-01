@@ -1,16 +1,7 @@
 ﻿using System.Collections.ObjectModel;
-using System.Text;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using RouteBeheerBL.Managers;
-using RouteBeheerBL.Model;
 using RouteBeheerDL;
 using WPFFaciliteitBeheerUI.Model;
 using WPFFaciliteitBeheerUI.Mappers;
@@ -21,7 +12,7 @@ namespace WPFFaciliteitBeheerUI {
     /// </summary>
     public partial class MainWindow : Window {
         private NetworkManager networkManager;
-        private readonly string connectionString = @"Data Source=NATHAN\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
+        private readonly string connectionString = @"Data Source=nathans-laptop\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
         public ObservableCollection<FacilityUI> Facilities;
         public MainWindow() {
             InitializeComponent();

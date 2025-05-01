@@ -1,31 +1,22 @@
-﻿using System.Collections.ObjectModel;
-using System.Drawing;
-using System.Net;
-using System.Text;
+﻿using RouteBeheerBL.Managers;
+using RouteBeheerDL;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
-using RouteBeheerBL.Interfaces;
-using RouteBeheerBL.Managers;
-using RouteBeheerBL.Model;
-using RouteBeheerDL;
-using Point = System.Windows.Point;
 using WPFNetwerkBeheerUI.Mappers;
 using WPFNetwerkBeheerUI.Model;
-using System.Collections.Specialized;
+using Point = System.Windows.Point;
 
 namespace WPFNetwerkBeheerUI {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window {
-        private ObservableCollection<Point> points = new();
+        private ObservableCollection<NetworkPointUI> points = new();
         // de lijst van punten die ik gebruik om op het canvas te tekenen.
         // Observable collection omdat ik de UI wil updaten wanneer er iets
         // veranderd in de lijst
@@ -34,20 +25,21 @@ namespace WPFNetwerkBeheerUI {
         // de lijst van segmenten die ik gebruik om op het canvas te tekenen
         // Observable collection idem met points
 
-        private Dictionary<Point, UIElement> pointElements = new Dictionary<Point, UIElement>(); 
+        private Dictionary<NetworkPointUI, UIElement> pointElements = new Dictionary<NetworkPointUI, UIElement>(); 
         // dictionary om de punten te koppelen aan hun UI elementen
         // om ze makkelijk te kunnen verwijderen zonder dat ik telkens
         // na elke verandering het hele canvas opnieuw moet tekenen
 
-        private Point selectedPoint; 
+        private NetworkPointUI selectedPoint; 
         //ik sla dit punt op om in de RemoveLocation/UpdateLocation en RemoveConnection/AddConnection
         // dit punt te gebruiken en vast te stellen of er wel een punt geselecteerd is na de click events op de knoppen
 
-        private Point clickedLocation; 
+        private NetworkPointUI clickedLocation; 
         // dit punt sla ik op om te gebruiken in de AddLocation  en om te
         // kijken of er wel een locatie geselecteerd is na het click event op de knop
 
         private readonly string connectionString = @"Data Source=NATHAN\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
+
         private NetworkManager nm;
 
         public MainWindow() {
@@ -62,26 +54,23 @@ namespace WPFNetwerkBeheerUI {
             segments = new ObservableCollection<SegmentUI>(nm.GetSegments().Select(sm => SegmentMapper.MapFromDomain(sm)));
 
             foreach (var segment in segments) {
-                Point p1 = new(segment.StartPoint.X, segment.StartPoint.Y);
-                Point p2 = new(segment.EndPoint.X, segment.EndPoint.Y);
-                DrawLine(p1, p2);
+                DrawLine(segment.StartPoint, segment.EndPoint);
             }
             DrawAllLines();
 
             List<NetworkPointUI> pointsUI = new(nm.GetNetworkPoints().Select( np => NetworkPointMapper.MapFromDomain(np)));
             foreach (var point in pointsUI) {
-                points.Add(new Point(point.X, point.Y));
+                points.Add(new NetworkPointUI(point.X, point.Y));
             }
         }
 
         private void Points_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e) {
             if (e.Action == NotifyCollectionChangedAction.Add) {
-                foreach (Point point in e.NewItems) {
+                foreach (NetworkPointUI point in e.NewItems) {
                     DrawPoint(point);
                 }
             } else if (e.Action == NotifyCollectionChangedAction.Remove) {
-                foreach (Point point in e.OldItems) {
-                    // Remove the visual element for this point
+                foreach (NetworkPointUI point in e.OldItems) {
                     if (pointElements.TryGetValue(point, out UIElement element)) {
                         canvas.Children.Remove(element);
                         pointElements.Remove(point);
@@ -90,7 +79,7 @@ namespace WPFNetwerkBeheerUI {
             }
         }
 
-        public void DrawPoint(Point point) {
+        private void DrawPoint(NetworkPointUI point) {
             Ellipse ellipse = new Ellipse {
                 Fill = Brushes.MediumTurquoise,
                 Width = 8,
@@ -100,13 +89,13 @@ namespace WPFNetwerkBeheerUI {
                 };
             
             Canvas.SetLeft(ellipse, point.X - (ellipse.Width / 2)); // de berekening die hier in plaats vind zorgt ervoor dat
-            Canvas.SetTop(ellipse, point.Y - (ellipse.Width /2));   // het midden van de ellipse overeenstemt met de exacte coordinaten
+            Canvas.SetTop(ellipse, point.Y - (ellipse.Width / 2));   // het midden van de ellipse overeenstemt met de exacte coordinaten
                                                                     // van het punt eerder zorgde dit voor problemen met de lijnen 
             canvas.Children.Add(ellipse);
             pointElements[point] = ellipse;
         }
 
-        private void DrawLine(Point p1, Point p2) {
+        private void DrawLine(NetworkPointUI p1, NetworkPointUI p2) {
             // Create a new Line
             Line line = new Line {
                 Stroke = Brushes.OrangeRed,
@@ -120,29 +109,16 @@ namespace WPFNetwerkBeheerUI {
             canvas.Children.Add(line);
         }
 
-        private void DrawAllLines() {
+        private void DrawAllLines()  {
             foreach (var segment in segments) {
-                Point p1 = new(segment.StartPoint.X, segment.StartPoint.Y);
-                Point p2 = new(segment.EndPoint.X, segment.EndPoint.Y);
-                DrawLine(p1, p2);
-            }
-        }
-
-        private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
-            Point mousePos = e.GetPosition(canvas);
-            Point nearbyPoint = FindNearbyPoint(mousePos);
-
-            if (nearbyPoint != default) {
-                HighlightPoint(selectedPoint);
-            } else {
-                clickedLocation = mousePos;
-                HighlightPoint(clickedLocation);
+                DrawLine(segment.StartPoint, segment.EndPoint);
             }
         }
 
         private void Canvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e) {
-            Point mousePos = e.GetPosition(canvas);
-            Point nearbyPoint = FindNearbyPoint(mousePos);
+            Point mousePosPoint = e.GetPosition(canvas);
+            NetworkPointUI mousePos = new(mousePosPoint.X, mousePosPoint.Y);
+            NetworkPointUI nearbyPoint = FindNearbyPoint(mousePos);
             // deze checks bepalen of er een bestaand punt geselescteerd is. Dit bepaald dan weer welke opties er zichtbaar zijn het contextmenu
             if(nearbyPoint != default) {
                 selectedPoint = nearbyPoint;
@@ -150,6 +126,7 @@ namespace WPFNetwerkBeheerUI {
                 MenuItemAddNetworkPoint.Visibility = Visibility.Collapsed;
                 MenuItemRemoveNetworkPoint.Visibility = Visibility.Visible;
                 MenuItemUpdateNetworkPoint.Visibility = Visibility.Visible;
+
             } else {
                 clickedLocation = mousePos;
                 HighlightPoint(clickedLocation);
@@ -159,7 +136,7 @@ namespace WPFNetwerkBeheerUI {
             }
         }
 
-        private Point FindNearbyPoint(Point p) {
+        private NetworkPointUI FindNearbyPoint(NetworkPointUI p) {
             double tolerance = 5; 
             foreach(var point in points) {
                 if (Math.Abs(point.X - p.X) < tolerance && Math.Abs(point.Y - p.Y) < tolerance) {
@@ -171,7 +148,7 @@ namespace WPFNetwerkBeheerUI {
             return default;
         }
 
-        private void HighlightPoint(Point p) {
+        private void HighlightPoint(NetworkPointUI p) {
             Ellipse highlightCircle = new Ellipse {
                 Width = 10,
                 Height = 10,
