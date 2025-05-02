@@ -315,7 +315,18 @@ namespace WPFNetwerkBeheerUI {
                     NetworkPointWindow npWindow = new(selectedPoint);
                     bool? result = npWindow.ShowDialog();
                     if (result == true) {
-                        nm.UpdateNetworkPoint(NetworkPointMapper.MapToDomain(selectedPoint));
+                        nm.UpdateNetworkPoint(NetworkPointMapper.MapToDomain(npWindow.point));
+
+                        // dit codeblok zoekt in de points collectie naar het geselecteerde punt om het daar aan te passen
+                        int index = points.IndexOf(selectedPoint);
+                        if (index != -1) {
+                            points[index] = npWindow.point; 
+                        }
+
+                        // dit codeblok past het networkpoint aan in de Ellipse/networkpoint dictionary
+                        selectedPoint = npWindow.point;
+                        var kvp = pointElements.FirstOrDefault(p => p.Value == selectedPoint);
+                        DrawPoint(kvp.Value);
                     }
                 } catch (InvalidOperationException ex) { //deze exception vangt op wanneer de coordinaten niet kloppen
                     MessageBox.Show(ex.Message, "Update Error", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -332,6 +343,8 @@ namespace WPFNetwerkBeheerUI {
         private void AddConnection_Click(object sender, RoutedEventArgs e) {
             RemovePreviousHighlight();
             RemovePreviousCoordinates();
+            RemoveDisplayedConnections();
+            removeConnectionClicked = false;
             connection = new();
             addConnectionClicked = true;
             TextBlockConnection.Text = "Please select a start and endpoint";
@@ -340,6 +353,7 @@ namespace WPFNetwerkBeheerUI {
         private void RemoveConnection_Click(object sender, RoutedEventArgs e) {
             RemovePreviousHighlight();
             RemovePreviousCoordinates();
+            addConnectionClicked = false;
             connection = new();
             removeConnectionClicked = true;
             TextBlockConnection.Text = "Please select the connection you want to remove";

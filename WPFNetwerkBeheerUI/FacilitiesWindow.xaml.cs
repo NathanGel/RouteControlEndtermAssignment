@@ -71,7 +71,8 @@ namespace WPFNetwerkBeheerUI {
         }
 
         private void BtnAdd_Click(object sender, RoutedEventArgs e) {
-
+            DialogResult = true;
+            Close();
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e) {

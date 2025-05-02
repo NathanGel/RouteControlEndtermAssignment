@@ -20,7 +20,7 @@ namespace WPFNetwerkBeheerUI {
     /// Interaction logic for NetworkPointWindow.xaml
     /// </summary>
     public partial class NetworkPointWindow : Window {
-        private NetworkPointUI point;
+        public NetworkPointUI point;
         private ObservableCollection<Facility> facilities;
         public NetworkPointWindow(NetworkPointUI point) {
             InitializeComponent();
@@ -33,14 +33,18 @@ namespace WPFNetwerkBeheerUI {
         }
 
         private void BtnSave_Click(object sender, RoutedEventArgs e) {
-
+            point.X = Convert.ToDouble(textBoxX.Text);
+            point.Y = Convert.ToDouble(textBoxY.Text);
+            point.Facilities = facilities;
+            DialogResult = true;
+            Close();
         }
 
         private void BtnFacilities_Click(object sender, RoutedEventArgs e) {
             FacilitiesWindow fWindow = new(facilities);
             bool? result = fWindow.ShowDialog();
             if (result == true) { 
-                
+                facilities = fWindow.selectedFacilities;
             }
         }
 
