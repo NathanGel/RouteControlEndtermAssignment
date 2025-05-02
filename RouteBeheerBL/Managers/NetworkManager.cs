@@ -26,7 +26,7 @@ namespace RouteBeheerBL.Managers {
             if (point == null) throw new NetworkException("Network point cannot be null");
             if (point.X == default || point.Y == default) throw new NetworkException("Network point coordinates cannot be default");
             if (point.X <= 0 || point.Y <= 0 || point.X > 1000 || point.Y > 1000) throw new InvalidOperationException("Coordinates do not match requirements.");
-            //repo.UpdateNetworkPoint(point);
+            repo.UpdateNetworkPoint(point);
         }
 
         public int AddConnection(Segment segment) {

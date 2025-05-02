@@ -162,7 +162,18 @@ namespace RouteBeheerDL {
         }
 
         public void UpdateNetworkPoint(NetworkPoint point) {
-            throw new NotImplementedException();
+            string query = "";
+            using (SqlConnection connection = new(connectionString))
+            using (SqlCommand cmd = connection.CreateCommand()) {
+                connection.Open();
+                SqlTransaction transaction = connection.BeginTransaction();
+                cmd.Transaction = transaction;
+                try {
+
+                } catch (SqlException) {
+                    throw new ApplicationException("An error occured while updating the networkpoint");
+                }
+            }
         }
 
         public int AddConnection(Segment segment) {

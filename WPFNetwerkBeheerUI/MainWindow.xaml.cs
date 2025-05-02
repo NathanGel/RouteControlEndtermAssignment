@@ -312,7 +312,6 @@ namespace WPFNetwerkBeheerUI {
         private void UpdateNetworkPoint_Click(object sender, RoutedEventArgs e) {
             if (selectedPoint != default) {
                 try {
-                    RemovePreviousHighlight(); //zorgen dat de vorige highlight zeker weg is na het verloop van de dialogen
                     double originalX = selectedPoint.X; //ik sla hier de originele x en y coordinaat op om fouten te vermijden
                     double originalY = selectedPoint.Y;
 
@@ -341,7 +340,8 @@ namespace WPFNetwerkBeheerUI {
                             }
                         }
 
-                        selectedPoint = default;
+                        RemovePreviousHighlight(); //zorgen dat de vorige highlight zeker weg is na het verloop van de dialogen
+                        selectedPoint = default; //op default zetten zodat dit niet voor problemen kan zorgen bij de volgende method
                     }
 
                 } catch (InvalidOperationException ex) { //deze exception vangt op wanneer de coordinaten niet kloppen
