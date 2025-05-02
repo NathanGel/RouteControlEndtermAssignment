@@ -174,7 +174,7 @@ namespace WPFNetwerkBeheerUI {
                 addConnectionClicked = false;
                 removeConnectionClicked = false;
 
-                canvas.Children.Remove(connectionInfo);
+                canvas.Children.Remove(connectionInfoTextBlock);
                 RemoveDisplayedConnections();
             }
 
@@ -193,7 +193,7 @@ namespace WPFNetwerkBeheerUI {
         }
 
         private void Canvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e) {
-            canvas.Children.Remove(connectionInfo);
+            canvas.Children.Remove(connectionInfoTextBlock);
             RemoveDisplayedConnections();
             addConnectionClicked = false;   // wanneer er een right click event plaatsvindt op het canvas
             removeConnectionClicked = false;// impliceert dit dat de add of remove connection functionaliteit
@@ -223,7 +223,7 @@ namespace WPFNetwerkBeheerUI {
                 MenuItemAddConnection.Visibility = Visibility.Collapsed;
                 MenuItemRemoveConnection.Visibility = Visibility.Collapsed;
             } else {
-                canvas.Children.Remove(connectionInfo);
+                canvas.Children.Remove(connectionInfoTextBlock);
                 NetworkPointUI mousePos = new(mousePosPoint.X, mousePosPoint.Y);
                 clickedLocation = mousePos;
                 HighlightPoint(clickedLocation);
@@ -271,16 +271,16 @@ namespace WPFNetwerkBeheerUI {
 
             // Add the highlight to canvas
             canvas.Children.Add(highlightCircle);
-            highlightElement = highlightCircle;
+            highlightEllipse = highlightCircle;
         }
 
         // dit Ellipse element gebruik ik om te tekenen waar/op welk punt er geklikt is op 
         // het canvas dit is achteraf ook makkelijk van het canvas te verwijderen
-        private Ellipse highlightElement;
+        private Ellipse highlightEllipse;
 
         private void RemovePreviousHighlight() {
-            if (highlightElement != null && canvas.Children.Contains(highlightElement))
-                canvas.Children.Remove(highlightElement);
+            if (highlightEllipse != null && canvas.Children.Contains(highlightEllipse))
+                canvas.Children.Remove(highlightEllipse);
         }
 
         private void AddNetworkPoint_Click(object sender, RoutedEventArgs e) {
@@ -326,30 +326,30 @@ namespace WPFNetwerkBeheerUI {
         private void AddConnection_Click(object sender, RoutedEventArgs e) {
             connection = new();
             addConnectionClicked = true;
-            connectionInfo = new() {
+            connectionInfoTextBlock = new() {
                 Text = "Please select a start and endpoint",
                 Foreground = new SolidColorBrush(Colors.Red),
                 FontSize = 20
             };
-            canvas.Children.Add(connectionInfo);
+            canvas.Children.Add(connectionInfoTextBlock);
         }
 
         private void RemoveConnection_Click(object sender, RoutedEventArgs e) {
             RemovePreviousHighlight();
             connection = new();
             removeConnectionClicked = true;
-            connectionInfo = new() {
+            connectionInfoTextBlock = new() {
                 Text = "Please select the connection you want to remove",
                 Foreground = new SolidColorBrush(Colors.Red),
                 FontSize = 20
             };
-            canvas.Children.Add(connectionInfo);
+            canvas.Children.Add(connectionInfoTextBlock);
         }
 
         // dit textblock element gebruik ik om te tonen wanneer er geklikt is op 
         // addconnection of removeconnection dit is achteraf ook makkelijk van het
         // canvas te verwijderen
-        private TextBlock connectionInfo;
+        private TextBlock connectionInfoTextBlock;
 
         private void AddConnection(NetworkPointUI point) {
             if(connection.StartPoint == default)
@@ -364,7 +364,7 @@ namespace WPFNetwerkBeheerUI {
                 connection.Id = id;
                 segments.Add(connection);
                 connection = default;
-                canvas.Children.Remove(connectionInfo);
+                canvas.Children.Remove(connectionInfoTextBlock);
                 //zou nog graag beide punten achteraf hertekenen om te vermijden dat de lijn overlapt
             }
         }
@@ -379,7 +379,7 @@ namespace WPFNetwerkBeheerUI {
             //logica ivm manager
             // wss nog een pop-up of je zeker bent??
             if (connection.StartPoint != default && connection.EndPoint != default) {
-                canvas.Children.Remove(connectionInfo);
+                canvas.Children.Remove(connectionInfoTextBlock);
                 RemovePreviousHighlight();
                 RemoveDisplayedConnections();
 
@@ -484,4 +484,4 @@ namespace WPFNetwerkBeheerUI {
             }
         }
     }
-}
+} 
