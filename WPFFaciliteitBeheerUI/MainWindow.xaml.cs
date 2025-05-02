@@ -5,6 +5,7 @@ using RouteBeheerBL.Managers;
 using RouteBeheerDL;
 using WPFFaciliteitBeheerUI.Model;
 using WPFFaciliteitBeheerUI.Mappers;
+using RouteBeheerBL.Exceptions;
 
 namespace WPFFaciliteitBeheerUI {
     /// <summary>
@@ -24,19 +25,35 @@ namespace WPFFaciliteitBeheerUI {
         private void UpdateFacility_Click(object sender, RoutedEventArgs e) {
             FacilityWindow window = new((FacilityUI)DataGridFacilities.SelectedItem, true);
             bool? result = window.ShowDialog();
-            if (result == true) {
-                networkManager.UpdateFacility(FacilityMapper.MapToDomain(window.Facility));
+            try {
+                if (result == true) {
+                    networkManager.UpdateFacility(FacilityMapper.MapToDomain(window.Facility));
+                }
+            } catch (NetworkException ex) { // Dit catch-blok vangt de exceptions op die gegooid worden in de manager UpdateFacility
+                MessageBox.Show("An error occured because the facility does not meet the specified requirements", ex.Message, MessageBoxButton.OK, MessageBoxImage.Warning);
+            } catch (ApplicationException) { // Dit catch-blok vangt de sql exceptions op die gegooid werden in de repo. De SqlException werd vertaald naar een ApplicationException
+                MessageBox.Show("An error occured while updating the facility", "Update Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            } catch (Exception ex) { // dit catch-blok dient als fallback indien er ergens een exception gegooid word die onverwacht is
+                MessageBox.Show("An unexpected error occured: " + ex.Message, "System Exception", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         private void AddFacility_Click(object sender, RoutedEventArgs e) {
             FacilityWindow window = new(null, false);
             bool? result = window.ShowDialog();
-            if (result == true) {
-                FacilityUI newFacility = window.Facility;
-                int id = networkManager.AddFacility(FacilityMapper.MapToDomain(newFacility));
-                newFacility.Id = id;
-                Facilities.Add(newFacility);
+            try {
+                if (result == true) {
+                    FacilityUI newFacility = window.Facility;
+                    int id = networkManager.AddFacility(FacilityMapper.MapToDomain(newFacility));
+                    newFacility.Id = id;
+                    Facilities.Add(newFacility);
+                }
+            } catch (NetworkException ex) {// Dit catch-blok vangt de exceptions op die gegooid worden in de manager AddFacility
+                MessageBox.Show("An error occured because the facility does not meet the specified requirements", ex.Message, MessageBoxButton.OK, MessageBoxImage.Warning);
+            } catch (ApplicationException) {// Dit catch-blok vangt de sql exceptions op die gegooid werden in de repo. De SqlException werd vertaald naar een ApplicationException
+                MessageBox.Show("An error occured while adding the networkpoint", "Adding Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            } catch (Exception ex) { // dit catch-blok dient als fallback indien er ergens een exception gegooid word die onverwacht is
+                MessageBox.Show("An unexpected error occured: " + ex.Message, "System Exception", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -44,11 +61,13 @@ namespace WPFFaciliteitBeheerUI {
             try {
                 networkManager.RemoveFacility(FacilityMapper.MapToDomain((FacilityUI)DataGridFacilities.SelectedItem));
                 Facilities.Remove((FacilityUI)DataGridFacilities.SelectedItem);
+            } catch (NetworkException ex) {// Dit catch-blok vangt de exceptions op die gegooid worden in de manager RemoveFacility
+                MessageBox.Show("An error occured because the facility does not meet the specified requirements", ex.Message, MessageBoxButton.OK, MessageBoxImage.Warning);
             } catch (InvalidOperationException ex) { //deze exception is gelinkt aan het feit dat er connections zijn
                 MessageBox.Show(ex.Message, "Deletion Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-            } catch (ApplicationException) { // deze exceptions bevatte al de resterende sqlexcpetions
+            } catch (ApplicationException) { // Dit catch-blok vangt de sql exceptions op die gegooid werden in de repo. De SqlException werd vertaald naar een ApplicationException
                 MessageBox.Show("An error occured while deleting the Facility");
-            } catch (Exception ex) { // indien het programma ergens nog een andere exception gooit die onverwacht is
+            } catch (Exception ex) { // dit catch-blok dient als fallback indien er ergens een exception gegooid word die onverwacht is
                 MessageBox.Show("Unexpected error: " + ex.Message);
             }
         }
