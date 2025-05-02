@@ -10,6 +10,7 @@ using System.Windows.Shapes;
 using WPFNetwerkBeheerUI.Mappers;
 using WPFNetwerkBeheerUI.Model;
 using Point = System.Windows.Point;
+using RouteBeheerBL.Exceptions;
 
 namespace WPFNetwerkBeheerUI {
     /// <summary>
@@ -59,15 +60,19 @@ namespace WPFNetwerkBeheerUI {
 
         private void ReadFromDatabase() {
             nm = new(new NetworkRepository(connectionString));
-            
-            List<SegmentUI> segmentsUI = new(nm.GetSegments().Select(sm => SegmentMapper.MapFromDomain(sm)));
-            foreach (var segment in segmentsUI) {
-                segments.Add(segment);
-            }
-
-            List<NetworkPointUI> pointsUI = new(nm.GetNetworkPoints().Select( np => NetworkPointMapper.MapFromDomain(np)));
-            foreach (var point in pointsUI) {
-                points.Add(new NetworkPointUI(point.Id, point.X, point.Y, point.Facilities));
+            try {
+                List<SegmentUI> segmentsUI = new(nm.GetSegments().Select(sm => SegmentMapper.MapFromDomain(sm)));
+                foreach (var segment in segmentsUI) {
+                    segments.Add(segment);
+                }
+                List<NetworkPointUI> pointsUI = new(nm.GetNetworkPoints().Select(np => NetworkPointMapper.MapFromDomain(np)));
+                foreach (var point in pointsUI) {
+                    points.Add(new NetworkPointUI(point.Id, point.X, point.Y, point.Facilities));
+                }
+            } catch (ApplicationException ex) { // dit catch-blok vangt elke mogelijke sqlexception die gegooid werden in de repo. De SqlException werd vertaald naar een ApplicationException
+                MessageBox.Show("An error occured while retrieving the network for initialization", ex.Message, MessageBoxButton.OK, MessageBoxImage.Error);
+            } catch (Exception ex) { // dit catch-blok dient als fallback indien er ergens een exception gegooid word die onverwacht is  
+                MessageBox.Show("An unexpected error occured:  " + ex.Message, "System Exception", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -293,14 +298,22 @@ namespace WPFNetwerkBeheerUI {
         }
 
         private void AddNetworkPoint_Click(object sender, RoutedEventArgs e) {
-            if (clickedLocation != default) {
-                NetworkPointUI newPoint = new(clickedLocation.X, clickedLocation.Y);
-                newPoint.Id = nm.AddNetworkPoint(NetworkPointMapper.MapToDomain(newPoint));
-                points.Add(newPoint);
-                RemovePreviousHighlight();
-                clickedLocation = default;
-            } else {
-                MessageBox.Show("No location selected for new network point");
+            try {
+                if (clickedLocation != default) {
+                    NetworkPointUI newPoint = new(clickedLocation.X, clickedLocation.Y);
+                    newPoint.Id = nm.AddNetworkPoint(NetworkPointMapper.MapToDomain(newPoint));
+                    points.Add(newPoint);
+                    RemovePreviousHighlight();
+                    clickedLocation = default;
+                } else {
+                    MessageBox.Show("No location selected for new network point");
+                }
+            } catch (NetworkException ex) { // Dit catch-blok vangt de exceptions op die gegooid worden in de manager AddNetworkPoint
+                MessageBox.Show("An error occured because the networkpoint does not meet the specified requirements", ex.Message, MessageBoxButton.OK, MessageBoxImage.Warning);
+            } catch (ApplicationException ex) { // Dit catch-blok vangt de sql exceptions op die gegooid werden in de repo. De SqlException werd vertaald naar een ApplicationException
+                MessageBox.Show("An error occured while adding a networkpoint", ex.Message, MessageBoxButton.OK, MessageBoxImage.Error);
+            } catch (Exception ex) { // dit catch-blok dient als fallback indien er ergens een exception gegooid word die onverwacht is
+                MessageBox.Show("An unexpected error occured: " + ex.Message, "System Exception", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -311,12 +324,15 @@ namespace WPFNetwerkBeheerUI {
                     points.Remove(selectedPoint);
                     RemovePreviousHighlight();
                     selectedPoint = default;
-                } catch (InvalidOperationException ex) { //deze exception is gelinkt aan het feit dat er connections zijn
-                    MessageBox.Show(ex.Message, "Deletion Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-                } catch (ApplicationException) { // deze exceptions bevatte al de resterende sqlexcpetions
-                    MessageBox.Show("An error occured while deleting the networkpoint");
-                } catch (Exception ex) { // indien het programma ergens nog een andere exception gooit die onverwacht is
-                    MessageBox.Show("Unexpected error: " + ex.Message);
+                    throw new Exception();
+                }catch (NetworkException ex) { // Dit catch-blok vangt de exceptions op die gegooid worden in de manager RemoveNetworkPoint
+                    MessageBox.Show("An error occured because the networkpoint did not meet the specified requirements", ex.Message, MessageBoxButton.OK, MessageBoxImage.Warning);
+                } catch (InvalidOperationException) { // Dit catch-blok vangt specifiek de sqlexceptions op die gegooid werden wanneer er een conflict is met de foreign key constraints in de databank. Deze exception werd vertaald naar een InvalidOperationException
+                    MessageBox.Show("An error occured because there are existing connections between points and segments", "Deletion Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                } catch (ApplicationException ex) { // Dit catch-blok vangt al de rest van de sql exceptions op die gegooid werden in de repo. De SqlException werd vertaald naar een ApplicationException
+                    MessageBox.Show("An error occured while deleting the networkpoint", ex.Message, MessageBoxButton.OK, MessageBoxImage.Error);
+                } catch (Exception ex) { // dit catch-blok dient als fallback indien er ergens een exception gegooid word die onverwacht is
+                    MessageBox.Show("An Unexpected error occured: " + ex.Message, "System exception", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             } else {
                 MessageBox.Show("No network point selected");
@@ -357,13 +373,12 @@ namespace WPFNetwerkBeheerUI {
                         RemovePreviousHighlight(); //zorgen dat de vorige highlight zeker weg is na het verloop van de dialogen
                         selectedPoint = default; //op default zetten zodat dit niet voor problemen kan zorgen bij de volgende method
                     }
-
-                } catch (InvalidOperationException ex) { //deze exception vangt op wanneer de coordinaten niet kloppen
-                    MessageBox.Show(ex.Message, "Update Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-                } catch (ApplicationException) { // deze exceptions bevatte al de resterende sqlexcpetions
-                    MessageBox.Show("An error occured while updating a networkpoint");
-                } catch (Exception ex) { // indien het programma ergens nog een andere exception gooit die onverwacht is
-                    MessageBox.Show("Unexpected error: " + ex.Message);
+                } catch (NetworkException ex) { // Dit catch-blok vangt de exceptions op die gegooid worden in de manager UpdateNetworkPoint
+                    MessageBox.Show("An error occured because the networkpoint does not meet the specified requirements", ex.Message, MessageBoxButton.OK, MessageBoxImage.Warning);
+                } catch (ApplicationException ex) { // Dit catch-blok vangt de sql exceptions op die gegooid werden in de repo. De SqlException werd vertaald naar een ApplicationException
+                    MessageBox.Show("An error occured while updating a networkpoint", ex.Message, MessageBoxButton.OK, MessageBoxImage.Error);
+                } catch (Exception ex) { // dit catch-blok dient als fallback indien er ergens een exception gegooid word die onverwacht is
+                    MessageBox.Show("An unexpected error occured: " + ex.Message, "System Exception", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             } else {
                 MessageBox.Show("No network point selected");
@@ -395,15 +410,23 @@ namespace WPFNetwerkBeheerUI {
             else if(connection.EndPoint == default)
                 connection.EndPoint = selectedPoint;
 
-            if(connection.StartPoint != default && connection.EndPoint != default) {
-                addConnectionClicked = false;
-                RemovePreviousHighlight();
-                int id = nm.AddConnection(SegmentMapper.MapToDomain(connection));
-                connection.Id = id;
-                segments.Add(connection);
-                connection = default;
-                TextBlockConnection.Text = null;
-                //zou nog graag beide punten achteraf hertekenen om te vermijden dat de lijn overlapt
+            try {
+                if (connection.StartPoint != default && connection.EndPoint != default) {
+                    addConnectionClicked = false;
+                    RemovePreviousHighlight();
+                    int id = nm.AddConnection(SegmentMapper.MapToDomain(connection));
+                    connection.Id = id;
+                    segments.Add(connection);
+                    connection = default;
+                    TextBlockConnection.Text = null;
+                    //zou nog graag beide punten achteraf hertekenen om te vermijden dat de lijn overlapt TODO
+                }
+            } catch (NetworkException ex) { // Dit catch-blok vangt de exceptions op die gegooid worden in de manager AddConnection
+                MessageBox.Show("An error occured because the connection did not meet the specified requirements", ex.Message, MessageBoxButton.OK, MessageBoxImage.Warning);
+            } catch (ApplicationException ex) { // Dit catch-blok vangt de sql exceptions op die gegooid werden in de repo. De SqlException werd vertaald naar een ApplicationException
+                MessageBox.Show("An error occured while adding a connection", ex.Message, MessageBoxButton.OK, MessageBoxImage.Error);
+            } catch (Exception ex) { // dit catch-blok dient als fallback indien er ergens een exception gegooid word die onverwacht is
+                MessageBox.Show("An unexpected error occured: " + ex.Message, "System Exception", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -425,17 +448,18 @@ namespace WPFNetwerkBeheerUI {
                 var segmentToRemove = segments.FirstOrDefault(s =>
                     (s.StartPoint.Id == connection.StartPoint.Id && s.EndPoint.Id == connection.EndPoint.Id) ||
                     (s.StartPoint.Id == connection.EndPoint.Id && s.EndPoint.Id == connection.StartPoint.Id));
-
                 if (segmentToRemove != null) {
                     try {
                         nm.RemoveConnection(SegmentMapper.MapToDomain(segmentToRemove));
                         segments.Remove(segmentToRemove);
-                    } catch (InvalidOperationException ex) { //deze exception is gelinkt aan het feit dat er connections zijn
-                        MessageBox.Show(ex.Message, "Deletion Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    } catch (ApplicationException ex) {// deze exceptions bevatte al de resterende sqlexcpetions
-                        MessageBox.Show("An error occured while deleting the networkpoint");
-                    } catch (Exception ex) { // indien het programma ergens nog een andere exception gooit die onverwacht is
-                        MessageBox.Show("Unexpected error: " + ex.Message);
+                    } catch (NetworkException ex) { // Dit catch-blok vangt de exceptions op die gegooid worden in de manager RemoveConnection
+                        MessageBox.Show("An error occured because the connection does not meet the specified requirements", ex.Message, MessageBoxButton.OK, MessageBoxImage.Warning);
+                    } catch (InvalidOperationException) { // Dit catch-blok vangt specifiek de sqlexceptions op die gegooid werden wanneer er een conflict is met de foreign key constraints in de databank. Deze exception werd vertaald naar een InvalidOperationException
+                        MessageBox.Show("Än error occured because there are existing connections within routes", "Deletion Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    } catch (ApplicationException ex) { // Dit catch-blok vangt de sql exceptions op die gegooid werden in de repo. De SqlException werd vertaald naar een ApplicationException
+                        MessageBox.Show("An error occured while deleting the networkpoint", ex.Message, MessageBoxButton.OK, MessageBoxImage.Error);
+                    } catch (Exception ex) { // dit catch-blok dient als fallback indien er ergens een exception gegooid word die onverwacht is
+                        MessageBox.Show("An unexpected error occured: " + ex.Message, "System Exception", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
             }

@@ -68,9 +68,11 @@ namespace RouteBeheerDL {
                     }
 
                     transaction.Commit();
-                } catch (Exception ex) {
+                } catch (SqlException ex) when(ex.Number == 547){
                     transaction.Rollback();
-                    throw new Exception("InitializeNetwork Invalid Transaction Rolled Back", ex);
+                    throw new InvalidOperationException("Cannot initialize the network because of a foreign key constraint conflict");
+                } catch (SqlException) {
+                    throw new ApplicationException("An error occured while initializing the network");
                 }
             }
         }
@@ -88,8 +90,8 @@ namespace RouteBeheerDL {
                         segments.Add(new((int)reader["id"], new((int)reader["start_id"], (double)reader["startX"], (double)reader["startY"]), new((int)reader["stop_id"], (double)reader["stopX"], (double)reader["stopY"])));
                     }
                     return segments;
-                } catch (Exception ex) {
-                    throw new Exception("GetSegments", ex);
+                } catch (SqlException) {
+                    throw new ApplicationException("An error occured while retrieving all segments");
                 }
             }
         }
@@ -119,8 +121,8 @@ namespace RouteBeheerDL {
                             np.Facilities.Add(new Facility((int)reader["facility_id"], (string)reader["name"]));
                     }
                     return networkPoints;
-                } catch (Exception ex) {
-                    throw new Exception("GetNetworkPoints", ex);
+                } catch (SqlException) {
+                    throw new ApplicationException("An error occured while retrieving all networkpoints");
                 }
             }
         }
@@ -136,26 +138,38 @@ namespace RouteBeheerDL {
                     cmd.Parameters.AddWithValue("@y", point.Y);
                     connection.Open();
                     id = (int)cmd.ExecuteScalar();
-                } catch (SqlException ex) {
-                    throw new Exception("Error adding network point", ex);
+                } catch (SqlException) {
+                    throw new ApplicationException("An error occured while adding a networkpoint");
                 }
             }
             return id;
         }
 
         public void RemoveNetworkPoint(NetworkPoint point) {
-            string query = "DELETE FROM NetworkPoints WHERE id=@id";
+            string queryFacilities = "DELETE FROM NetworkPoint_Facilities WHERE networkpoint_id=@id";
+            string queryPoints = "DELETE FROM NetworkPoints WHERE id=@id";
             using (SqlConnection connection = new(connectionString))
             using (SqlCommand cmd = connection.CreateCommand()) {
+                connection.Open();
+                SqlTransaction transaction = connection.BeginTransaction();
+                cmd.Transaction = transaction;
                 try {
-                    cmd.CommandText = query;
+                    cmd.CommandText = queryFacilities;
                     cmd.Parameters.AddWithValue("@id", point.Id);
-                    connection.Open();
                     cmd.ExecuteNonQuery();
+
+                    cmd.CommandText = queryPoints;
+                    cmd.Parameters.Clear();
+                    cmd.Parameters.AddWithValue("@id", point.Id);
+                    cmd.ExecuteNonQuery();
+
+                    transaction.Commit();
                 } catch (SqlException ex) when (ex.Number == 547) { // dit exception getal is het getal voor een foreign key constraint
+                    transaction.Rollback();
                     throw new InvalidOperationException("Cannot delete this point because it's connected to one or more segments"); // deze exception vertaal ik naar een InvalidOperationsException en
                                                                                                                                     // vang ik in de UI op zo weet ik dat het gaat over een bestaande link
                 } catch (SqlException) {
+                    transaction.Rollback();
                     throw new ApplicationException("An error occured while deleting the networkpoint"); // deze error vertaal ik naae een ApplicationException en bevat eender welke ander
                                                                                                         // sql error en vang ik ook op in de ui
                 }
@@ -214,8 +228,8 @@ namespace RouteBeheerDL {
                     connection.Open();
                     int id = (int)cmd.ExecuteScalar();
                     return id;
-                } catch (SqlException ex) {
-                    throw new Exception("AddConnection", ex);
+                } catch (SqlException) {
+                    throw new ApplicationException("An error occured while adding the connection");
                 }
             }
         }
@@ -232,7 +246,7 @@ namespace RouteBeheerDL {
                 } catch (SqlException ex) when (ex.Number == 547) {
                     throw new InvalidOperationException("Cannot delete segment because it's part of one or more routes");// deze exception vertaal ik naar een InvalidOperationsException en
                                                                                                                          // vang ik in de UI op zo weet ik dat het gaat over een bestaande link
-                } catch (SqlException ex) {
+                } catch (SqlException) {
                     throw new ApplicationException("An error occured while deleting the segment");// deze error vertaal ik naae een ApplicationException en bevat eender welke ander
                                                                                                   // sql error en vang ik ook op in de ui
                 }
@@ -249,8 +263,8 @@ namespace RouteBeheerDL {
                     connection.Open();
                     int id = (int)cmd.ExecuteScalar();
                     return id;
-                } catch (Exception ex) {
-                    throw new Exception("AddFacility", ex);
+                } catch (SqlException) {
+                    throw new ApplicationException("An error occured while adding a facility");
                 }
             }
         }
@@ -268,26 +282,8 @@ namespace RouteBeheerDL {
                         facilities.Add(new((int)reader["id"], (string)reader["name"]));
                     }
                     return facilities;
-                } catch (Exception ex) {
-                    throw new Exception("GetAllFacilities", ex);
-                }
-            }
-        }
-
-        public Facility GetFacility(int id) {
-            string query = "SELECT * FROM Facilities WHERE id=@id";
-            using (SqlConnection connection = new(connectionString))
-            using (SqlCommand cmd = connection.CreateCommand()) {
-                try {
-                    cmd.CommandText = query;
-                    cmd.Parameters.AddWithValue("@id", id);
-                    connection.Open();
-                    SqlDataReader reader = cmd.ExecuteReader();
-                    reader.Read();
-                    Facility f = new((int)reader["id"], (string)reader["name"]);
-                    return f;
-                } catch (Exception ex) {
-                    throw new Exception("GetFacility", ex);
+                } catch (SqlException) {
+                    throw new ApplicationException("An error occured while retrieving all facilities");
                 }
             }
         }
@@ -323,8 +319,8 @@ namespace RouteBeheerDL {
                     cmd.Parameters.AddWithValue("@name", facility.Name);
                     connection.Open();
                     cmd.ExecuteNonQuery();
-                } catch (Exception ex) {
-                    throw new Exception("UpdateFacility", ex);
+                } catch (SqlException) {
+                    throw new ApplicationException("An error occured while updating a facility");
                 }
             }
         }

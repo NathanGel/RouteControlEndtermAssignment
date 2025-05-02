@@ -37,9 +37,13 @@ namespace RouteBeheerBL.Managers {
                 ReadNetworkPoints();
                 ReadFacilitiesLocations();
                 ReadStretches();
-                _networkPointRepository.InitializeNetwork( _networkPointMapping, _facilityMapping, _segments);
+                _networkPointRepository.InitializeNetwork(_networkPointMapping, _facilityMapping, _segments);
+            } catch (ApplicationException ex) {
+                Console.WriteLine("InitializeNetwork", ex);
+            } catch (NetworkInitializationException ex) {
+                Console.WriteLine("An error occured while initializing the network: " + ex.Source);
             } catch (Exception ex) {
-                throw new NetworkInitializationException("Error initializing network", ex);
+                Console.WriteLine("Unexpected exception: " + ex);
             }
         }
 

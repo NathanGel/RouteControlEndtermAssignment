@@ -13,7 +13,8 @@ namespace RouteBeheerBL.Managers {
 
         public int AddNetworkPoint(NetworkPoint point) {
             if (point == null) throw new NetworkException("Network point cannot be null");
-            if(point.X == default || point.Y == default) throw new NetworkException("Network point coordinates cannot be default");
+            if (point.X == default || point.Y == default) throw new NetworkException("Network point coordinates cannot be default");
+            if (point.X <= 0 || point.Y <= 0 || point.X > 1000 || point.Y > 1000) throw new NetworkException("Coordinates do not match requirements.");
             return repo.AddNetworkPoint(point);
         }
 
@@ -25,12 +26,12 @@ namespace RouteBeheerBL.Managers {
         public void UpdateNetworkPoint(NetworkPoint point) {
             if (point == null) throw new NetworkException("Network point cannot be null");
             if (point.X == default || point.Y == default) throw new NetworkException("Network point coordinates cannot be default");
-            if (point.X <= 0 || point.Y <= 0 || point.X > 1000 || point.Y > 1000) throw new InvalidOperationException("Coordinates do not match requirements.");
+            if (point.X <= 0 || point.Y <= 0 || point.X > 1000 || point.Y > 1000) throw new NetworkException("Coordinates do not match requirements.");
             repo.UpdateNetworkPoint(point);
         }
 
         public int AddConnection(Segment segment) {
-           
+            if (segment == null) throw new NetworkException("Segment cannot be null");
             return repo.AddConnection(segment);
         }
 
@@ -60,11 +61,6 @@ namespace RouteBeheerBL.Managers {
         public void UpdateFacility(Facility facility) {
             if (facility == null) throw new NetworkException("UpdateFacility Invalid Null");
             repo.UpdateFacility(facility);
-        }
-
-        public void GetFacility(int id) {
-            if (id <= 0) throw new NetworkException("UpdateFacility Invalid Null");
-            repo.GetFacility(id);
         }
 
         public List<Facility> GetAllFacilities() {

@@ -12,7 +12,6 @@ namespace RouteBeheerBL.Interfaces {
         List<Segment> GetSegments();
         int AddFacility(Facility facility);
         void RemoveFacility(Facility facility);
-        Facility GetFacility(int id);
         void UpdateFacility(Facility facility);
         List<Facility> GetAllFacilities();
     }
