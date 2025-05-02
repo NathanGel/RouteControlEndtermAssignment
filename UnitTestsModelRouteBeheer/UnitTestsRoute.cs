@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using RouteBeheerBL.Exceptions;
 using RouteBeheerBL.Model;
-using RouteBeheerBL.Exceptions;
 using System.Drawing;
 
 namespace UnitTestsModelRouteBeheer {

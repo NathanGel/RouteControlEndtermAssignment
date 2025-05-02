@@ -1,11 +1,11 @@
-﻿using System.Collections.ObjectModel;
-using System.Windows;
-using System.Windows.Input;
+﻿using RouteBeheerBL.Exceptions;
 using RouteBeheerBL.Managers;
 using RouteBeheerDL;
-using WPFFaciliteitBeheerUI.Model;
+using System.Collections.ObjectModel;
+using System.Windows;
+using System.Windows.Input;
 using WPFFaciliteitBeheerUI.Mappers;
-using RouteBeheerBL.Exceptions;
+using WPFFaciliteitBeheerUI.Model;
 
 namespace WPFFaciliteitBeheerUI {
     /// <summary>

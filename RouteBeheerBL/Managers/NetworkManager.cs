@@ -1,7 +1,6 @@
 ﻿using RouteBeheerBL.Exceptions;
 using RouteBeheerBL.Interfaces;
 using RouteBeheerBL.Model;
-using System.Data.SqlTypes;
 
 namespace RouteBeheerBL.Managers {
     public class NetworkManager {

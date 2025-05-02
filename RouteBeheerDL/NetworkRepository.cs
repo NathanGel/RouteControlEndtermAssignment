@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography.Pkcs;
-using System.Text;
-using System.Threading.Tasks;
-using System.Transactions;
-using Microsoft.Data.SqlClient;
+﻿using Microsoft.Data.SqlClient;
 using RouteBeheerBL.Interfaces;
 using RouteBeheerBL.Model;
 

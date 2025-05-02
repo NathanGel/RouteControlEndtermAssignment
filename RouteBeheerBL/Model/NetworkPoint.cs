@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace RouteBeheerBL.Model {
+﻿namespace RouteBeheerBL.Model {
     public class NetworkPoint {
         public NetworkPoint(double x, double y) {
             X = x;

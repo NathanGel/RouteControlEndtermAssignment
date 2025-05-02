@@ -1,8 +1,6 @@
-﻿using RouteBeheerBL.Model;
+﻿using RouteBeheerBL.Interfaces;
 using RouteBeheerBL.Managers;
 using RouteBeheerDL;
-using RouteBeheerBL.Interfaces;
-using System.Net;
 
 namespace ConsoleAppImportGegevens {
     public class Program {
