@@ -312,6 +312,10 @@ namespace WPFNetwerkBeheerUI {
         private void UpdateNetworkPoint_Click(object sender, RoutedEventArgs e) {
             if (selectedPoint != default) {
                 try {
+                    RemovePreviousHighlight(); //zorgen dat de vorige highlight zeker weg is na het verloop van de dialogen
+                    double originalX = selectedPoint.X; //ik sla hier de originele x en y coordinaat op om fouten te vermijden
+                    double originalY = selectedPoint.Y;
+
                     NetworkPointWindow npWindow = new(selectedPoint);
                     bool? result = npWindow.ShowDialog();
                     if (result == true) {
@@ -320,14 +324,26 @@ namespace WPFNetwerkBeheerUI {
                         // dit codeblok zoekt in de points collectie naar het geselecteerde punt om het daar aan te passen
                         int index = points.IndexOf(selectedPoint);
                         if (index != -1) {
-                            points[index] = npWindow.point; 
+                            points[index] = npWindow.point;
                         }
 
                         // dit codeblok past het networkpoint aan in de Ellipse/networkpoint dictionary
-                        selectedPoint = npWindow.point;
                         var kvp = pointElements.FirstOrDefault(p => p.Value == selectedPoint);
-                        DrawPoint(kvp.Value);
+                        if (kvp.Key != null) {
+                            pointElements[kvp.Key] = npWindow.point; // vervang het punt in de dictionary
+
+                            // Het punt opnieuw tekenen indien de coordinaten gewijzigd zijn
+                            if (npWindow.point.X != originalX || npWindow.point.Y != originalY) {
+                                canvas.Children.Remove(kvp.Key); // verwijder de oude ellipse van het canvas
+                                pointElements.Remove(kvp.Key);   // verwijder de oude ellipse/point uit de dictionary
+
+                                DrawPoint(npWindow.point);       // het punt opnieuw tekenen
+                            }
+                        }
+
+                        selectedPoint = default;
                     }
+
                 } catch (InvalidOperationException ex) { //deze exception vangt op wanneer de coordinaten niet kloppen
                     MessageBox.Show(ex.Message, "Update Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 } catch (ApplicationException) { // deze exceptions bevatte al de resterende sqlexcpetions
