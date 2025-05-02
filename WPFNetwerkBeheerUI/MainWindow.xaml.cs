@@ -236,10 +236,24 @@ namespace WPFNetwerkBeheerUI {
 
         private void DisplayCoordinates(NetworkPointUI point) {
             RemovePreviousCoordinates();
-            coordinatesTextBlock = new TextBlock();
-            coordinatesTextBlock.Text = $"X:{point.X}    Y:{point.Y}";
-            Canvas.SetLeft(coordinatesTextBlock, point.X);
-            Canvas.SetTop(coordinatesTextBlock, point.Y);
+
+            coordinatesTextBlock = new TextBlock {
+                Text = $"X:{point.X}    Y:{point.Y}",
+                Background = new SolidColorBrush(Color.FromRgb(37, 40, 54)), 
+                Foreground = new SolidColorBrush(Color.FromRgb(245, 247, 251)), 
+                Padding = new Thickness(4),
+                FontSize = 12
+            };
+
+            
+            double maxX = canvas.ActualWidth - 250; // het aantal px dat word opgeschoven naar rechts om te vermijden dat het coordinaten blok buiten het canvas valt
+            double maxY = canvas.ActualHeight - 20; //het aantal px dat word opgeschoven naar boven om te vermijden dat het coordinaten blok buiten het canvas valt
+
+            double x = Math.Min(point.X, maxX);
+            double y = Math.Min(point.Y, maxY);
+
+            Canvas.SetLeft(coordinatesTextBlock, x);
+            Canvas.SetTop(coordinatesTextBlock, y);
 
             canvas.Children.Add(coordinatesTextBlock);
         }

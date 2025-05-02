@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography.Pkcs;
 using System.Text;
 using System.Threading.Tasks;
@@ -162,15 +163,41 @@ namespace RouteBeheerDL {
         }
 
         public void UpdateNetworkPoint(NetworkPoint point) {
-            string query = "";
+            string queryNetworkPoint = "UPDATE NetworkPoints SET x_coordinate = @x, y_coordinate = @y where id = @id";
+            string queryClearPreviousFacilities = "DELETE FROM NetworkPoint_Facilities WHERE networkpoint_id = @id";
+            string queryUpdatedFacilities = "INSERT INTO NetworkPoint_Facilities(networkpoint_id, facility_id) VALUES(@id, @facilityId)";
             using (SqlConnection connection = new(connectionString))
             using (SqlCommand cmd = connection.CreateCommand()) {
                 connection.Open();
                 SqlTransaction transaction = connection.BeginTransaction();
                 cmd.Transaction = transaction;
                 try {
+                    // command en logica om networkpoint aan te passen
+                    cmd.CommandText = queryNetworkPoint;
+                    cmd.Parameters.AddWithValue("@id", point.Id);
+                    cmd.Parameters.AddWithValue("@x", point.X);
+                    cmd.Parameters.AddWithValue("@y", point.Y);
+                    cmd.ExecuteNonQuery();
 
+                    //command en logica om de oude facilities te clearen
+                    cmd.CommandText = queryClearPreviousFacilities;
+                    cmd.Parameters.Clear();
+                    cmd.Parameters.AddWithValue("@id", point.Id);
+                    cmd.ExecuteNonQuery();
+
+                    //command en logica om de geupdatete lijst toe te voegen
+                    cmd.CommandText = queryUpdatedFacilities;
+                    cmd.Parameters.Clear();
+                    foreach (var facility in point.Facilities) {
+                        cmd.Parameters.Clear();
+                        cmd.Parameters.AddWithValue("@id", point.Id);
+                        cmd.Parameters.AddWithValue("@facilityId", facility.Id);
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    transaction.Commit();
                 } catch (SqlException) {
+                    transaction.Rollback();
                     throw new ApplicationException("An error occured while updating the networkpoint");
                 }
             }
