@@ -324,7 +324,6 @@ namespace WPFNetwerkBeheerUI {
                     points.Remove(selectedPoint);
                     RemovePreviousHighlight();
                     selectedPoint = default;
-                    throw new Exception();
                 }catch (NetworkException ex) { // Dit catch-blok vangt de exceptions op die gegooid worden in de manager RemoveNetworkPoint
                     MessageBox.Show("An error occured because the networkpoint did not meet the specified requirements", ex.Message, MessageBoxButton.OK, MessageBoxImage.Warning);
                 } catch (InvalidOperationException) { // Dit catch-blok vangt specifiek de sqlexceptions op die gegooid werden wanneer er een conflict is met de foreign key constraints in de databank. Deze exception werd vertaald naar een InvalidOperationException
