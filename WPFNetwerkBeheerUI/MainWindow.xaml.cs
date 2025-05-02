@@ -155,7 +155,19 @@ namespace WPFNetwerkBeheerUI {
         }
 
         private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
-            RemovePreviousHighlight();
+            Point mousePosPoint = e.GetPosition(canvas);
+
+            // deze statement maakt gebruik van de hittest om te bepalen op wat voor UIElement 
+            // er geklikt is. Indien dit geen ellipse is of mijn dictionary dit niet bevat
+            // worden de voorafgaande highlights verwijdert. Dit om telkens te vermijden dat
+            // er coordinaten of een highlight zichtbaar is wanneer dit niet langer nodig is
+            HitTestResult result = VisualTreeHelper.HitTest(canvas, mousePosPoint);
+            if (result == null || result.VisualHit is not Ellipse || !pointElements.ContainsKey((Ellipse)result.VisualHit)) {
+                selectedPoint = default;
+                RemovePreviousHighlight();
+                RemovePreviousCoordinates();
+            }
+
             if (selectedPoint != default && !addConnectionClicked) {
                 ShowCoordinates(selectedPoint);
             } else if(selectedPoint != default && addConnectionClicked) {
@@ -165,9 +177,22 @@ namespace WPFNetwerkBeheerUI {
         }
 
         private void Canvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e) {
-            RemovePreviousCoordinates();
-            // deze checks bepalen of er een bestaand punt geselescteerd is. Dit bepaald dan weer welke opties er zichtbaar zijn het contextmenu
-            if(selectedPoint != default) {
+            Point mousePosPoint = e.GetPosition(canvas);
+
+            // deze statement maakt gebruik van de hittest om te bepalen op wat voor UIElement 
+            // er geklikt is. Indien dit geen ellipse is of mijn dictionary dit niet bevat
+            // worden de voorafgaande highlights verwijdert. Dit om telkens te vermijden dat
+            // er coordinaten of een highlight zichtbaar is wanneer dit niet langer nodig is
+            HitTestResult result = VisualTreeHelper.HitTest(canvas, mousePosPoint);
+            if (result == null || result.VisualHit is not Ellipse || !pointElements.ContainsKey((Ellipse)result.VisualHit)) {
+                selectedPoint = default;
+                RemovePreviousHighlight();
+                RemovePreviousCoordinates();
+            }
+
+            // deze checks bepalen of er een bestaand punt geselescteerd is.
+            // Dit bepaald dan weer welke opties er zichtbaar zijn het contextmenu
+            if (selectedPoint != default) {
                 HighlightPoint(selectedPoint);
                 MenuItemAddNetworkPoint.Visibility = Visibility.Collapsed;
                 MenuItemRemoveNetworkPoint.Visibility = Visibility.Visible;
@@ -175,7 +200,6 @@ namespace WPFNetwerkBeheerUI {
                 MenuItemAddConnection.Visibility = Visibility.Collapsed;
                 MenuItemRemoveConnection.Visibility = Visibility.Collapsed;
             } else {
-                Point mousePosPoint = e.GetPosition(canvas);
                 NetworkPointUI mousePos = new(mousePosPoint.X, mousePosPoint.Y);
                 clickedLocation = mousePos;
                 HighlightPoint(clickedLocation);
@@ -255,8 +279,8 @@ namespace WPFNetwerkBeheerUI {
         }
 
         private void AddConnection_Click(object sender, RoutedEventArgs e) {
-            RemovePreviousHighlight();
-            RemovePreviousCoordinates();
+            //RemovePreviousHighlight();
+            //RemovePreviousCoordinates();
             newConnection = new();
             addConnectionClicked = true;
             connectionInfo = new() {
