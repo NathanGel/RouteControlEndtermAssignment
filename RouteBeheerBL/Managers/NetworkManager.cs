@@ -22,6 +22,13 @@ namespace RouteBeheerBL.Managers {
             repo.RemoveNetworkPoint(point);
         }
 
+        public void UpdateNetworkPoint(NetworkPoint point) {
+            if (point == null) throw new NetworkException("Network point cannot be null");
+            if (point.X == default || point.Y == default) throw new NetworkException("Network point coordinates cannot be default");
+            if (point.X <= 0 || point.Y <= 0) throw new InvalidOperationException("Coordinates do not match requirements.");
+            repo.UpdateNetworkPoint(point);
+        }
+
         public int AddConnection(Segment segment) {
            
             return repo.AddConnection(segment);
@@ -30,12 +37,6 @@ namespace RouteBeheerBL.Managers {
         public void RemoveConnection(Segment segment) {
             if (segment == null) throw new NetworkException("Segment cannot be null");
             repo.RemoveConnection(segment);
-        }
-
-        public void UpdateNetworkPoint(NetworkPoint point) {
-            if (point == null) throw new NetworkException("Network point cannot be null");
-            if (point.X == default || point.Y == default) throw new NetworkException("Network point coordinates cannot be default");
-            repo.UpdateNetworkPoint(point);
         }
 
         public List<NetworkPoint> GetNetworkPoints() {

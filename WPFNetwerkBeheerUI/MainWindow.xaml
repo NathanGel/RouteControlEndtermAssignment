@@ -5,7 +5,9 @@
        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
        xmlns:local="clr-namespace:WPFNetwerkBeheerUI"
        mc:Ignorable="d"
-       Title="Network Management" Height="1050" Width="1050" WindowStyle="None" AllowsTransparency="True" Background="Transparent">
+       Title="Network Management" Height="1110" Width="1020"
+       WindowStyle="None" AllowsTransparency="True" Background="Transparent">
+
     <Window.Resources>
         <Style x:Key="WindowControlButton" TargetType="Button">
             <Setter Property="Width" Value="46"/>
@@ -22,21 +24,24 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="30"/>
+                <!-- Top Bar -->
+                <RowDefinition Height="Auto"/>
+                <!-- Button Bar -->
                 <RowDefinition Height="*"/>
+                <!-- Main Content -->
             </Grid.RowDefinitions>
 
+            <!-- Top Bar -->
             <Grid Background="#252836" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
-                <TextBlock Text="Network Management" Foreground="#F5F7FB" Margin="10,0,0,0" 
+                <TextBlock Text="Network Management" Foreground="#F5F7FB" Margin="10,0,0,0"
                            VerticalAlignment="Center" HorizontalAlignment="Left" FontWeight="SemiBold"/>
-
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Style="{StaticResource WindowControlButton}" 
+                    <Button Style="{StaticResource WindowControlButton}"
                             Content="&#xE921;" Click="MinimizeButton_Click"/>
-                    <Button Style="{StaticResource WindowControlButton}" 
+                    <Button Style="{StaticResource WindowControlButton}"
                             Content="&#xE922;" Click="MaximizeRestoreButton_Click" x:Name="MaxRestoreButton"/>
-                    <Button Style="{StaticResource WindowControlButton}" 
-                            Content="&#xE8BB;" Click="CloseButton_Click" 
-                            Background="Transparent">
+                    <Button Style="{StaticResource WindowControlButton}"
+                            Content="&#xE8BB;" Click="CloseButton_Click" Background="Transparent">
                         <Button.Triggers>
                             <EventTrigger RoutedEvent="Button.MouseEnter">
                                 <BeginStoryboard>
@@ -59,15 +64,40 @@
                 </StackPanel>
             </Grid>
 
-            <Grid Grid.Row="1">
-                <Canvas Name="canvas" Width="1000" Height="1000"  Grid.RowSpan="5" Grid.Column="1" Background="#2A2D3E" Margin="10" MouseLeftButtonDown="Canvas_MouseLeftButtonDown" MouseRightButtonDown="Canvas_MouseRightButtonDown">
+            <!-- Button Bar -->
+            <Grid Grid.Row="1" Margin="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Name="TextBlockConnection"
+                           Grid.Column="0"
+                           VerticalAlignment="Center"
+                           FontSize="20"
+                           Foreground="Red"/>
+
+                <StackPanel Orientation="Horizontal" Grid.Column="1" HorizontalAlignment="Right">
+                    <Button Content="Add Connection" Click="AddConnection_Click"
+                            Background="#6C5CE7" Foreground="#F5F7FB" BorderBrush="#252836"
+                            Margin="5" BorderThickness="1" Height="30" Width="130"/>
+                    <Button Content="Remove Connection" Click="RemoveConnection_Click"
+                            Background="#E81123" Foreground="White" BorderBrush="#A80000"
+                            Margin="5" BorderThickness="1" Height="30" Width="130"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- Main Content -->
+            <Grid Grid.Row="2">
+                <Canvas Name="canvas" Width="1000" Height="1000"
+                        Background="#2A2D3E" Margin="10"
+                        MouseLeftButtonDown="Canvas_MouseLeftButtonDown"
+                        MouseRightButtonDown="Canvas_MouseRightButtonDown">
                     <Canvas.ContextMenu>
                         <ContextMenu Name="contextMenu">
                             <MenuItem Name="MenuItemAddNetworkPoint" Header="Add NetworkPoint" Click="AddNetworkPoint_Click"/>
                             <MenuItem Name="MenuItemRemoveNetworkPoint" Header="Remove NetworkPoint" Click="RemoveNetworkPoint_Click"/>
                             <MenuItem Name="MenuItemUpdateNetworkPoint" Header="Update NetworkPoint" Click="UpdateNetworkPoint_Click"/>
-                            <MenuItem Name="MenuItemAddConnection" Header="Add Connection" Click="AddConnection_Click"/>
-                            <MenuItem Name="MenuItemRemoveConnection" Header="Remove Connection" Click="RemoveConnection_Click"/>
                         </ContextMenu>
                     </Canvas.ContextMenu>
                 </Canvas>

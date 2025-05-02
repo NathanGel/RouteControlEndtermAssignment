@@ -94,7 +94,7 @@ namespace RouteBeheerDL {
         }
 
         public List<NetworkPoint> GetNetworkPoints() {
-            string query = "SELECT * FROM NetworkPoints";
+            string query = "SELECT * FROM NetworkPoints n JOIN NetworkPoint_Facilities nf ON n.id = nf.networkpoint_id JOIN Facilities f ON nf.facility_id = f.id;\r\n";
             using (SqlConnection connection = new(connectionString))
             using(SqlCommand cmd = connection.CreateCommand()) {
                 List<NetworkPoint> networkPoints = new();
@@ -102,8 +102,18 @@ namespace RouteBeheerDL {
                     cmd.CommandText = query;
                     connection.Open();
                     SqlDataReader reader = cmd.ExecuteReader();
+                    NetworkPoint np = null;
+                    int lastId = -1;
                     while (reader.Read()) {
-                        networkPoints.Add(new((int)reader["id"], (double)reader["x_coordinate"], (double)reader["y_coordinate"]));
+                        int currentId = (int)reader["id"];
+
+                        if (np == null || currentId != lastId) {
+                            np = new NetworkPoint(currentId, (double)reader["x_coordinate"], (double)reader["y_coordinate"]);
+                            networkPoints.Add(np);
+                            lastId = currentId;
+                        }
+
+                        np.Facilities.Add(new Facility((int)reader["facility_id"], (string)reader["name"]));
                     }
                     return networkPoints;
                 } catch (Exception ex) {

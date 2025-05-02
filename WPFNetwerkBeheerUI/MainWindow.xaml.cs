@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
@@ -22,14 +21,14 @@ namespace WPFNetwerkBeheerUI {
         // Observable collection omdat ik de UI wil updaten wanneer er iets
         // veranderd in de lijst
 
-        private ObservableCollection<SegmentUI> segments = new();
-        // de lijst van segmenten die ik gebruik om op het canvas te tekenen
-        // Observable collection idem met points
-
         private Dictionary<Ellipse, NetworkPointUI> pointElements = new Dictionary<Ellipse, NetworkPointUI>();
         // dictionary om de punten te koppelen aan hun UI elementen
         // om ze makkelijk te kunnen verwijderen zonder dat ik telkens
         // na elke verandering het hele canvas opnieuw moet tekenen
+
+        private ObservableCollection<SegmentUI> segments = new();
+        // de lijst van segmenten die ik gebruik om op het canvas te tekenen
+        // Observable collection idem met points
 
         private Dictionary<SegmentUI, Line> segmentElements = new Dictionary<SegmentUI, Line>();
 
@@ -68,7 +67,7 @@ namespace WPFNetwerkBeheerUI {
 
             List<NetworkPointUI> pointsUI = new(nm.GetNetworkPoints().Select( np => NetworkPointMapper.MapFromDomain(np)));
             foreach (var point in pointsUI) {
-                points.Add(new NetworkPointUI(point.Id, point.X, point.Y));
+                points.Add(new NetworkPointUI(point.Id, point.X, point.Y, point.Facilities));
             }
         }
 
@@ -174,7 +173,7 @@ namespace WPFNetwerkBeheerUI {
                 addConnectionClicked = false;
                 removeConnectionClicked = false;
 
-                canvas.Children.Remove(connectionInfoTextBlock);
+                TextBlockConnection.Text = null;
                 RemoveDisplayedConnections();
             }
 
@@ -193,7 +192,7 @@ namespace WPFNetwerkBeheerUI {
         }
 
         private void Canvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e) {
-            canvas.Children.Remove(connectionInfoTextBlock);
+            TextBlockConnection.Text = null;
             RemoveDisplayedConnections();
             addConnectionClicked = false;   // wanneer er een right click event plaatsvindt op het canvas
             removeConnectionClicked = false;// impliceert dit dat de add of remove connection functionaliteit
@@ -220,18 +219,14 @@ namespace WPFNetwerkBeheerUI {
                 MenuItemAddNetworkPoint.Visibility = Visibility.Collapsed;
                 MenuItemRemoveNetworkPoint.Visibility = Visibility.Visible;
                 MenuItemUpdateNetworkPoint.Visibility = Visibility.Visible;
-                MenuItemAddConnection.Visibility = Visibility.Collapsed;
-                MenuItemRemoveConnection.Visibility = Visibility.Collapsed;
             } else {
-                canvas.Children.Remove(connectionInfoTextBlock);
+                TextBlockConnection.Text = null;
                 NetworkPointUI mousePos = new(mousePosPoint.X, mousePosPoint.Y);
                 clickedLocation = mousePos;
                 HighlightPoint(clickedLocation);
                 MenuItemRemoveNetworkPoint.Visibility = Visibility.Collapsed;
                 MenuItemUpdateNetworkPoint.Visibility = Visibility.Collapsed;
                 MenuItemAddNetworkPoint.Visibility = Visibility.Visible;
-                MenuItemAddConnection.Visibility = Visibility.Visible;
-                MenuItemRemoveConnection.Visibility = Visibility.Visible;
             }
         }
 
@@ -304,7 +299,7 @@ namespace WPFNetwerkBeheerUI {
                     selectedPoint = default;
                 } catch (InvalidOperationException ex) { //deze exception is gelinkt aan het feit dat er connections zijn
                     MessageBox.Show(ex.Message, "Deletion Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-                } catch (ApplicationException ex) { // deze exceptions bevatte al de resterende sqlexcpetions
+                } catch (ApplicationException) { // deze exceptions bevatte al de resterende sqlexcpetions
                     MessageBox.Show("An error occured while deleting the networkpoint");
                 } catch (Exception ex) { // indien het programma ergens nog een andere exception gooit die onverwacht is
                     MessageBox.Show("Unexpected error: " + ex.Message);
@@ -316,40 +311,39 @@ namespace WPFNetwerkBeheerUI {
 
         private void UpdateNetworkPoint_Click(object sender, RoutedEventArgs e) {
             if (selectedPoint != default) {
-                NetworkPointWindow npWindow = new();
-                npWindow.Show();
+                try {
+                    NetworkPointWindow npWindow = new(selectedPoint);
+                    bool? result = npWindow.ShowDialog();
+                    if (result == true) {
+                        nm.UpdateNetworkPoint(NetworkPointMapper.MapToDomain(selectedPoint));
+                    }
+                } catch (InvalidOperationException ex) { //deze exception vangt op wanneer de coordinaten niet kloppen
+                    MessageBox.Show(ex.Message, "Update Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                } catch (ApplicationException) { // deze exceptions bevatte al de resterende sqlexcpetions
+                    MessageBox.Show("An error occured while updating a networkpoint");
+                } catch (Exception ex) { // indien het programma ergens nog een andere exception gooit die onverwacht is
+                    MessageBox.Show("Unexpected error: " + ex.Message);
+                }
             } else {
                 MessageBox.Show("No network point selected");
             }
         }
 
         private void AddConnection_Click(object sender, RoutedEventArgs e) {
+            RemovePreviousHighlight();
+            RemovePreviousCoordinates();
             connection = new();
             addConnectionClicked = true;
-            connectionInfoTextBlock = new() {
-                Text = "Please select a start and endpoint",
-                Foreground = new SolidColorBrush(Colors.Red),
-                FontSize = 20
-            };
-            canvas.Children.Add(connectionInfoTextBlock);
+            TextBlockConnection.Text = "Please select a start and endpoint";
         }
 
         private void RemoveConnection_Click(object sender, RoutedEventArgs e) {
             RemovePreviousHighlight();
+            RemovePreviousCoordinates();
             connection = new();
             removeConnectionClicked = true;
-            connectionInfoTextBlock = new() {
-                Text = "Please select the connection you want to remove",
-                Foreground = new SolidColorBrush(Colors.Red),
-                FontSize = 20
-            };
-            canvas.Children.Add(connectionInfoTextBlock);
+            TextBlockConnection.Text = "Please select the connection you want to remove";
         }
-
-        // dit textblock element gebruik ik om te tonen wanneer er geklikt is op 
-        // addconnection of removeconnection dit is achteraf ook makkelijk van het
-        // canvas te verwijderen
-        private TextBlock connectionInfoTextBlock;
 
         private void AddConnection(NetworkPointUI point) {
             if(connection.StartPoint == default)
@@ -364,7 +358,7 @@ namespace WPFNetwerkBeheerUI {
                 connection.Id = id;
                 segments.Add(connection);
                 connection = default;
-                canvas.Children.Remove(connectionInfoTextBlock);
+                TextBlockConnection.Text = null;
                 //zou nog graag beide punten achteraf hertekenen om te vermijden dat de lijn overlapt
             }
         }
@@ -379,7 +373,8 @@ namespace WPFNetwerkBeheerUI {
             //logica ivm manager
             // wss nog een pop-up of je zeker bent??
             if (connection.StartPoint != default && connection.EndPoint != default) {
-                canvas.Children.Remove(connectionInfoTextBlock);
+                TextBlockConnection.Text = null;
+
                 RemovePreviousHighlight();
                 RemoveDisplayedConnections();
 

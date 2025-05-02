@@ -46,7 +46,7 @@ namespace WPFFaciliteitBeheerUI {
                 Facilities.Remove((FacilityUI)DataGridFacilities.SelectedItem);
             } catch (InvalidOperationException ex) { //deze exception is gelinkt aan het feit dat er connections zijn
                 MessageBox.Show(ex.Message, "Deletion Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-            } catch (ApplicationException ex) { // deze exceptions bevatte al de resterende sqlexcpetions
+            } catch (ApplicationException) { // deze exceptions bevatte al de resterende sqlexcpetions
                 MessageBox.Show("An error occured while deleting the Facility");
             } catch (Exception ex) { // indien het programma ergens nog een andere exception gooit die onverwacht is
                 MessageBox.Show("Unexpected error: " + ex.Message);

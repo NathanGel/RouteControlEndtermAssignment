@@ -14,7 +14,7 @@ namespace WPFNetwerkBeheerUI.Model {
             Y = y;
         }
 
-        public NetworkPointUI(double x, double y, ObservableCollection<FacilityUI> facilities) {
+        public NetworkPointUI(double x, double y, ObservableCollection<Facility> facilities) {
             X = x;
             Y = y;
             Facilities = facilities;
@@ -26,7 +26,7 @@ namespace WPFNetwerkBeheerUI.Model {
             Y = y;
         }
 
-        public NetworkPointUI(int id, double x, double y, ObservableCollection<FacilityUI> facilities) {
+        public NetworkPointUI(int id, double x, double y, ObservableCollection<Facility> facilities) {
             Id = id;
             X = x;
             Y = y;
@@ -50,8 +50,8 @@ namespace WPFNetwerkBeheerUI.Model {
                 OnPropertyChanged(nameof(Y));
             }
         }
-        private ObservableCollection<FacilityUI> _facilities = new(); // dit veranderd naar een observable collection om te zorgen dat de UI altijd aanpast wanneer er een verwijdert wordt/toegevoegd
-        public ObservableCollection<FacilityUI> Facilities { 
+        private ObservableCollection<Facility> _facilities = new(); // dit veranderd naar een observable collection om te zorgen dat de UI altijd aanpast wanneer er een verwijdert wordt/toegevoegd
+        public ObservableCollection<Facility> Facilities { 
             get { return _facilities; }
             set {
                 _facilities = value;
