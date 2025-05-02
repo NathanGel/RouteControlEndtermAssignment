@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
@@ -164,10 +165,17 @@ namespace WPFNetwerkBeheerUI {
             // worden de voorafgaande highlights verwijdert. Dit om telkens te vermijden dat
             // er coordinaten of een highlight zichtbaar is wanneer dit niet langer nodig is
             HitTestResult result = VisualTreeHelper.HitTest(canvas, mousePosPoint);
-            if (result == null || result.VisualHit is not Ellipse || !pointElements.ContainsKey((Ellipse)result.VisualHit)) {
+            //if (result == null || result.VisualHit is not Ellipse || !pointElements.ContainsKey((Ellipse)result.VisualHit))
+            if (result == null || result.VisualHit is not Ellipse) {
                 selectedPoint = default;
                 RemovePreviousHighlight();
                 RemovePreviousCoordinates();
+
+                addConnectionClicked = false;
+                removeConnectionClicked = false;
+
+                canvas.Children.Remove(connectionInfo);
+                RemoveDisplayedConnections();
             }
 
             if (selectedPoint != default && !addConnectionClicked && !removeConnectionClicked) {
@@ -185,6 +193,8 @@ namespace WPFNetwerkBeheerUI {
         }
 
         private void Canvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e) {
+            canvas.Children.Remove(connectionInfo);
+            RemoveDisplayedConnections();
             addConnectionClicked = false;   // wanneer er een right click event plaatsvindt op het canvas
             removeConnectionClicked = false;// impliceert dit dat de add of remove connection functionaliteit
                                             // word afgebroken
@@ -213,6 +223,7 @@ namespace WPFNetwerkBeheerUI {
                 MenuItemAddConnection.Visibility = Visibility.Collapsed;
                 MenuItemRemoveConnection.Visibility = Visibility.Collapsed;
             } else {
+                canvas.Children.Remove(connectionInfo);
                 NetworkPointUI mousePos = new(mousePosPoint.X, mousePosPoint.Y);
                 clickedLocation = mousePos;
                 HighlightPoint(clickedLocation);
@@ -224,8 +235,9 @@ namespace WPFNetwerkBeheerUI {
             }
         }
 
-        private TextBlock coordinatesTextBlock; // dit textblock element gebruik ik om de coordinaten op het canvas te tonen 
-                                                // dit is achteraf ook makkelijk van het canvas te verwijderen
+        // dit textblock element gebruik ik om de coordinaten op het canvas te tonen 
+        // dit is achteraf ook makkelijk van het canvas te verwijderen
+        private TextBlock coordinatesTextBlock;
 
         private void DisplayCoordinates(NetworkPointUI point) {
             RemovePreviousCoordinates();
@@ -262,8 +274,9 @@ namespace WPFNetwerkBeheerUI {
             highlightElement = highlightCircle;
         }
 
-        private Ellipse highlightElement; // dit Ellipse element gebruik ik om te tekenen waar/op welk punt er geklikt is op 
-                                          // het canvas dit is achteraf ook makkelijk van het canvas te verwijderen
+        // dit Ellipse element gebruik ik om te tekenen waar/op welk punt er geklikt is op 
+        // het canvas dit is achteraf ook makkelijk van het canvas te verwijderen
+        private Ellipse highlightElement;
 
         private void RemovePreviousHighlight() {
             if (highlightElement != null && canvas.Children.Contains(highlightElement))
@@ -303,8 +316,8 @@ namespace WPFNetwerkBeheerUI {
 
         private void UpdateNetworkPoint_Click(object sender, RoutedEventArgs e) {
             if (selectedPoint != default) {
-                MessageBox.Show("Update Network Point clicked");
-                selectedPoint = default;
+                NetworkPointWindow npWindow = new();
+                npWindow.Show();
             } else {
                 MessageBox.Show("No network point selected");
             }
@@ -320,7 +333,10 @@ namespace WPFNetwerkBeheerUI {
             };
             canvas.Children.Add(connectionInfo);
         }
+
         private void RemoveConnection_Click(object sender, RoutedEventArgs e) {
+            RemovePreviousHighlight();
+            connection = new();
             removeConnectionClicked = true;
             connectionInfo = new() {
                 Text = "Please select the connection you want to remove",
@@ -330,9 +346,10 @@ namespace WPFNetwerkBeheerUI {
             canvas.Children.Add(connectionInfo);
         }
 
-        private TextBlock connectionInfo; // dit textblock element gebruik ik om te tonen wanneer er geklikt is op 
-                                          // addconnection of removeconnection dit is achteraf ook makkelijk van het
-                                          // canvas te verwijderen
+        // dit textblock element gebruik ik om te tonen wanneer er geklikt is op 
+        // addconnection of removeconnection dit is achteraf ook makkelijk van het
+        // canvas te verwijderen
+        private TextBlock connectionInfo;
 
         private void AddConnection(NetworkPointUI point) {
             if(connection.StartPoint == default)
@@ -360,10 +377,40 @@ namespace WPFNetwerkBeheerUI {
 
             //logica toevoegen die een segment zoekt op basis van start en eindpunt
             //logica ivm manager
-            canvas.Children.Remove(connectionInfo);
+            // wss nog een pop-up of je zeker bent??
+            if (connection.StartPoint != default && connection.EndPoint != default) {
+                canvas.Children.Remove(connectionInfo);
+                RemovePreviousHighlight();
+                RemoveDisplayedConnections();
+
+                var segmentToRemove = segments.FirstOrDefault(s =>
+                    (s.StartPoint.Id == connection.StartPoint.Id && s.EndPoint.Id == connection.EndPoint.Id) ||
+                    (s.StartPoint.Id == connection.EndPoint.Id && s.EndPoint.Id == connection.StartPoint.Id));
+
+                if (segmentToRemove != null) {
+                    try {
+                        nm.RemoveConnection(SegmentMapper.MapToDomain(segmentToRemove));
+                        segments.Remove(segmentToRemove);
+                    } catch (InvalidOperationException ex) { //deze exception is gelinkt aan het feit dat er connections zijn
+                        MessageBox.Show(ex.Message, "Deletion Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    } catch (ApplicationException ex) {// deze exceptions bevatte al de resterende sqlexcpetions
+                        MessageBox.Show("An error occured while deleting the networkpoint");
+                    } catch (Exception ex) { // indien het programma ergens nog een andere exception gooit die onverwacht is
+                        MessageBox.Show("Unexpected error: " + ex.Message);
+                    }
+                }
+            }
+
         }
 
-        List<Ellipse> existingConnections = new List<Ellipse>();
+        private void RemoveDisplayedConnections() {
+            foreach (Ellipse ellipse in existingConnections.Keys)
+                canvas.Children.Remove(ellipse);
+        }
+
+        // de originele ellipse opslaan in een dictionary samen
+        // met het networkpoint om zo makkelijk op te zoeken
+        Dictionary<Ellipse, NetworkPointUI> existingConnections = new Dictionary<Ellipse, NetworkPointUI>();
 
         private void DisplayExistingConnectionsFromPoint(NetworkPointUI point) {
             List<NetworkPointUI> connections = new();
@@ -374,9 +421,30 @@ namespace WPFNetwerkBeheerUI {
                     connections.Add(segment.StartPoint);
             }
 
+            foreach (NetworkPointUI np in connections) {
+                Ellipse ellipse = new Ellipse() {
+                    Width = 10,
+                    Height = 10,
+                    Fill = Brushes.Red,
+                    Stroke = Brushes.Red,
+                    StrokeThickness = 2
+                };
 
+                ellipse.MouseLeftButtonDown += Ellipse_MouseLeftButtonDownConnection;
+                Canvas.SetLeft(ellipse, np.X - ellipse.Width / 2);
+                Canvas.SetTop(ellipse, np.Y - ellipse.Height / 2);
+
+                canvas.Children.Add(ellipse);
+                existingConnections.Add(ellipse,np);
+            }
         }
 
+        private void Ellipse_MouseLeftButtonDownConnection(object sender, MouseButtonEventArgs e) {// een nieuwe ellipse left klik event om specifiek af te handelen
+                                                                                                   // dat wanneer er op de opgelichte ellipses geklikt wordt het correcte
+                                                                                                   // punt gekozen word
+            if (sender is Ellipse clickedEllipse && existingConnections.TryGetValue(clickedEllipse, out NetworkPointUI point))
+                selectedPoint = point;
+        }
 
         // Onderstaande methods dienen enkel voor de window actions ivm
         // slepen, maximize, minimize, close en dubbel klik op te topbar om te maximaliseren

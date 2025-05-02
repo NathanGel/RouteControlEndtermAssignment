@@ -75,7 +75,7 @@ namespace RouteBeheerDL {
         }
 
         public List<Segment> GetSegments() {
-            string query = "SELECT s.start_id, s.stop_id, nStart.x_coordinate AS startX, nStart.y_coordinate AS startY, nStop.x_coordinate AS stopX, nStop.y_coordinate AS stopY FROM Segments s JOIN NetworkPoints nStart ON s.start_id=nStart.id JOIN NetworkPoints nStop  ON s.stop_id=nStop.id;";
+            string query = "SELECT s.id, s.start_id, s.stop_id, nStart.x_coordinate AS startX, nStart.y_coordinate AS startY, nStop.x_coordinate AS stopX, nStop.y_coordinate AS stopY FROM Segments s JOIN NetworkPoints nStart ON s.start_id=nStart.id JOIN NetworkPoints nStop  ON s.stop_id=nStop.id;";
             using (SqlConnection connection = new(connectionString))
             using (SqlCommand cmd = connection.CreateCommand()) {
                 List<Segment> segments = new();
@@ -84,7 +84,7 @@ namespace RouteBeheerDL {
                     connection.Open();
                     SqlDataReader reader = cmd.ExecuteReader();
                     while (reader.Read()) {
-                        segments.Add(new(new((int)reader["start_id"], (double)reader["startX"], (double)reader["startY"]), new((int)reader["stop_id"], (double)reader["stopX"], (double)reader["stopY"])));
+                        segments.Add(new((int)reader["id"], new((int)reader["start_id"], (double)reader["startX"], (double)reader["startY"]), new((int)reader["stop_id"], (double)reader["stopX"], (double)reader["stopY"])));
                     }
                     return segments;
                 } catch (Exception ex) {
@@ -129,6 +129,7 @@ namespace RouteBeheerDL {
             }
             return id;
         }
+
         public void RemoveNetworkPoint(NetworkPoint point) {
             string query = "DELETE FROM NetworkPoints WHERE id=@id";
             using (SqlConnection connection = new(connectionString))
@@ -148,6 +149,10 @@ namespace RouteBeheerDL {
             }
         }
 
+        public void UpdateNetworkPoint(NetworkPoint point) {
+            throw new NotImplementedException();
+        }
+
         public int AddConnection(Segment segment) {
             string querySegment = "INSERT INTO Segments(start_id, stop_id) OUTPUT INSERTED.id VALUES(@startId, @endId)";
             using (SqlConnection connection = new(connectionString))
@@ -165,12 +170,23 @@ namespace RouteBeheerDL {
             }
         }
 
-        public void DisconnectNetworkPoint(NetworkPoint p1, NetworkPoint p2) {
-            throw new NotImplementedException();
-        }
-
-        public void UpdateNetworkPoint(NetworkPoint point) {
-            throw new NotImplementedException();
+        public void RemoveConnection(Segment segment) {
+            string query = "DELETE FROM Segments WHERE id=@id";
+            using (SqlConnection connection = new(connectionString))
+            using (SqlCommand cmd = connection.CreateCommand()) {
+                try {
+                    cmd.CommandText = query;
+                    cmd.Parameters.AddWithValue("@id", segment.Id);
+                    connection.Open();
+                    cmd.ExecuteNonQuery();
+                } catch (SqlException ex) when (ex.Number == 547) {
+                    throw new InvalidOperationException("Cannot delete segment because it's part of one or more routes");// deze exception vertaal ik naar een InvalidOperationsException en
+                                                                                                                         // vang ik in de UI op zo weet ik dat het gaat over een bestaande link
+                } catch (SqlException ex) {
+                    throw new ApplicationException("An error occured while deleting the segment");// deze error vertaal ik naae een ApplicationException en bevat eender welke ander
+                                                                                                  // sql error en vang ik ook op in de ui
+                }
+            }
         }
 
         public int AddFacility(Facility facility) {

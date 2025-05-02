@@ -6,7 +6,7 @@ namespace RouteBeheerBL.Interfaces {
         int AddNetworkPoint(NetworkPoint point);
         void RemoveNetworkPoint(NetworkPoint point);
         int AddConnection(Segment segment);
-        void DisconnectNetworkPoint(NetworkPoint p1, NetworkPoint p2);
+        void RemoveConnection(Segment segment);
         void UpdateNetworkPoint(NetworkPoint point);
         List<NetworkPoint> GetNetworkPoints();
         List<Segment> GetSegments();
