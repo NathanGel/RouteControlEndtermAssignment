@@ -70,9 +70,14 @@
                   CanUserAddRows="False"
                   SelectionMode="Single"
                   SelectionUnit="FullRow"
-                  AutoGenerateColumns="True"
+                  AutoGenerateColumns="False"
                   IsReadOnly="true">
-
+            
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Id" Binding="{Binding Id}" Width="auto" />
+                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
+            </DataGrid.Columns>
+            
             <DataGrid.Resources>
                 <Style TargetType="DataGridRow">
                     <Setter Property="Background" Value="Transparent"/>

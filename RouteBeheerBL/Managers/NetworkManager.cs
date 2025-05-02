@@ -1,6 +1,7 @@
 ﻿using RouteBeheerBL.Exceptions;
 using RouteBeheerBL.Interfaces;
 using RouteBeheerBL.Model;
+using System.Data.SqlTypes;
 
 namespace RouteBeheerBL.Managers {
     public class NetworkManager {
@@ -68,11 +69,6 @@ namespace RouteBeheerBL.Managers {
 
         public List<Facility> GetAllFacilities() {
             return repo.GetAllFacilities();
-        }
-
-        public bool CheckForExistingConnectionsFacility(Facility facility) {
-            if (facility == null) throw new NetworkException("CheckForExistingConnectionsFacility Invalid Null");
-            return repo.CheckForExistingConnectionsFacility(facility);
         }
     }
 }

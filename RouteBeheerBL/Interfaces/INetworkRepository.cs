@@ -15,6 +15,5 @@ namespace RouteBeheerBL.Interfaces {
         Facility GetFacility(int id);
         void UpdateFacility(Facility facility);
         List<Facility> GetAllFacilities();
-        bool CheckForExistingConnectionsFacility(Facility facility);
     }
 }

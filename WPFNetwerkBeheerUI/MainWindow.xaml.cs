@@ -42,7 +42,9 @@ namespace WPFNetwerkBeheerUI {
 
         private bool addConnectionClicked = false;
 
-        private SegmentUI newConnection;
+        private bool removeConnectionClicked = false;
+
+        private SegmentUI connection;
 
         private readonly string connectionString = @"Data Source=NATHAN\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
 
@@ -168,15 +170,25 @@ namespace WPFNetwerkBeheerUI {
                 RemovePreviousCoordinates();
             }
 
-            if (selectedPoint != default && !addConnectionClicked) {
-                ShowCoordinates(selectedPoint);
-            } else if(selectedPoint != default && addConnectionClicked) {
+            if (selectedPoint != default && !addConnectionClicked && !removeConnectionClicked) {
+                RemovePreviousHighlight();
+                DisplayCoordinates(selectedPoint);
+            } else if(selectedPoint != default) {
                 HighlightPoint(selectedPoint);
-                AddConnection(selectedPoint);
+                if (addConnectionClicked)
+                    AddConnection(selectedPoint);
+                else if (removeConnectionClicked) {
+                    DisplayExistingConnectionsFromPoint(selectedPoint);
+                    RemoveConnection(selectedPoint);
+                }
             }
         }
 
         private void Canvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e) {
+            addConnectionClicked = false;   // wanneer er een right click event plaatsvindt op het canvas
+            removeConnectionClicked = false;// impliceert dit dat de add of remove connection functionaliteit
+                                            // word afgebroken
+
             Point mousePosPoint = e.GetPosition(canvas);
 
             // deze statement maakt gebruik van de hittest om te bepalen op wat voor UIElement 
@@ -193,6 +205,7 @@ namespace WPFNetwerkBeheerUI {
             // deze checks bepalen of er een bestaand punt geselescteerd is.
             // Dit bepaald dan weer welke opties er zichtbaar zijn het contextmenu
             if (selectedPoint != default) {
+                RemovePreviousCoordinates();
                 HighlightPoint(selectedPoint);
                 MenuItemAddNetworkPoint.Visibility = Visibility.Collapsed;
                 MenuItemRemoveNetworkPoint.Visibility = Visibility.Visible;
@@ -211,9 +224,10 @@ namespace WPFNetwerkBeheerUI {
             }
         }
 
-        private TextBlock coordinatesTextBlock; // Ik gebruik dit veld om achteraf de textblock makkelijk te verwijderen van het canvas
+        private TextBlock coordinatesTextBlock; // dit textblock element gebruik ik om de coordinaten op het canvas te tonen 
+                                                // dit is achteraf ook makkelijk van het canvas te verwijderen
 
-        private void ShowCoordinates(NetworkPointUI point) {
+        private void DisplayCoordinates(NetworkPointUI point) {
             RemovePreviousCoordinates();
             coordinatesTextBlock = new TextBlock();
             coordinatesTextBlock.Text = $"X:{point.X}    Y:{point.Y}";
@@ -248,7 +262,8 @@ namespace WPFNetwerkBeheerUI {
             highlightElement = highlightCircle;
         }
 
-        private Ellipse highlightElement; // Ik gebruik dit veld om achteraf makkelijk te verwijderen van het canvas
+        private Ellipse highlightElement; // dit Ellipse element gebruik ik om te tekenen waar/op welk punt er geklikt is op 
+                                          // het canvas dit is achteraf ook makkelijk van het canvas te verwijderen
 
         private void RemovePreviousHighlight() {
             if (highlightElement != null && canvas.Children.Contains(highlightElement))
@@ -269,46 +284,20 @@ namespace WPFNetwerkBeheerUI {
 
         private void RemoveNetworkPoint_Click(object sender, RoutedEventArgs e) {
             if (selectedPoint != default) {
-                nm.RemoveNetworkPoint(NetworkPointMapper.MapToDomain(new NetworkPointUI(selectedPoint.Id, selectedPoint.X, selectedPoint.Y)));
-                points.Remove(selectedPoint);
-                RemovePreviousHighlight();
-                selectedPoint = default;
+                try {
+                    nm.RemoveNetworkPoint(NetworkPointMapper.MapToDomain(new NetworkPointUI(selectedPoint.Id, selectedPoint.X, selectedPoint.Y)));
+                    points.Remove(selectedPoint);
+                    RemovePreviousHighlight();
+                    selectedPoint = default;
+                } catch (InvalidOperationException ex) { //deze exception is gelinkt aan het feit dat er connections zijn
+                    MessageBox.Show(ex.Message, "Deletion Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                } catch (ApplicationException ex) { // deze exceptions bevatte al de resterende sqlexcpetions
+                    MessageBox.Show("An error occured while deleting the networkpoint");
+                } catch (Exception ex) { // indien het programma ergens nog een andere exception gooit die onverwacht is
+                    MessageBox.Show("Unexpected error: " + ex.Message);
+                }
             } else {
                 MessageBox.Show("No network point selected");
-            }
-        }
-
-        private void AddConnection_Click(object sender, RoutedEventArgs e) {
-            //RemovePreviousHighlight();
-            //RemovePreviousCoordinates();
-            newConnection = new();
-            addConnectionClicked = true;
-            connectionInfo = new() {
-                Text = "Please select a start and endpoint",
-                Foreground = new SolidColorBrush(Colors.Red),
-                FontSize = 20
-            };
-            canvas.Children.Add(connectionInfo);
-        }
-
-        private TextBlock connectionInfo;
-
-        private void AddConnection(NetworkPointUI point) {
-            if(newConnection.StartPoint == default) {
-                newConnection.StartPoint = selectedPoint;
-            } else if(newConnection.EndPoint == default) { 
-                newConnection.EndPoint = selectedPoint;
-            }
-
-            if(newConnection.StartPoint != default && newConnection.EndPoint != default) {
-                addConnectionClicked = false;
-                RemovePreviousHighlight();
-                int id = nm.AddConnection(SegmentMapper.MapToDomain(newConnection));
-                newConnection.Id = id;
-                segments.Add(newConnection);
-                newConnection = default;
-                canvas.Children.Remove(connectionInfo);
-                //zou nog graag beide punten achteraf hertekenen om te vermijden dat de lijn overlapt
             }
         }
 
@@ -321,15 +310,76 @@ namespace WPFNetwerkBeheerUI {
             }
         }
 
+        private void AddConnection_Click(object sender, RoutedEventArgs e) {
+            connection = new();
+            addConnectionClicked = true;
+            connectionInfo = new() {
+                Text = "Please select a start and endpoint",
+                Foreground = new SolidColorBrush(Colors.Red),
+                FontSize = 20
+            };
+            canvas.Children.Add(connectionInfo);
+        }
         private void RemoveConnection_Click(object sender, RoutedEventArgs e) {
-            if (selectedPoint != default) {
-                MessageBox.Show("Remove Connection clicked");
-                selectedPoint = default;
-            } else {
-                MessageBox.Show("No network point selected");
+            removeConnectionClicked = true;
+            connectionInfo = new() {
+                Text = "Please select the connection you want to remove",
+                Foreground = new SolidColorBrush(Colors.Red),
+                FontSize = 20
+            };
+            canvas.Children.Add(connectionInfo);
+        }
+
+        private TextBlock connectionInfo; // dit textblock element gebruik ik om te tonen wanneer er geklikt is op 
+                                          // addconnection of removeconnection dit is achteraf ook makkelijk van het
+                                          // canvas te verwijderen
+
+        private void AddConnection(NetworkPointUI point) {
+            if(connection.StartPoint == default)
+                connection.StartPoint = selectedPoint;
+            else if(connection.EndPoint == default)
+                connection.EndPoint = selectedPoint;
+
+            if(connection.StartPoint != default && connection.EndPoint != default) {
+                addConnectionClicked = false;
+                RemovePreviousHighlight();
+                int id = nm.AddConnection(SegmentMapper.MapToDomain(connection));
+                connection.Id = id;
+                segments.Add(connection);
+                connection = default;
+                canvas.Children.Remove(connectionInfo);
+                //zou nog graag beide punten achteraf hertekenen om te vermijden dat de lijn overlapt
             }
         }
 
+        private void RemoveConnection(NetworkPointUI point) {
+            if (connection.StartPoint == default)
+                connection.StartPoint = selectedPoint;
+            else if (connection.EndPoint == default)
+                connection.EndPoint = selectedPoint;
+
+            //logica toevoegen die een segment zoekt op basis van start en eindpunt
+            //logica ivm manager
+            canvas.Children.Remove(connectionInfo);
+        }
+
+        List<Ellipse> existingConnections = new List<Ellipse>();
+
+        private void DisplayExistingConnectionsFromPoint(NetworkPointUI point) {
+            List<NetworkPointUI> connections = new();
+            foreach (SegmentUI segment in segments) {
+                if (segment.StartPoint.Id == point.Id)
+                    connections.Add(segment.EndPoint);
+                else if (segment.EndPoint.Id == point.Id)
+                    connections.Add(segment.StartPoint);
+            }
+
+
+        }
+
+
+        // Onderstaande methods dienen enkel voor de window actions ivm
+        // slepen, maximize, minimize, close en dubbel klik op te topbar om te maximaliseren
         private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
             if (e.ClickCount == 2) {
                 if (WindowState == WindowState.Maximized) {

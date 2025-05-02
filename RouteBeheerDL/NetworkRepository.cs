@@ -129,6 +129,24 @@ namespace RouteBeheerDL {
             }
             return id;
         }
+        public void RemoveNetworkPoint(NetworkPoint point) {
+            string query = "DELETE FROM NetworkPoints WHERE id=@id";
+            using (SqlConnection connection = new(connectionString))
+            using (SqlCommand cmd = connection.CreateCommand()) {
+                try {
+                    cmd.CommandText = query;
+                    cmd.Parameters.AddWithValue("@id", point.Id);
+                    connection.Open();
+                    cmd.ExecuteNonQuery();
+                } catch (SqlException ex) when (ex.Number == 547) { // dit exception getal is het getal voor een foreign key constraint
+                    throw new InvalidOperationException("Cannot delete this point because it's connected to one or more segments"); // deze exception vertaal ik naar een InvalidOperationsException en
+                                                                                                                                    // vang ik in de UI op zo weet ik dat het gaat over een bestaande link
+                } catch (SqlException) {
+                    throw new ApplicationException("An error occured while deleting the networkpoint"); // deze error vertaal ik naae een ApplicationException en bevat eender welke ander
+                                                                                                        // sql error en vang ik ook op in de ui
+                }
+            }
+        }
 
         public int AddConnection(Segment segment) {
             string querySegment = "INSERT INTO Segments(start_id, stop_id) OUTPUT INSERTED.id VALUES(@startId, @endId)";
@@ -151,25 +169,10 @@ namespace RouteBeheerDL {
             throw new NotImplementedException();
         }
 
-        public void RemoveNetworkPoint(NetworkPoint point) {
-            string query = "DELETE FROM NetworkPoints WHERE id=@id";
-            using (SqlConnection connection = new(connectionString))
-            using (SqlCommand cmd = connection.CreateCommand()) {
-                try {
-                    cmd.CommandText = query;
-                    cmd.Parameters.AddWithValue("@id", point.Id);
-                    connection.Open();
-                    cmd.ExecuteNonQuery();
-                } catch (Exception ex) {
-                    throw new Exception("RemoveNetworkPoint", ex);
-                }
-            }
-
-        }
-
         public void UpdateNetworkPoint(NetworkPoint point) {
             throw new NotImplementedException();
         }
+
         public int AddFacility(Facility facility) {
             string query = "INSERT INTO Facilities(name) OUTPUT INSERTED.id VALUES(@name)";
             using (SqlConnection connection = new(connectionString))
@@ -233,8 +236,12 @@ namespace RouteBeheerDL {
                     connection.Open();
                     cmd.ExecuteNonQuery();
 
-                } catch (Exception ex) {
-                    throw new Exception("RemoveFacility", ex);
+                } catch (SqlException ex) when (ex.Number == 547) { // // dit exception getal is het getal voor een foreign key constraint
+                    throw new InvalidOperationException("Cannot delete this facility because it's connected to one or more networkpoints", ex); // deze exception vertaal ik naar een InvalidOperationsException en
+                                                                                                                                                // vang ik in de UI op zo weet ik dat het gaat over een bestaande link
+                } catch (SqlException) {
+                    throw new ApplicationException("An error occured while deleting the facility"); // deze error vertaal ik naae een ApplicationException en bevat eender welke ander
+                                                                                                    // sql error en vang ik ook op in de ui 
                 }
             }
 
@@ -252,22 +259,6 @@ namespace RouteBeheerDL {
                     cmd.ExecuteNonQuery();
                 } catch (Exception ex) {
                     throw new Exception("UpdateFacility", ex);
-                }
-            }
-        }
-
-        public bool CheckForExistingConnectionsFacility(Facility facility) {
-            string query = "SELECT COUNT(*) FROM NetworkPoint_Facilities WHERE facility_id=@id";
-            using (SqlConnection connection = new(connectionString))
-            using (SqlCommand cmd = connection.CreateCommand()) {
-                try {
-                    cmd.CommandText = query;
-                    cmd.Parameters.AddWithValue("@id", facility.Id);
-                    connection.Open();
-                    int count = (int)cmd.ExecuteScalar();
-                    return count > 0;
-                } catch (Exception ex) {
-                    throw new Exception("CheckForExistingConnectionsFacility", ex);
                 }
             }
         }

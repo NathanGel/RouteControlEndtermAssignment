@@ -41,11 +41,16 @@ namespace WPFFaciliteitBeheerUI {
         }
 
         private void RemoveFacility_Click(object sender, RoutedEventArgs e) {
-            bool result = networkManager.CheckForExistingConnectionsFacility(FacilityMapper.MapToDomain((FacilityUI)DataGridFacilities.SelectedItem));
-            if (!result) {
+            try {
                 networkManager.RemoveFacility(FacilityMapper.MapToDomain((FacilityUI)DataGridFacilities.SelectedItem));
                 Facilities.Remove((FacilityUI)DataGridFacilities.SelectedItem);
-            } else MessageBox.Show("Facility could not be removed. \nThere are existing connections to points.");
+            } catch (InvalidOperationException ex) { //deze exception is gelinkt aan het feit dat er connections zijn
+                MessageBox.Show(ex.Message, "Deletion Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            } catch (ApplicationException ex) { // deze exceptions bevatte al de resterende sqlexcpetions
+                MessageBox.Show("An error occured while deleting the Facility");
+            } catch (Exception ex) { // indien het programma ergens nog een andere exception gooit die onverwacht is
+                MessageBox.Show("Unexpected error: " + ex.Message);
+            }
         }
 
         private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
