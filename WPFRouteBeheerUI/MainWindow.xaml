@@ -5,7 +5,7 @@
        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
        xmlns:local="clr-namespace:WPFRouteBeheerUI"
        mc:Ignorable="d"
-       Title="Network Management" Height="1110" Width="1020"
+       Title="Route Management" Height="1110" Width="1020"
        WindowStyle="None" AllowsTransparency="True" Background="Transparent">
 
     <Window.Resources>
@@ -24,6 +24,7 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="30"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
@@ -60,6 +61,19 @@
                 </StackPanel>
             </Grid>
 
+            <Grid Grid.Row="1" Margin="10">
+                <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                    <Button Content="Manage Routes" Margin="5" Background="#6C5CE7" Foreground="#F5F7FB" BorderBrush="#252836"
+                            BorderThickness="1" Height="30" Width="auto" Click="BtnManageRoutes_Click"/>
+                    <Button Content="Add Route" Margin="5" Background="#6C5CE7" Foreground="#F5F7FB" BorderBrush="#252836"
+                            BorderThickness="1" Height="30" Width="auto" Click="BtnAddRoute_Click"/>
+                    <Button Content="Select Route" Margin="5" Background="#6C5CE7" Foreground="#F5F7FB" BorderBrush="#252836"
+                            BorderThickness="1" Height="30" Width="auto" Click="BtnSelectRoute_Click"/>
+                    <Button Content="Remove All Current Highlights" Background="#E81123" Foreground="White" BorderBrush="#A80000"
+                            Margin="5" BorderThickness="1" Height="30" Width="auto" Click="BtnRemoveAllCurrentHighlights_Click"/>
+                </StackPanel>
+            </Grid>
+            
             <!-- Main Content -->
             <Grid Grid.Row="2">
                 <Canvas Name="canvas" Width="1000" Height="1000"

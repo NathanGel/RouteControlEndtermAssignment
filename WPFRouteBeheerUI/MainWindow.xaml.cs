@@ -61,5 +61,21 @@ namespace WPFRouteBeheerUI {
                 DragMove();
             }
         }
+
+        private void BtnManageRoutes_Click(object sender, RoutedEventArgs e) {
+
+        }
+
+        private void BtnAddRoute_Click(object sender, RoutedEventArgs e) {
+
+        }
+
+        private void BtnRemoveAllCurrentHighlights_Click(object sender, RoutedEventArgs e) {
+
+        }
+
+        private void BtnSelectRoute_Click(object sender, RoutedEventArgs e) {
+
+        }
     }
 }
