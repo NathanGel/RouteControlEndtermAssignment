@@ -47,7 +47,7 @@ namespace WPFNetwerkBeheerUI {
 
         private SegmentUI connection;
 
-        private readonly string connectionString = @"Data Source=NATHAN\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
+        private readonly string connectionString = @"Data Source=nathans-laptop\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
 
         private NetworkManager nm;
 

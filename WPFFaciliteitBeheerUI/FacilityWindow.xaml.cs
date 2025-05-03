@@ -25,7 +25,7 @@ namespace WPFFaciliteitBeheerUI {
                 Facility.Name = textBoxName.Text;
                 DialogResult = true;
             } else {
-                Facility = new FacilityUI(textBoxName.Text);
+                Facility = new FacilityUI(0,textBoxName.Text);
                 DialogResult = true;
             }
         }

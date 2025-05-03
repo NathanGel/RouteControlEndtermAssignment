@@ -13,7 +13,7 @@ namespace WPFFaciliteitBeheerUI {
     /// </summary>
     public partial class MainWindow : Window {
         private NetworkManager networkManager;
-        private readonly string connectionString = @"Data Source=nathan\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
+        private readonly string connectionString = @"Data Source=nathans-laptop\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
         public ObservableCollection<FacilityUI> Facilities;
         public MainWindow() {
             InitializeComponent();
@@ -44,7 +44,7 @@ namespace WPFFaciliteitBeheerUI {
             try {
                 if (result == true) {
                     FacilityUI newFacility = window.Facility;
-                    int id = networkManager.AddFacility(FacilityMapper.MapToDomain(newFacility));
+                    int id = networkManager.AddFacility(FacilityMapper.MapToDomainNoId(newFacility));
                     newFacility.Id = id;
                     Facilities.Add(newFacility);
                 }
