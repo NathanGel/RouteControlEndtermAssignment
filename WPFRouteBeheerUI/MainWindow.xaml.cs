@@ -16,7 +16,50 @@ namespace WPFRouteBeheerUI {
     public partial class MainWindow : Window {
         public MainWindow() {
             InitializeComponent();
-            MainFrame.Navigate(new MainPage());
+        }
+
+        private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
+            MessageBox.Show("Not implemented");
+        }
+
+        private void Canvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e) {
+            MessageBox.Show("Not implemented");
+        }
+
+        private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
+            if (e.ClickCount == 2) {
+                if (WindowState == WindowState.Maximized) {
+                    WindowState = WindowState.Normal;
+                } else {
+                    WindowState = WindowState.Maximized;
+                }
+            } else {
+                DragMove();
+            }
+        }
+
+        private void MinimizeButton_Click(object sender, RoutedEventArgs e) {
+            WindowState = WindowState.Minimized;
+        }
+
+        private void MaximizeRestoreButton_Click(object sender, RoutedEventArgs e) {
+            if (WindowState == WindowState.Maximized) {
+                WindowState = WindowState.Normal;
+                MaxRestoreButton.Content = "\uE922";
+            } else {
+                WindowState = WindowState.Maximized;
+                MaxRestoreButton.Content = "\uE922";
+            }
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e) {
+            Close();
+        }
+
+        private void TitleBar_MouseMove(object sender, MouseEventArgs e) {
+            if (e.LeftButton == MouseButtonState.Pressed) {
+                DragMove();
+            }
         }
     }
 }
