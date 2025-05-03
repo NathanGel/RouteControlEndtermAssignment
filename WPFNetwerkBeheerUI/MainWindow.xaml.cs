@@ -131,7 +131,7 @@ namespace WPFNetwerkBeheerUI {
                                                                      // van het punt eerder zorgde dit voor problemen met de lijnen 
             ellipse.MouseLeftButtonDown += Ellipse_MouseLeftButtonDown;
             ellipse.MouseRightButtonDown += Ellipse_MouseRightButtonDown;
-            //ellipse.MouseRightButtonDown += Ellipse_Clicked();
+
             canvas.Children.Add(ellipse);
             pointElements[ellipse] = point;
         }

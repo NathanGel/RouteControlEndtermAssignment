@@ -19,7 +19,9 @@ namespace WPFRouteBeheerUI {
     /// </summary>
     public partial class MainWindow : Window {
         private List<NetworkPoint> points;
+        private Dictionary<Ellipse, NetworkPoint> pointElements = new();
         private List<Segment> segments;
+        private Dictionary<Segment, Line> segmentElements = new();
         private ObservableCollection<Route> routes;
         private readonly string connectionString = @"Data Source=nathans-laptop\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
         private NetworkManager nm;
@@ -31,6 +33,7 @@ namespace WPFRouteBeheerUI {
             routes = new ObservableCollection<Route>();
             InitializeComponent();
             ReadFromDatabase();
+            DrawNetwork();
         }
 
         public void ReadFromDatabase() {
@@ -51,6 +54,55 @@ namespace WPFRouteBeheerUI {
                 MessageBox.Show("An unexpected error occured:  " + ex.Message, "System Exception", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        public void DrawNetwork() {
+            foreach (var segment in segments) {
+                // Create a new Line
+                Line line = new Line {
+                    Stroke = Brushes.OrangeRed,
+                    StrokeThickness = 1,
+                    X1 = segment.StartPoint.X,
+                    Y1 = segment.StartPoint.Y,
+                    X2 = segment.EndPoint.X,
+                    Y2 = segment.EndPoint.Y
+                };
+
+                canvas.Children.Add(line);
+                segmentElements.Add(segment, line);
+            }
+            foreach (var point in points) {
+                Ellipse ellipse = new Ellipse {
+                    Fill = Brushes.MediumTurquoise,
+                    Width = 8,
+                    Height = 8,
+                    Stroke = Brushes.Black,
+                    StrokeThickness = 2,
+                };
+
+                Canvas.SetLeft(ellipse, point.X - (ellipse.Width / 2)); // de berekening die hier in plaats vind zorgt ervoor dat
+                Canvas.SetTop(ellipse, point.Y - (ellipse.Width / 2));   // het midden van de ellipse overeenstemt met de exacte coordinaten
+                                                                         // van het punt eerder zorgde dit voor problemen met de lijnen 
+                ellipse.MouseLeftButtonDown += Ellipse_MouseLeftButtonDown;
+                ellipse.MouseRightButtonDown += Ellipse_MouseRightButtonDown;
+
+                canvas.Children.Add(ellipse);
+                pointElements[ellipse] = point;
+            }
+        }
+
+        private void Ellipse_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
+            if (sender is Ellipse ellipse && pointElements.TryGetValue(ellipse, out NetworkPoint point)) {
+                MessageBox.Show($"Point ID: {point.Id}, X: {point.X}, Y: {point.Y}");
+            }
+        }
+
+        private void Ellipse_MouseRightButtonDown(object sender, MouseButtonEventArgs e) {
+            if (sender is Ellipse ellipse && pointElements.TryGetValue(ellipse, out NetworkPoint point)) {
+                MessageBox.Show($"Right-clicked on Point ID: {point.Id}, X: {point.X}, Y: {point.Y}");
+            }
+        }
+
+
 
         private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
             MessageBox.Show("Not implemented");
