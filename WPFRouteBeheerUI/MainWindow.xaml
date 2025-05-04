@@ -62,7 +62,8 @@
             </Grid>
 
             <Grid Grid.Row="1" Margin="10">
-                <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                <TextBlock Name="TextBlockCurrentContext" Foreground="Red" FontSize="20"/>
+                <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
                     <Button Content="Manage Routes" Margin="5" Background="#6C5CE7" Foreground="#F5F7FB" BorderBrush="#252836"
                             BorderThickness="1" Height="30" Width="auto" Click="BtnManageRoutes_Click"/>
                     <Button Content="Add Route" Margin="5" Background="#6C5CE7" Foreground="#F5F7FB" BorderBrush="#252836"

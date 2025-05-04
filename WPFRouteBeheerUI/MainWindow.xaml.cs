@@ -154,6 +154,7 @@ namespace WPFRouteBeheerUI {
 
         private void BtnAddRoute_Click(object sender, RoutedEventArgs e) {
             addRouteClicked = true;
+            TextBlockCurrentContext.Text = "Left click to add point to Route \nRight click to add point and indicate it as a stop";
         }
 
         private void BtnRemoveAllCurrentHighlights_Click(object sender, RoutedEventArgs e) {

@@ -125,7 +125,8 @@ namespace WPFNetwerkBeheerUI {
                 Stroke = Brushes.Black,
                 StrokeThickness = 2, 
             };
-            
+
+            Canvas.SetZIndex(ellipse, 1);
             Canvas.SetLeft(ellipse, point.X - (ellipse.Width / 2)); // de berekening die hier in plaats vind zorgt ervoor dat
             Canvas.SetTop(ellipse, point.Y - (ellipse.Width / 2));   // het midden van de ellipse overeenstemt met de exacte coordinaten
                                                                      // van het punt eerder zorgde dit voor problemen met de lijnen 
@@ -156,7 +157,7 @@ namespace WPFNetwerkBeheerUI {
                 X2 = segment.EndPoint.X,     
                 Y2 = segment.EndPoint.Y
             };
-
+            Canvas.SetZIndex(line, 0);
             canvas.Children.Add(line);
             segmentElements.Add(segment, line);
         }
@@ -276,7 +277,7 @@ namespace WPFNetwerkBeheerUI {
                 Stroke = Brushes.Red,
                 StrokeThickness = 2
             };
-
+            Canvas.SetZIndex(highlightCircle, 2);
             Canvas.SetLeft(highlightCircle, p.X - highlightCircle.Width / 2);
             Canvas.SetTop(highlightCircle, p.Y - highlightCircle.Height / 2);
 
@@ -493,6 +494,7 @@ namespace WPFNetwerkBeheerUI {
                 };
 
                 ellipse.MouseLeftButtonDown += Ellipse_MouseLeftButtonDownConnection;
+                Canvas.SetZIndex(ellipse, 2);
                 Canvas.SetLeft(ellipse, np.X - ellipse.Width / 2);
                 Canvas.SetTop(ellipse, np.Y - ellipse.Height / 2);
 

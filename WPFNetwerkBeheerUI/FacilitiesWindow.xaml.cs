@@ -10,10 +10,11 @@ namespace WPFNetwerkBeheerUI {
     /// Interaction logic for FacilitiesWindow.xaml
     /// </summary>
     public partial class FacilitiesWindow : Window {
+        // make sure theres no doubles between selected and all
         public ObservableCollection<Facility> selectedFacilities;
         private ObservableCollection<Facility> allFacilities;
         private NetworkManager nm;
-        private readonly string connectionString = @"Data Source=nathans-laptop\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
+        private readonly string connectionString = @"Data Source=nathan\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
         public FacilitiesWindow(ObservableCollection<Facility> facilities) {
             InitializeComponent();
             nm = new(new NetworkRepository(connectionString));
