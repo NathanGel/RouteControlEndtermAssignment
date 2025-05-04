@@ -23,12 +23,12 @@ namespace WPFRouteBeheerUI {
         private List<Segment> segments;
         private Dictionary<Segment, Line> segmentElements = new();
         private ObservableCollection<Route> routes;
-        private readonly string connectionString = @"Data Source=nathans-laptop\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
+        private readonly string connectionString = @"Data Source=nathan\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
         private NetworkManager nm;
         private RouteManager rm;
         private bool addRouteClicked;
-        private List<NetworkPoint> selectedPoints = new();
-        private NetworkPoint selectedPoint;
+        private List<(NetworkPoint, bool)> selectedPoints = new();
+        private Ellipse selectedPoint;
         public MainWindow() {
             rm = new(new RouteRepository(connectionString));
             points = new List<NetworkPoint>();
@@ -94,44 +94,59 @@ namespace WPFRouteBeheerUI {
         }
 
         private void Ellipse_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
-            if (sender is Ellipse ellipse && pointElements.TryGetValue(ellipse, out NetworkPoint point)) {
-                selectedPoint = point;
+            if (sender is Ellipse ellipse) {
+                selectedPoint = ellipse;
             }
         }
 
         private void Ellipse_MouseRightButtonDown(object sender, MouseButtonEventArgs e) {
-            if (sender is Ellipse ellipse && pointElements.TryGetValue(ellipse, out NetworkPoint point)) {
-                MessageBox.Show($"Right-clicked on Point ID: {point.Id}, X: {point.X}, Y: {point.Y}");
+            if (sender is Ellipse ellipse) {
+                selectedPoint = ellipse;
             }
         }
 
         private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
-            if (addRouteClicked) {
-                if (selectedPoints.Count == 0)
-                    selectedPoints.Add(selectedPoint);
-                else if (segments.Any(s=>s.StartPoint == selectedPoint && s.EndPoint == selectedPoints[^1]  || s.EndPoint == selectedPoint && s.StartPoint == selectedPoints[^1])){
-                    selectedPoints.Add(selectedPoint);
+            if (addRouteClicked && selectedPoint != default) {
+                if(selectedPoints.Count == 0) {
+                    selectedPoints.Add((pointElements[selectedPoint], true));
+                    HighlightPoint(selectedPoint, true);
+                } else if (segments.Any( s => s.StartPoint.Equals(pointElements[selectedPoint]) && s.EndPoint.Equals(selectedPoints[^1].Item1)) || segments.Any(s => s.StartPoint.Equals(selectedPoints[^1].Item1) && s.EndPoint.Equals(pointElements[selectedPoint]))) {
+                    selectedPoints.Add((pointElements[selectedPoint], false));
+                    HighlightPoint(selectedPoint, false);
                 }
-                foreach (var point in selectedPoints) {
-                    if (pointElements.FirstOrDefault(x => x.Value == point).Key is Ellipse ellipse) {
-                        HighlightPoint(ellipse);
-                    }
+                selectedPoint = default;
+            }
+        }
+
+        private void Canvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e) {
+            if (addRouteClicked && selectedPoint != default) {
+                if (selectedPoints.Count == 0) {
+                    selectedPoints.Add((pointElements[selectedPoint], true));
+                    HighlightPoint(selectedPoint, true);
+                } else if (segments.Any(s => s.StartPoint.Equals(pointElements[selectedPoint]) && s.EndPoint.Equals(selectedPoints[^1].Item1)) || segments.Any(s => s.StartPoint.Equals(selectedPoints[^1].Item1) && s.EndPoint.Equals(pointElements[selectedPoint]))) {
+                    selectedPoints.Add((pointElements[selectedPoint], true));
+                    HighlightPoint(selectedPoint, true);
                 }
+                selectedPoint = default;
             }
         }
 
         private List<Ellipse> highlightedPoints = new();
 
-        private void HighlightPoint(Ellipse ellipse) {
+        private void HighlightPoint(Ellipse ellipse, bool isStop) {
             if (ellipse != null) {
-                ellipse.Stroke = Brushes.Red;
-                highlightedPoints.Add(ellipse);
+                if (isStop) {
+                    ellipse.Stroke = Brushes.LightGreen;
+                    ellipse.Fill = Brushes.LightGreen;
+                    highlightedPoints.Add(ellipse);
+                } else {
+                    ellipse.Stroke = Brushes.Red;
+                    ellipse.Fill = Brushes.Red;
+                    highlightedPoints.Add(ellipse);
+                }
             }
         }
 
-        private void Canvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e) {
-            MessageBox.Show("Not implemented");
-        }
 
         private void BtnManageRoutes_Click(object sender, RoutedEventArgs e) {
 
@@ -142,7 +157,12 @@ namespace WPFRouteBeheerUI {
         }
 
         private void BtnRemoveAllCurrentHighlights_Click(object sender, RoutedEventArgs e) {
-
+            canvas.Children.Clear();
+            pointElements.Clear();
+            segmentElements.Clear();
+            highlightedPoints.Clear();
+            addRouteClicked = false;
+            DrawNetwork();
         }
 
         private void BtnSelectRoute_Click(object sender, RoutedEventArgs e) {

@@ -28,5 +28,16 @@
         public double X { get; set; }
         public double Y { get; set; }
         public List<Facility> Facilities { get; set; } = new();
+
+        public override bool Equals(object? obj) {
+            if (obj is not NetworkPoint other)
+                return false;
+
+            return Id == other.Id;
+        }
+
+        public override int GetHashCode() {
+            return Id.GetHashCode();
+        }
     }
 }
