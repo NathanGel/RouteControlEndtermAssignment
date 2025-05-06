@@ -30,9 +30,11 @@ namespace RouteBeheerBL.Managers {
                 ReadStretches();
                 _networkPointRepository.InitializeNetwork(_networkPointMapping, _facilityMapping, _segments);
             } catch (ApplicationException ex) {
-                Console.WriteLine("InitializeNetwork", ex);
+                Console.WriteLine("InitializeNetwork An exception was thrown in the DataBase", ex);
             } catch (NetworkInitializationException ex) {
                 Console.WriteLine("An error occured while initializing the network: " + ex.Source);
+            } catch (NetworkException ex) {
+                Console.WriteLine(ex.Source, ex.Message);
             } catch (Exception ex) {
                 Console.WriteLine("Unexpected exception: " + ex);
             }

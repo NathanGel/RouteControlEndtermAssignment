@@ -1,5 +1,6 @@
 ﻿using RouteBeheerBL.Interfaces;
 using RouteBeheerBL.Model;
+using RouteBeheerBL.Exceptions;
 
 namespace RouteBeheerBL.Managers {
     public class RouteManager {
@@ -9,6 +10,7 @@ namespace RouteBeheerBL.Managers {
         }
 
         public int AddRoute(Route route) {
+            if (route == null) throw new RouteException("Route invalid cannot be null");
             return _repo.Add(route);
         }
 
@@ -21,7 +23,7 @@ namespace RouteBeheerBL.Managers {
         }
 
         public List<Route> GetAllRoutes() {
-            return _repo.GetAll();
+            return _repo.GetAllRoutes();
         }
     }
 }

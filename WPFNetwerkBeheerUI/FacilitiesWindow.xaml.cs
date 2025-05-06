@@ -18,8 +18,11 @@ namespace WPFNetwerkBeheerUI {
         public FacilitiesWindow(ObservableCollection<Facility> facilities) {
             InitializeComponent();
             nm = new(new NetworkRepository(connectionString));
-            allFacilities = new ObservableCollection<Facility>(nm.GetAllFacilities());
             selectedFacilities = facilities;
+
+            var selectedIds = new HashSet<int>(selectedFacilities.Select(f => f.Id));
+            allFacilities = new ObservableCollection<Facility>(nm.GetAllFacilities().Where(f => !selectedIds.Contains(f.Id)).ToList());
+
             ListBoxSelectedFacilities.ItemsSource = selectedFacilities;
             ListBoxAllFacilities.ItemsSource = allFacilities;
         }

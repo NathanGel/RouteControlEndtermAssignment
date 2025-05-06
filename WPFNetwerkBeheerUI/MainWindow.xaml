@@ -7,7 +7,7 @@
        mc:Ignorable="d"
        Title="Network Management" Height="1110" Width="1020"
        WindowStyle="None" AllowsTransparency="True" Background="Transparent">
-
+ 
     <Window.Resources>
         <Style x:Key="WindowControlButton" TargetType="Button">
             <Setter Property="Width" Value="46"/>
