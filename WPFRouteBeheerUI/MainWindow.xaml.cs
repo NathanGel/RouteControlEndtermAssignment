@@ -30,7 +30,7 @@ namespace WPFRouteBeheerUI {
         private RouteManager rm;
         private bool addRouteClicked;
         private List<(NetworkPoint, bool)> selectedPoints = new();
-        private List<Segment> selectedSegments;
+        private List<Segment> selectedSegments = new();
         private Ellipse selectedPoint;
         public MainWindow() {
             rm = new(new RouteRepository(connectionString));
@@ -110,12 +110,22 @@ namespace WPFRouteBeheerUI {
 
         private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
             if (addRouteClicked && selectedPoint != default) {
-                if(selectedPoints.Count == 0) {
+                if (selectedPoints.Count == 0) {
                     selectedPoints.Add((pointElements[selectedPoint], true));
                     HighlightPoint(selectedPoint, true);
-                } else if (segments.Any( s => s.StartPoint.Equals(pointElements[selectedPoint]) && s.EndPoint.Equals(selectedPoints[^1].Item1)) || segments.Any(s => s.StartPoint.Equals(selectedPoints[^1].Item1) && s.EndPoint.Equals(pointElements[selectedPoint]))) {
-                    selectedPoints.Add((pointElements[selectedPoint], false));
-                    HighlightPoint(selectedPoint, false);
+                } else {
+                    Segment? segment = segments
+                        .FirstOrDefault(
+                        s =>
+                            (s.StartPoint.Equals(selectedPoints[^1].Item1) && s.EndPoint.Equals(pointElements[selectedPoint])) ||
+                            (s.StartPoint.Equals(pointElements[selectedPoint]) && s.EndPoint.Equals(selectedPoints[^1].Item1))
+                    );
+
+                    if (segment != null && !selectedSegments.Contains(segment)) {
+                        selectedSegments.Add(segment);
+                        selectedPoints.Add((pointElements[selectedPoint], false));
+                        HighlightPoint(selectedPoint, false);
+                    }
                 }
                 selectedPoint = default;
             }
@@ -126,9 +136,20 @@ namespace WPFRouteBeheerUI {
                 if (selectedPoints.Count == 0) {
                     selectedPoints.Add((pointElements[selectedPoint], true));
                     HighlightPoint(selectedPoint, true);
-                } else if (segments.Any(s => s.StartPoint.Equals(pointElements[selectedPoint]) && s.EndPoint.Equals(selectedPoints[^1].Item1)) || segments.Any(s => s.StartPoint.Equals(selectedPoints[^1].Item1) && s.EndPoint.Equals(pointElements[selectedPoint]))) {
-                    selectedPoints.Add((pointElements[selectedPoint], true));
-                    HighlightPoint(selectedPoint, true);
+                } else {
+                    Segment? segment = segments
+                        .FirstOrDefault(
+                        s =>
+                            (s.StartPoint.Equals(selectedPoints[^1].Item1) && s.EndPoint.Equals(pointElements[selectedPoint])) ||
+                            (s.StartPoint.Equals(pointElements[selectedPoint]) && s.EndPoint.Equals(selectedPoints[^1].Item1))
+                    );
+
+
+                    if (segment != null && !selectedSegments.Contains(segment)) {
+                        selectedSegments.Add(segment);
+                        selectedPoints.Add((pointElements[selectedPoint], true));
+                        HighlightPoint(selectedPoint, true);
+                    }
                 }
                 selectedPoint = default;
             }
@@ -183,6 +204,7 @@ namespace WPFRouteBeheerUI {
                     Route route = new(dialog.RouteName, selectedSegments, selectedPoints);
                     route.Id = rm.AddRoute(route);
                     routes.Add(route);
+                    //maybe something that shows the route was added???
                 } catch (RouteException ex) {
                     MessageBox.Show("An error occured because the route does not meet the specified requirements", ex.Message, MessageBoxButton.OK, MessageBoxImage.Warning);
                 } catch (ApplicationException ex) {
@@ -191,9 +213,14 @@ namespace WPFRouteBeheerUI {
                     MessageBox.Show("An uncexpected error occured: ", ex.Message, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
+            RemoveAllCurrentHighLights();
         }
 
         private void BtnRemoveAllCurrentHighlights_Click(object sender, RoutedEventArgs e) {
+            RemoveAllCurrentHighLights();
+        }
+
+        private void RemoveAllCurrentHighLights() {
             canvas.Children.Clear();
             pointElements.Clear();
             segmentElements.Clear();
@@ -201,6 +228,7 @@ namespace WPFRouteBeheerUI {
             addRouteClicked = false;
             top.Children.Remove(buttonConfirmSelection);
             selectedPoints.Clear();
+            selectedSegments.Clear();
             DrawNetwork();
         }
 

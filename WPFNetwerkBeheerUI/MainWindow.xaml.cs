@@ -64,7 +64,8 @@ namespace WPFNetwerkBeheerUI {
             try {
                 List<NetworkPointUI> pointsUI = new(nm.GetNetworkPoints().Select(np => NetworkPointMapper.MapFromDomain(np)));
                 foreach (var point in pointsUI) {
-                    points.Add(new NetworkPointUI(point.Id, point.X, point.Y, point.Facilities));
+                    points.Add(point);
+                    // new NetworkPointUI(point.Id, point.X, point.Y, point.Facilities)
                 }
                 List<SegmentUI> segmentsUI = new(nm.GetSegments().Select(sm => SegmentMapper.MapFromDomain(sm)));
                 foreach (var segment in segmentsUI) {

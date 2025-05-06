@@ -12,6 +12,7 @@ namespace RouteBeheerDL {
         }
 
         public int Add(Route route) {
+            int routeId;
             string queryRoute = "INSERT INTO Routes(name) OUTPUT INSERTED.id VALUES(@name)";
             string queryRouteSegments = "INSERT INTO Route_Segments(route_id, segment_id, sequenceNo) VALUES(@routeId, @segmentId, @sequenceNo)";
             string queryRouteNetworkPoints = "INSERT INTO Route_NetworkPoints(route_id, networkpoint_id, isStop) VALUES(@routeId, @networkpointId, @isStop)";
@@ -23,7 +24,7 @@ namespace RouteBeheerDL {
                 try {
                     cmd.CommandText = queryRoute;
                     cmd.Parameters.AddWithValue("@name", route.Name);
-                    int routeId = (int)cmd.ExecuteScalar();
+                    routeId = (int)cmd.ExecuteScalar();
 
                     cmd.CommandText = queryRouteSegments;
                     cmd.Parameters.Clear();
@@ -51,7 +52,7 @@ namespace RouteBeheerDL {
                     throw new ApplicationException();
                 }
             }
-            return default;
+            return routeId;
         }
 
         public void Delete(int routeId) {
