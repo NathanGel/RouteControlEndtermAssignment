@@ -56,6 +56,18 @@ namespace WPFNetwerkBeheerUI.Model {
         public void OnPropertyChanged(string propertyName) {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
+        public override bool Equals(object? obj) {
+            if (obj is not NetworkPointUI other)
+                return false;
+
+            return Id == other.Id;
+        }
+
+        public override int GetHashCode() {
+            return Id.GetHashCode();
+        }
+
         public event PropertyChangedEventHandler? PropertyChanged;
     }
 }

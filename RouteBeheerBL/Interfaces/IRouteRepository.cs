@@ -4,6 +4,6 @@ namespace RouteBeheerBL.Interfaces {
         int Add(Route route);
         void Update(Route route);
         void Delete(int routeId);
-        List<Route> GetAll();
+        List<Route> GetAllRoutes();
     }
 }

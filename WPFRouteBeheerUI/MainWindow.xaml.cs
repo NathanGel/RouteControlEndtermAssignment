@@ -12,6 +12,8 @@ using RouteBeheerBL.Managers;
 using RouteBeheerDL;
 using RouteBeheerBL.Model;
 using System.Collections.ObjectModel;
+using System.Net;
+using RouteBeheerBL.Exceptions;
 
 namespace WPFRouteBeheerUI {
     /// <summary>
@@ -28,6 +30,7 @@ namespace WPFRouteBeheerUI {
         private RouteManager rm;
         private bool addRouteClicked;
         private List<(NetworkPoint, bool)> selectedPoints = new();
+        private List<Segment> selectedSegments = new();
         private Ellipse selectedPoint;
         public MainWindow() {
             rm = new(new RouteRepository(connectionString));
@@ -107,12 +110,22 @@ namespace WPFRouteBeheerUI {
 
         private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
             if (addRouteClicked && selectedPoint != default) {
-                if(selectedPoints.Count == 0) {
+                if (selectedPoints.Count == 0) {
                     selectedPoints.Add((pointElements[selectedPoint], true));
                     HighlightPoint(selectedPoint, true);
-                } else if (segments.Any( s => s.StartPoint.Equals(pointElements[selectedPoint]) && s.EndPoint.Equals(selectedPoints[^1].Item1)) || segments.Any(s => s.StartPoint.Equals(selectedPoints[^1].Item1) && s.EndPoint.Equals(pointElements[selectedPoint]))) {
-                    selectedPoints.Add((pointElements[selectedPoint], false));
-                    HighlightPoint(selectedPoint, false);
+                } else {
+                    Segment? segment = segments
+                        .FirstOrDefault(
+                        s =>
+                            (s.StartPoint.Equals(selectedPoints[^1].Item1) && s.EndPoint.Equals(pointElements[selectedPoint])) ||
+                            (s.StartPoint.Equals(pointElements[selectedPoint]) && s.EndPoint.Equals(selectedPoints[^1].Item1))
+                    );
+
+                    if (segment != null && !selectedSegments.Contains(segment)) {
+                        selectedSegments.Add(segment);
+                        selectedPoints.Add((pointElements[selectedPoint], false));
+                        HighlightPoint(selectedPoint, false);
+                    }
                 }
                 selectedPoint = default;
             }
@@ -123,9 +136,20 @@ namespace WPFRouteBeheerUI {
                 if (selectedPoints.Count == 0) {
                     selectedPoints.Add((pointElements[selectedPoint], true));
                     HighlightPoint(selectedPoint, true);
-                } else if (segments.Any(s => s.StartPoint.Equals(pointElements[selectedPoint]) && s.EndPoint.Equals(selectedPoints[^1].Item1)) || segments.Any(s => s.StartPoint.Equals(selectedPoints[^1].Item1) && s.EndPoint.Equals(pointElements[selectedPoint]))) {
-                    selectedPoints.Add((pointElements[selectedPoint], true));
-                    HighlightPoint(selectedPoint, true);
+                } else {
+                    Segment? segment = segments
+                        .FirstOrDefault(
+                        s =>
+                            (s.StartPoint.Equals(selectedPoints[^1].Item1) && s.EndPoint.Equals(pointElements[selectedPoint])) ||
+                            (s.StartPoint.Equals(pointElements[selectedPoint]) && s.EndPoint.Equals(selectedPoints[^1].Item1))
+                    );
+
+
+                    if (segment != null && !selectedSegments.Contains(segment)) {
+                        selectedSegments.Add(segment);
+                        selectedPoints.Add((pointElements[selectedPoint], true));
+                        HighlightPoint(selectedPoint, true);
+                    }
                 }
                 selectedPoint = default;
             }
@@ -153,16 +177,58 @@ namespace WPFRouteBeheerUI {
         }
 
         private void BtnAddRoute_Click(object sender, RoutedEventArgs e) {
-            addRouteClicked = true;
-            TextBlockCurrentContext.Text = "Left click to add point to Route \nRight click to add point and indicate it as a stop";
+            if (!addRouteClicked) {
+                addRouteClicked = true;
+                buttonConfirmSelection = new() {
+                    Content = "Confirm Selection",
+                    Foreground = Brushes.White,
+                    Background = Brushes.Green,
+                    BorderBrush = Brushes.Green,
+                    Height = 30
+                };
+
+                buttonConfirmSelection.Click += BtnConfirmSelection_Click;
+
+                top.Children.Add(buttonConfirmSelection);
+                MessageBox.Show("• Left click to select a point \n• Right click to select it as a stop", "Select Points for Route", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private Button buttonConfirmSelection;
+
+        private void BtnConfirmSelection_Click(object sender, RoutedEventArgs e) {
+            RouteNameDialogWindow dialog = new();
+            bool? result = dialog.ShowDialog();
+            if (result == true) {
+                try {
+                    Route route = new(dialog.RouteName, selectedSegments, selectedPoints);
+                    route.Id = rm.AddRoute(route);
+                    routes.Add(route);
+                    //maybe something that shows the route was added???
+                } catch (RouteException ex) {
+                    MessageBox.Show("An error occured because the route does not meet the specified requirements", ex.Message, MessageBoxButton.OK, MessageBoxImage.Warning);
+                } catch (ApplicationException ex) {
+                    MessageBox.Show("An error occured while adding a route", ex.Message, MessageBoxButton.OK, MessageBoxImage.Error);
+                } catch (Exception ex) {
+                    MessageBox.Show("An uncexpected error occured: ", ex.Message, MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            RemoveAllCurrentHighLights();
         }
 
         private void BtnRemoveAllCurrentHighlights_Click(object sender, RoutedEventArgs e) {
+            RemoveAllCurrentHighLights();
+        }
+
+        private void RemoveAllCurrentHighLights() {
             canvas.Children.Clear();
             pointElements.Clear();
             segmentElements.Clear();
             highlightedPoints.Clear();
             addRouteClicked = false;
+            top.Children.Remove(buttonConfirmSelection);
+            selectedPoints.Clear();
+            selectedSegments.Clear();
             DrawNetwork();
         }
 

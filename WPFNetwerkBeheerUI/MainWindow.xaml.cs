@@ -11,6 +11,7 @@ using WPFNetwerkBeheerUI.Mappers;
 using WPFNetwerkBeheerUI.Model;
 using Point = System.Windows.Point;
 using RouteBeheerBL.Exceptions;
+using System.Linq;
 
 namespace WPFNetwerkBeheerUI {
     /// <summary>
@@ -61,13 +62,14 @@ namespace WPFNetwerkBeheerUI {
         private void ReadFromDatabase() {
             nm = new(new NetworkRepository(connectionString));
             try {
+                List<NetworkPointUI> pointsUI = new(nm.GetNetworkPoints().Select(np => NetworkPointMapper.MapFromDomain(np)));
+                foreach (var point in pointsUI) {
+                    points.Add(point);
+                    // new NetworkPointUI(point.Id, point.X, point.Y, point.Facilities)
+                }
                 List<SegmentUI> segmentsUI = new(nm.GetSegments().Select(sm => SegmentMapper.MapFromDomain(sm)));
                 foreach (var segment in segmentsUI) {
                     segments.Add(segment);
-                }
-                List<NetworkPointUI> pointsUI = new(nm.GetNetworkPoints().Select(np => NetworkPointMapper.MapFromDomain(np)));
-                foreach (var point in pointsUI) {
-                    points.Add(new NetworkPointUI(point.Id, point.X, point.Y, point.Facilities));
                 }
             } catch (ApplicationException ex) { // dit catch-blok vangt elke mogelijke sqlexception die gegooid werden in de repo. De SqlException werd vertaald naar een ApplicationException
                 MessageBox.Show("An error occured while retrieving the network for initialization", ex.Message, MessageBoxButton.OK, MessageBoxImage.Error);
@@ -258,6 +260,7 @@ namespace WPFNetwerkBeheerUI {
             double x = Math.Min(point.X, maxX);
             double y = Math.Min(point.Y, maxY);
 
+            Canvas.SetZIndex(coordinatesTextBlock, 2);
             Canvas.SetLeft(coordinatesTextBlock, x);
             Canvas.SetTop(coordinatesTextBlock, y);
 
@@ -357,7 +360,7 @@ namespace WPFNetwerkBeheerUI {
                         }
 
                         // dit codeblok past het networkpoint aan in de Ellipse/networkpoint dictionary
-                        var kvp = pointElements.FirstOrDefault(p => p.Value == selectedPoint);
+                        var kvp = pointElements.FirstOrDefault(p => p.Value.Equals(selectedPoint));
                         if (kvp.Key != null) {
                             pointElements[kvp.Key] = npWindow.point; // vervang het punt in de dictionary
 
@@ -366,6 +369,17 @@ namespace WPFNetwerkBeheerUI {
                                 canvas.Children.Remove(kvp.Key); // verwijder de oude ellipse van het canvas
                                 pointElements.Remove(kvp.Key);   // verwijder de oude ellipse/point uit de dictionary
 
+                                List<SegmentUI> segmentsToChange = segments.Where(s => s.StartPoint.Equals(kvp.Value) || s.EndPoint.Equals(kvp.Value)).ToList();
+                                foreach (SegmentUI segment in segmentsToChange) {
+                                    if (segment.StartPoint.Id == kvp.Value.Id)
+                                        segment.StartPoint = kvp.Value;
+                                    else if(segment.EndPoint.Id == kvp.Value.Id)
+                                        segment.EndPoint = kvp.Value;
+
+                                    canvas.Children.Remove(segmentElements[segment]);
+                                    segmentElements.Remove(segment);
+                                    DrawLine(segment);
+                                }
                                 DrawPoint(npWindow.point);       // het punt opnieuw tekenen
                             }
                         }
