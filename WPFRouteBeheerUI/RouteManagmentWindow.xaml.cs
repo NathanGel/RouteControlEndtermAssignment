@@ -20,5 +20,29 @@ namespace WPFRouteBeheerUI {
         public RouteManagmentWindow() {
             InitializeComponent();
         }
+        private void MinimizeButton_Click(object sender, RoutedEventArgs e) {
+            WindowState = WindowState.Minimized;
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e) {
+            Close();
+        }
+
+        private void TitleBar_MouseMove(object sender, MouseEventArgs e) {
+            if (e.LeftButton == MouseButtonState.Pressed) {
+                DragMove();
+            }
+        }
+        private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
+            if (e.ClickCount == 2) {
+                if (WindowState == WindowState.Maximized) {
+                    WindowState = WindowState.Normal;
+                } else {
+                    WindowState = WindowState.Maximized;
+                }
+            } else {
+                DragMove();
+            }
+        }
     }
 }

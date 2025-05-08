@@ -1,11 +1,12 @@
-﻿<Window x:Class="WPFRouteBeheerUI.RouteManagmentWindow"
+﻿<Window x:Class="WPFRouteBeheerUI.SelectRouteDialogWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WPFRouteBeheerUI"
         mc:Ignorable="d"
-        Title="Route Management" Height="450" Width="800" WindowStyle="None" Background="#1F2129" AllowsTransparency="True">
+        Title="Select Route" Height="300" Width="500"
+        WindowStyle="None" Background="#1F2129" AllowsTransparency="True">
 
     <Window.Resources>
         <Style x:Key="WindowControlButton" TargetType="Button">
@@ -19,7 +20,7 @@
         </Style>
     </Window.Resources>
 
-    <Grid>
+    <Grid Margin="0">
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
             <RowDefinition Height="*"/>
@@ -27,7 +28,7 @@
 
         <!-- Title Bar -->
         <Grid Grid.Row="0" Background="#252836" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
-            <TextBlock Text="Route Management" Foreground="#F5F7FB" Margin="10,0,0,0"
+            <TextBlock Text="Select Route" Foreground="#F5F7FB" Margin="10,0,0,0"
                        VerticalAlignment="Center" HorizontalAlignment="Left" FontWeight="SemiBold"/>
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -55,7 +56,7 @@
             </StackPanel>
         </Grid>
 
-        <!-- Route DataGrid -->
+        <!-- DataGrid for Routes -->
         <DataGrid Grid.Row="1" Name="DataGridRoutes" Margin="5"
                   Background="#2A2D3E"
                   Foreground="#F5F7FB"
@@ -68,51 +69,13 @@
                   SelectionMode="Single"
                   SelectionUnit="FullRow"
                   AutoGenerateColumns="False"
-                  IsReadOnly="true"
-                  RowDetailsVisibilityMode="VisibleWhenSelected">
+                  IsReadOnly="True">
 
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Id" Binding="{Binding Id}" Width="Auto"/>
                 <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
             </DataGrid.Columns>
 
-            <!-- Row details for Segments and Stops -->
-            <DataGrid.RowDetailsTemplate>
-                <DataTemplate>
-                    <Expander Header="Details" Background="#2A2D3E" Foreground="White" Margin="10,5,10,10">
-                        <StackPanel>
-                            <TextBlock Text="Segments:" FontWeight="Bold" Margin="0,5,0,2"/>
-                            <ItemsControl ItemsSource="{Binding Segments}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding}" Foreground="#F5F7FB"/>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-
-                            <TextBlock Text="Stops:" FontWeight="Bold" Margin="10,10,0,2"/>
-                            <ItemsControl ItemsSource="{Binding Stops}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock>
-                                            <Run Text="ID: "/>
-                                            <Run Text="{Binding Item1.Id}"/>
-                                            <Run Text=", X: "/>
-                                            <Run Text="{Binding Item1.X}"/>
-                                            <Run Text=", Y: "/>
-                                            <Run Text="{Binding Item1.Y}"/>
-                                            <Run Text=", IsStop: "/>
-                                            <Run Text="{Binding Item2}"/>
-                                        </TextBlock>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
-                    </Expander>
-                </DataTemplate>
-            </DataGrid.RowDetailsTemplate>
-
-            <!-- Style overrides -->
             <DataGrid.Resources>
                 <Style TargetType="DataGridRow">
                     <Setter Property="Background" Value="Transparent"/>
@@ -137,6 +100,12 @@
                     <Setter Property="BorderThickness" Value="0,0,0,1"/>
                 </Style>
             </DataGrid.Resources>
+
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Select Route" Click="SelectRoute_Click"/>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
         </DataGrid>
     </Grid>
 </Window>

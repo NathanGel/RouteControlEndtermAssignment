@@ -28,7 +28,7 @@ namespace RouteBeheerDL {
 
                     cmd.CommandText = queryRouteSegments;
                     cmd.Parameters.Clear();
-                    for (int i = 0; i<route.Segments.Count - 1; i++) {
+                    for (int i = 0; i<route.Segments.Count; i++) {
                         cmd.Parameters.Clear();
                         cmd.Parameters.AddWithValue("@routeId", routeId);
                         cmd.Parameters.AddWithValue("@segmentId", route.Segments[i].Id);
@@ -85,7 +85,70 @@ namespace RouteBeheerDL {
         }
 
         public List<Route> GetAllRoutes() {
-            throw new NotImplementedException();
+            string query = "SELECT r.id AS RouteID,r.name AS RouteName, " +
+                           "rs.sequenceNo AS SegmentSequence, " +
+                           "s.id AS SegmentID, " +
+                           "npStart.id AS StartPointID, npStart.x_coordinate AS StartPoint_X, npStart.y_coordinate AS StartPoint_Y, rnpStart.isStop AS StartPointIsStop, " +
+                           "npStop.id AS StopPointID, npStop.x_coordinate AS StopPoint_X, npStop.y_coordinate AS StopPoint_Y, rnpStop.isStop AS StopPointIsStop " +
+                           "FROM Routes r " +
+                           "JOIN Route_Segments rs ON rs.route_id = r.id " +
+                           "JOIN Segments s ON s.id = rs.segment_id " +
+                           "JOIN NetworkPoints npStart ON npStart.id = s.start_id " +
+                           "JOIN NetworkPoints npStop ON npStop.id = s.stop_id " +
+                           "JOIN Route_NetworkPoints rnpStart ON rnpStart.route_id = r.id " +
+                           "AND rnpStart.networkpoint_id = s.start_id " +
+                           "JOIN Route_NetworkPoints rnpStop ON rnpStop.route_id = r.id " +
+                           "AND rnpStop.networkpoint_id = s.stop_id " +
+                           "ORDER BY r.id, rs.sequenceNo;";
+            using (SqlConnection connection = new(connectionstring))
+            using (SqlCommand cmd = connection.CreateCommand()) {
+                try {
+                    List<Route> routes = new ();
+                    cmd.CommandText = query;
+                    connection.Open();
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    int currentRouteId = -1;
+                    Route route = null;
+                    List<Segment> segments = new ();
+                    List < (NetworkPoint, bool)> stops = new ();
+                    HashSet<int> addedStops = new();
+                    while (reader.Read()) {
+                        if ((int)reader["RouteID"] != currentRouteId) {
+                            currentRouteId = (int)reader["RouteId"];
+                            if (route != null) {
+                                route.Segments = segments;
+                                route.Stops = stops;
+                                routes.Add(new Route(route.Id, route.Name, [.. route.Segments], [.. route.Stops]));
+                                route = null;
+                                segments.Clear();
+                                stops.Clear();
+                            }
+                            route = new();
+                            route.Id = currentRouteId;
+                            route.Name = (string)reader["RouteName"];
+                        }
+                        NetworkPoint start = new NetworkPoint((int)reader["StartPointID"], (double)reader["StartPoint_X"], (double)reader["StartPoint_Y"]);
+                        NetworkPoint stop = new NetworkPoint((int)reader["StopPointID"], (double)reader["StopPoint_X"], (double)reader["StopPoint_Y"]);
+                        
+                        if (addedStops.Add(start.Id))
+                            stops.Add((start, (bool)reader["StartPointIsStop"]));
+                        if (addedStops.Add(stop.Id))
+                            stops.Add((stop, (bool)reader["StopPointIsStop"]));
+
+                        segments.Add(new Segment((int)reader["SegmentID"], start, stop));
+                    }
+
+                    if (route != null) {
+                        route.Segments = segments;
+                        route.Stops = stops;
+                        routes.Add(new Route(route.Id, route.Name, [.. route.Segments], [.. route.Stops]));
+                    }
+
+                    return routes;
+                } catch (SqlException ex) {
+                    throw new ApplicationException("An error occured while retrieving all routes.");
+                }
+            }
         }
 
         public void Update(Route route) {

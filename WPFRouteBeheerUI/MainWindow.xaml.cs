@@ -22,6 +22,7 @@ namespace WPFRouteBeheerUI {
     public partial class MainWindow : Window {
         private List<NetworkPoint> points;
         private Dictionary<Ellipse, NetworkPoint> pointElements = new();
+        private Dictionary<NetworkPoint, Ellipse> elementPoints = new();
         private List<Segment> segments;
         private Dictionary<Segment, Line> segmentElements = new();
         private ObservableCollection<Route> routes;
@@ -36,7 +37,7 @@ namespace WPFRouteBeheerUI {
             rm = new(new RouteRepository(connectionString));
             points = new List<NetworkPoint>();
             segments = new List<Segment>();
-            routes = new ObservableCollection<Route>();
+            routes = new ObservableCollection<Route>(rm.GetAllRoutes());
             InitializeComponent();
             ReadFromDatabase();
             DrawNetwork();
@@ -93,6 +94,7 @@ namespace WPFRouteBeheerUI {
 
                 canvas.Children.Add(ellipse);
                 pointElements[ellipse] = point;
+                elementPoints[point] = ellipse;
             }
         }
 
@@ -171,7 +173,6 @@ namespace WPFRouteBeheerUI {
             }
         }
 
-
         private void BtnManageRoutes_Click(object sender, RoutedEventArgs e) {
 
         }
@@ -233,7 +234,18 @@ namespace WPFRouteBeheerUI {
         }
 
         private void BtnSelectRoute_Click(object sender, RoutedEventArgs e) {
+            SelectRouteDialogWindow window = new(routes.ToList());
+            bool? result = window.ShowDialog();
+            if (result == true) {
+                HighLightSelectedRoute(window.route);
+            }
+        }
 
+        private void HighLightSelectedRoute(Route route) {
+            foreach (var point in route.Stops) {
+                Ellipse e = pointElements.FirstOrDefault(p => p.Value.Equals(point.Item1)).Key;
+                HighlightPoint(e, point.Item2);
+            }
         }
 
         private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
