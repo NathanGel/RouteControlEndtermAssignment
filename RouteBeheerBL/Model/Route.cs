@@ -54,8 +54,8 @@ namespace RouteBeheerBL.Model {
                 if (value == null || value.Count == 0) throw new RouteException("Stops Invalid Null");
                 if (value.Any(s => s.Item1 == null)) throw new RouteException("Stops Invalid Null");
                 if (value.Count < 5) throw new RouteException("Stops Invalid Less Than 5");
-                if (value[0].Item2 == false) throw new RouteException("Stops Invalid StartPoint Not A Stop");
-                if (value[^1].Item2 == false) throw new RouteException("Stops Invalid EndPoint Not A Stop");
+                //if (value[0].Item2 == false) throw new RouteException("Stops Invalid StartPoint Not A Stop");
+                //if (value[^1].Item2 == false) throw new RouteException("Stops Invalid EndPoint Not A Stop");
                 _stops = value;
             }
         }

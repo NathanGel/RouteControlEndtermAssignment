@@ -17,7 +17,7 @@ namespace WPFFaciliteitBeheerUI {
         public ObservableCollection<FacilityUI> Facilities;
         public MainWindow() {
             InitializeComponent();
-            networkManager = new NetworkManager(new NetworkRepository(connectionString));
+            networkManager = new NetworkManager(new NetworkRepository(connectionString), new RouteRepository(connectionString));
             Facilities = new(networkManager.GetAllFacilities().Select( s => FacilityMapper.MapFromDomain(s)));
             DataGridFacilities.ItemsSource = Facilities;
         }

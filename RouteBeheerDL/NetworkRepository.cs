@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using RouteBeheerBL.Interfaces;
 using RouteBeheerBL.Model;
+using System.Drawing;
 
 namespace RouteBeheerDL {
     public class NetworkRepository : INetworkRepository {
@@ -68,7 +69,6 @@ namespace RouteBeheerDL {
                 }
             }
         }
-
         public List<Segment> GetSegments() {
             string query = "SELECT s.id, s.start_id, s.stop_id, nStart.x_coordinate AS startX, nStart.y_coordinate AS startY, nStop.x_coordinate AS stopX, nStop.y_coordinate AS stopY FROM Segments s JOIN NetworkPoints nStart ON s.start_id=nStart.id JOIN NetworkPoints nStop  ON s.stop_id=nStop.id;";
             using (SqlConnection connection = new(connectionString))
@@ -87,7 +87,6 @@ namespace RouteBeheerDL {
                 }
             }
         }
-
         public List<NetworkPoint> GetNetworkPoints() {
             string query = "SELECT * FROM NetworkPoints n LEFT JOIN NetworkPoint_Facilities nf ON n.id = nf.networkpoint_id LEFT JOIN Facilities f ON nf.facility_id = f.id";
             using (SqlConnection connection = new(connectionString))
@@ -118,7 +117,6 @@ namespace RouteBeheerDL {
                 }
             }
         }
-
         public int AddNetworkPoint(NetworkPoint point) {
             int id;
             string query = "INSERT INTO NetworkPoints(x_coordinate, y_coordinate) OUTPUT INSERTED.ID VALUES(@x, @y)";
@@ -136,7 +134,6 @@ namespace RouteBeheerDL {
             }
             return id;
         }
-
         public void RemoveNetworkPoint(NetworkPoint point) {
             string queryFacilities = "DELETE FROM NetworkPoint_Facilities WHERE networkpoint_id=@id";
             string queryPoints = "DELETE FROM NetworkPoints WHERE id=@id";
@@ -167,7 +164,6 @@ namespace RouteBeheerDL {
                 }
             }
         }
-
         public void UpdateNetworkPoint(NetworkPoint point) {
             string queryNetworkPoint = "UPDATE NetworkPoints SET x_coordinate = @x, y_coordinate = @y where id = @id";
             string queryClearPreviousFacilities = "DELETE FROM NetworkPoint_Facilities WHERE networkpoint_id = @id";
@@ -208,7 +204,6 @@ namespace RouteBeheerDL {
                 }
             }
         }
-
         public int AddConnection(Segment segment) {
             string querySegment = "INSERT INTO Segments(start_id, stop_id) OUTPUT INSERTED.id VALUES(@startId, @endId)";
             using (SqlConnection connection = new(connectionString))
@@ -225,7 +220,6 @@ namespace RouteBeheerDL {
                 }
             }
         }
-
         public void RemoveConnection(Segment segment) {
             string query = "DELETE FROM Segments WHERE id=@id";
             using (SqlConnection connection = new(connectionString))
@@ -244,7 +238,6 @@ namespace RouteBeheerDL {
                 }
             }
         }
-
         public int AddFacility(Facility facility) {
             string query = "INSERT INTO Facilities(name) OUTPUT INSERTED.id VALUES(@name)";
             using (SqlConnection connection = new(connectionString))
@@ -260,7 +253,6 @@ namespace RouteBeheerDL {
                 }
             }
         }
-
         public List<Facility> GetAllFacilities() {
             string query = "SELECT * FROM Facilities";
             using (SqlConnection connection = new(connectionString))
@@ -279,7 +271,6 @@ namespace RouteBeheerDL {
                 }
             }
         }
-
         public void RemoveFacility(Facility facility) {
             string query = "DELETE FROM Facilities WHERE id=@id";
             using (SqlConnection connection = new(connectionString))
@@ -300,7 +291,6 @@ namespace RouteBeheerDL {
             }
 
         }
-
         public void UpdateFacility(Facility facility) {
             string query = "UPDATE Facilities SET name = @name WHERE id=@id";
             using (SqlConnection connection = new(connectionString))
@@ -313,6 +303,43 @@ namespace RouteBeheerDL {
                     cmd.ExecuteNonQuery();
                 } catch (SqlException) {
                     throw new ApplicationException("An error occured while updating a facility");
+                }
+            }
+        }
+        public bool CheckForExistingConnectionsWithinSegments(NetworkPoint point) {
+            string query = "SELECT count(*) AS count FROM Segments WHERE start_id=@id OR stop_id=@id";
+            using (SqlConnection connection = new(connectionString))
+            using (SqlCommand cmd = connection.CreateCommand()) {
+                try {
+                    cmd.CommandText = query;
+                    cmd.Parameters.AddWithValue("@id", point.Id);
+                    connection.Open();
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    return reader.Read() && (int)reader["count"] != 0 ? true : false;
+                } catch (SqlException) {
+                    throw new ApplicationException("An error occured while checking for existing connections");
+                } catch (Exception) {
+                    throw new Exception();
+                }
+            }
+        }
+
+        public bool CheckForExistingConnectionsBetweenFacilitiesAndNetworkPoints(Facility facility) {
+            string query = "SELECT count(*) AS count FROM NetworkPoint_Facilities WHERE facility_id=@id";
+            using (SqlConnection connection = new(connectionString))
+            using (SqlCommand cmd = connection.CreateCommand()) {
+                try {
+                    cmd.CommandText = query;
+                    cmd.Parameters.AddWithValue("@id", facility.Id);
+                    connection.Open();
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    return reader.Read() && (int)reader["count"] != 0 ? true : false;
+                } catch (SqlException) {
+                    throw new ApplicationException("An error occured while checking for existing connections");
+                } catch (Exception) {
+                    throw new Exception();
                 }
             }
         }

@@ -5,9 +5,11 @@ using RouteBeheerBL.Model;
 namespace RouteBeheerBL.Managers {
     public class NetworkManager {
         private INetworkRepository repo;
+        private IRouteRepository routeRepo;
 
-        public NetworkManager(INetworkRepository repo) {
+        public NetworkManager(INetworkRepository repo, IRouteRepository routeRepo) {
             this.repo = repo;
+            this.routeRepo = routeRepo;
         }
 
         public int AddNetworkPoint(NetworkPoint point) {
@@ -18,6 +20,8 @@ namespace RouteBeheerBL.Managers {
         }
 
         public void RemoveNetworkPoint(NetworkPoint point) {
+            if (repo.CheckForExistingConnectionsWithinSegments(point)) throw new InvalidOperationException("Cannot delete this point because it's connected to one or more segments");
+            if (routeRepo.CheckForExistingConnectionsWithinRoutes(point)) throw new InvalidOperationException("Cannot delete this point because it's connected to one or more routes");
             if (point == null) throw new NetworkException("Network point cannot be null");
             repo.RemoveNetworkPoint(point);
         }
@@ -35,6 +39,7 @@ namespace RouteBeheerBL.Managers {
         }
 
         public void RemoveConnection(Segment segment) {
+            if (routeRepo.CheckForExistingConnectionsWithinRoutes(segment)) throw new InvalidOperationException("Cannot delete this segment because it's connected to one or more routes");
             if (segment == null) throw new NetworkException("Segment cannot be null");
             repo.RemoveConnection(segment);
         }
@@ -53,6 +58,7 @@ namespace RouteBeheerBL.Managers {
         }
 
         public void RemoveFacility(Facility facility) {
+            if (repo.CheckForExistingConnectionsBetweenFacilitiesAndNetworkPoints(facility)) throw new InvalidOperationException("Cannot remove facility because it's connected to one or more networkpoints");
             if (facility == null) throw new NetworkException("RemoveFacility Invalid Null");
             repo.RemoveFacility(facility);
         }

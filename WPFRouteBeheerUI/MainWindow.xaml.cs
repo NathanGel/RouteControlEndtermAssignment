@@ -44,7 +44,7 @@ namespace WPFRouteBeheerUI {
         }
 
         public void ReadFromDatabase() {
-            nm = new(new NetworkRepository(connectionString));
+            nm = new(new NetworkRepository(connectionString), new RouteRepository(connectionString));
             try {
                 List<Segment> segmentsFromDb = new(nm.GetSegments());
                 foreach (var segment in segmentsFromDb) {
@@ -202,7 +202,7 @@ namespace WPFRouteBeheerUI {
             bool? result = dialog.ShowDialog();
             if (result == true) {
                 try {
-                    Route route = new(dialog.RouteName, selectedSegments, selectedPoints);
+                    Route route = new(dialog.RouteName, [.. selectedSegments], [.. selectedPoints]);
                     route.Id = rm.AddRoute(route);
                     routes.Add(route);
                     //maybe something that shows the route was added???

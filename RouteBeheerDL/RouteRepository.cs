@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using RouteBeheerBL.Interfaces;
 using RouteBeheerBL.Model;
+using System.Drawing;
 using System.Globalization;
 
 namespace RouteBeheerDL {
@@ -53,6 +54,42 @@ namespace RouteBeheerDL {
                 }
             }
             return routeId;
+        }
+
+        public bool CheckForExistingConnectionsWithinRoutes(NetworkPoint point) {
+            string query = "SELECT COUNT(*) AS count FROM Route_NetworkPoints WHERE networkpoint_id=@id";
+            using (SqlConnection connection = new(connectionstring))
+            using (SqlCommand cmd = connection.CreateCommand()) {
+                try {
+                    cmd.CommandText = query;
+                    cmd.Parameters.AddWithValue("@id", point.Id);
+                    connection.Open();
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    return reader.Read() && (int)reader["count"] != 0 ? true : false;
+                } catch (SqlException) {
+                    throw new ApplicationException("An error occured while checking for existing connections between networkpoints and routes");
+                } catch (Exception) {
+                    throw new Exception();
+                }
+            }
+        }
+
+        public bool CheckForExistingConnectionsWithinRoutes(Segment segment) {
+            string query = "SELECT COUNT(*) AS count FROM Route_Segments WHERE segment_id=@id";
+            using (SqlConnection connection = new(connectionstring))
+            using (SqlCommand cmd = connection.CreateCommand()) {
+                try {
+                    cmd.CommandText = query;
+                    cmd.Parameters.AddWithValue("@id", segment.Id);
+                    connection.Open();
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    return reader.Read() && (int)reader["count"] != 0 ? true : false;
+                } catch (SqlException) {
+                    throw new ApplicationException("An error occured while checking for existing connections between segments and routes");
+                } catch (Exception) {
+                    throw new Exception();
+                }
+            }
         }
 
         public void Delete(int routeId) {
@@ -122,6 +159,7 @@ namespace RouteBeheerDL {
                                 route = null;
                                 segments.Clear();
                                 stops.Clear();
+                                addedStops.Clear();
                             }
                             route = new();
                             route.Id = currentRouteId;
@@ -147,7 +185,7 @@ namespace RouteBeheerDL {
                     return routes;
                 } catch (SqlException ex) {
                     throw new ApplicationException("An error occured while retrieving all routes.");
-                }
+                } 
             }
         }
 

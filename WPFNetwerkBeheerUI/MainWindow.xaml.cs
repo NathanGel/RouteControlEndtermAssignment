@@ -48,7 +48,7 @@ namespace WPFNetwerkBeheerUI {
 
         private SegmentUI connection;
 
-        private readonly string connectionString = @"Data Source=nathans-laptop\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
+        private readonly string connectionString = @"Data Source=nathan\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
 
         private NetworkManager nm;
 
@@ -60,7 +60,7 @@ namespace WPFNetwerkBeheerUI {
         }
 
         private void ReadFromDatabase() {
-            nm = new(new NetworkRepository(connectionString));
+            nm = new(new NetworkRepository(connectionString), new RouteRepository(connectionString));
             try {
                 List<NetworkPointUI> pointsUI = new(nm.GetNetworkPoints().Select(np => NetworkPointMapper.MapFromDomain(np)));
                 foreach (var point in pointsUI) {

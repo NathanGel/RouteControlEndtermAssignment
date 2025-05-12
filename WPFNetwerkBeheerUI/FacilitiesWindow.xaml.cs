@@ -17,7 +17,7 @@ namespace WPFNetwerkBeheerUI {
         private readonly string connectionString = @"Data Source=nathan\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
         public FacilitiesWindow(ObservableCollection<Facility> facilities) {
             InitializeComponent();
-            nm = new(new NetworkRepository(connectionString));
+            nm = new(new NetworkRepository(connectionString), new RouteRepository(connectionString));
             selectedFacilities = facilities;
 
             var selectedIds = new HashSet<int>(selectedFacilities.Select(f => f.Id));
