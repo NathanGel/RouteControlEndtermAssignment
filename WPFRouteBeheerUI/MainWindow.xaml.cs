@@ -33,6 +33,8 @@ namespace WPFRouteBeheerUI {
         private List<(NetworkPoint, bool)> selectedPoints = new();
         private List<(Segment, bool)> selectedSegments = new();
         private Ellipse selectedPoint;
+        private Route selectedRoute;
+        private bool calculateDistanceClicked = false;
         public MainWindow() {
             rm = new(new RouteRepository(connectionString));
             points = new List<NetworkPoint>();
@@ -253,6 +255,11 @@ namespace WPFRouteBeheerUI {
             top.Children.Remove(buttonConfirmSelection);
             selectedPoints.Clear();
             selectedSegments.Clear();
+            selectedPoint = null;
+            selectedRoute = null;
+            contextTop.Children.Clear();
+            buttonSaveRouteAsTXT = null;
+            buttonCalculateDistance = null;
             DrawNetwork();
         }
 
@@ -262,7 +269,50 @@ namespace WPFRouteBeheerUI {
             bool? result = window.ShowDialog();
             if (result == true) {
                 HighLightSelectedRoute(window.route);
+                selectedRoute = window.route;
             }
+            addRouteClicked = true;
+
+            buttonSaveRouteAsTXT = new() {
+                Content = "Save to File",
+                Foreground = Brushes.White,
+                Background = Brushes.Green,
+                BorderBrush = Brushes.Green,
+                Height = 30,
+                Margin = new Thickness(5, 5, 5, 5)
+            };
+
+            buttonCalculateDistance = new() {
+                Content = "Calculate Distance",
+                Foreground = Brushes.White,
+                Background = Brushes.Green,
+                BorderBrush = Brushes.Green,
+                Height = 30,
+                Margin = new Thickness(5, 5, 5, 5)
+            };
+
+            double distance = 0;
+            foreach (var segment in selectedRoute.Segments) {
+                distance += Route.GetDistance(segment.Item1.StartPoint, segment.Item1.EndPoint);
+            }
+
+            buttonSaveRouteAsTXT.Click += BtnSaveRouteAsTXT_Click;
+            buttonCalculateDistance.Click += BtnCalculateDistance_Click;
+
+            contextTop.Children.Add(buttonSaveRouteAsTXT);
+            contextTop.Children.Add(buttonCalculateDistance);
+        }
+
+        private Button buttonSaveRouteAsTXT;
+        private Button buttonCalculateDistance;
+
+        private void BtnSaveRouteAsTXT_Click(object sender, RoutedEventArgs e) {
+            // Implement the logic to save the route as TXT
+        }
+
+        private void BtnCalculateDistance_Click(object sender, RoutedEventArgs e) {
+            calculateDistanceClicked = true;
+            MessageBox.Show("Select the 2 point from the route for which you want to calculate the route", "Distance Calculation", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void HighLightSelectedRoute(Route route) {

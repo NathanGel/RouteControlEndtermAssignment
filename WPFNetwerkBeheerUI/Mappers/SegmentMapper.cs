@@ -7,6 +7,10 @@ namespace WPFNetwerkBeheerUI.Mappers {
             return new(segment.Id, NetworkPointMapper.MapToDomain(segment.StartPoint), NetworkPointMapper.MapToDomain(segment.EndPoint));
         }
 
+        public static Segment MapToDomainWithoutId(SegmentUI segment) {
+            return new(NetworkPointMapper.MapToDomain(segment.StartPoint), NetworkPointMapper.MapToDomain(segment.EndPoint));
+        }
+
         public static SegmentUI MapFromDomain(Segment segment) {
             return new(segment.Id, NetworkPointMapper.MapFromDomain(segment.StartPoint), NetworkPointMapper.MapFromDomain(segment.EndPoint));
         }

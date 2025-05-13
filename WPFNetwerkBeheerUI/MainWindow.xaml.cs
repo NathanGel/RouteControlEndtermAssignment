@@ -444,7 +444,7 @@ namespace WPFNetwerkBeheerUI {
                 if (connection.StartPoint != default && connection.EndPoint != default) {
                     addConnectionClicked = false;
                     RemovePreviousHighlight();
-                    int id = nm.AddConnection(SegmentMapper.MapToDomain(connection));
+                    int id = nm.AddConnection(SegmentMapper.MapToDomainWithoutId(connection));
                     connection.Id = id;
                     segments.Add(connection);
                     connection = default;

@@ -1,0 +1,45 @@
+﻿<Window x:Class="WPFRouteBeheerUI.DistanceWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Distance Info" Height="200" Width="400"
+        WindowStyle="None" AllowsTransparency="True" Background="#1F2129">
+
+    <Window.Resources>
+        <Style x:Key="WindowControlButton" TargetType="Button">
+            <Setter Property="Width" Value="46"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#F5F7FB"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="5"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title Bar -->
+        <Grid Background="#252836" Grid.Row="0" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+            <TextBlock Text="Distance Info" VerticalAlignment="Center" Margin="10,0,0,0"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Style="{StaticResource WindowControlButton}" Content="&#xE8BB;" Click="CloseButton_Click"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Content -->
+        <StackPanel Grid.Row="1" Margin="20" VerticalAlignment="Center">
+            <TextBlock x:Name="Point1Text" Text="Point 1: (X1, Y1)" />
+            <TextBlock x:Name="Point2Text" Text="Point 2: (X2, Y2)" />
+            <TextBlock x:Name="DistanceText" Text="Distance: D" FontWeight="Bold"/>
+        </StackPanel>
+    </Grid>
+</Window>
