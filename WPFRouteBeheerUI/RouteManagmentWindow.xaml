@@ -32,26 +32,7 @@
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Style="{StaticResource WindowControlButton}" Content="&#xE921;" Click="MinimizeButton_Click"/>
-                <Button Style="{StaticResource WindowControlButton}" Content="&#xE8BB;" Click="CloseButton_Click">
-                    <Button.Triggers>
-                        <EventTrigger RoutedEvent="Button.MouseEnter">
-                            <BeginStoryboard>
-                                <Storyboard>
-                                    <ColorAnimation Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"
-                                                    To="#E81123" Duration="0:0:0.1"/>
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </EventTrigger>
-                        <EventTrigger RoutedEvent="Button.MouseLeave">
-                            <BeginStoryboard>
-                                <Storyboard>
-                                    <ColorAnimation Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"
-                                                    To="Transparent" Duration="0:0:0.1"/>
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </EventTrigger>
-                    </Button.Triggers>
-                </Button>
+                <Button Style="{StaticResource WindowControlButton}" Content="&#xE8BB;" Click="CloseButton_Click"/>
             </StackPanel>
         </Grid>
 
@@ -68,51 +49,40 @@
                   SelectionMode="Single"
                   SelectionUnit="FullRow"
                   AutoGenerateColumns="False"
-                  IsReadOnly="true"
+                  IsReadOnly="True"
                   RowDetailsVisibilityMode="VisibleWhenSelected">
 
+            <!-- Main Columns -->
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Id" Binding="{Binding Id}" Width="Auto"/>
                 <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
+
+                <!-- Locations Column with Nested DataGrid -->
+                <DataGridTemplateColumn Header="Locations">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <DataGrid ItemsSource="{Binding Locations}"
+                                      AutoGenerateColumns="False"
+                                      Background="#2A2D3E"
+                                      Foreground="#F5F7FB"
+                                      Margin="10,0,10,0"
+                                      HeadersVisibility="Column"
+                                      HorizontalAlignment="Stretch"
+                                      VerticalAlignment="Top"
+                                      CanUserAddRows="False"
+                                      ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                      ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Location Id" Binding="{Binding Id}" Width="Auto" />
+                                    <DataGridTextColumn Header="Location Name" Binding="{Binding Name}" Width="*" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
             </DataGrid.Columns>
 
-            <!-- Row details for Segments and Stops -->
-            <DataGrid.RowDetailsTemplate>
-                <DataTemplate>
-                    <Expander Header="Details" Background="#2A2D3E" Foreground="White" Margin="10,5,10,10">
-                        <StackPanel>
-                            <TextBlock Text="Segments:" FontWeight="Bold" Margin="0,5,0,2"/>
-                            <ItemsControl ItemsSource="{Binding Segments}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding}" Foreground="#F5F7FB"/>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-
-                            <TextBlock Text="Stops:" FontWeight="Bold" Margin="10,10,0,2"/>
-                            <ItemsControl ItemsSource="{Binding Stops}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock>
-                                            <Run Text="ID: "/>
-                                            <Run Text="{Binding Item1.Id}"/>
-                                            <Run Text=", X: "/>
-                                            <Run Text="{Binding Item1.X}"/>
-                                            <Run Text=", Y: "/>
-                                            <Run Text="{Binding Item1.Y}"/>
-                                            <Run Text=", IsStop: "/>
-                                            <Run Text="{Binding Item2}"/>
-                                        </TextBlock>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
-                    </Expander>
-                </DataTemplate>
-            </DataGrid.RowDetailsTemplate>
-
-            <!-- Style overrides -->
+            <!-- Row details and other necessary styles -->
             <DataGrid.Resources>
                 <Style TargetType="DataGridRow">
                     <Setter Property="Background" Value="Transparent"/>

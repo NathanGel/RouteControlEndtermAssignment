@@ -31,13 +31,21 @@ namespace WPFRouteBeheerUI {
         private RouteManager rm;
         private bool addRouteClicked;
         private List<(NetworkPoint, bool)> selectedPoints = new();
-        private List<Segment> selectedSegments = new();
+        private List<(Segment, bool)> selectedSegments = new();
         private Ellipse selectedPoint;
         public MainWindow() {
             rm = new(new RouteRepository(connectionString));
             points = new List<NetworkPoint>();
             segments = new List<Segment>();
-            routes = new ObservableCollection<Route>(rm.GetAllRoutes());
+            try {
+                routes = new ObservableCollection<Route>(rm.GetAllRoutes());
+            } catch (RouteException ex) {
+                MessageBox.Show("An error occured because the route does not meet the specified requirements", ex.Message, MessageBoxButton.OK, MessageBoxImage.Warning);
+            } catch (ApplicationException ex) {
+                MessageBox.Show("An error occured while retrieving the routes for initialization", ex.Message, MessageBoxButton.OK, MessageBoxImage.Error);
+            } catch (Exception ex) { 
+                MessageBox.Show("An unexpected error occured:  " + ex.Message, "System Exception", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
             InitializeComponent();
             ReadFromDatabase();
             DrawNetwork();
@@ -116,16 +124,20 @@ namespace WPFRouteBeheerUI {
                     selectedPoints.Add((pointElements[selectedPoint], true));
                     HighlightPoint(selectedPoint, true);
                 } else {
-                    Segment? segment = segments
-                        .FirstOrDefault(
+                    var lastPoint = selectedPoints[^1].Item1;
+                    var currentPoint = pointElements[selectedPoint];
+
+                    Segment? segment = segments.FirstOrDefault(
                         s =>
-                            (s.StartPoint.Equals(selectedPoints[^1].Item1) && s.EndPoint.Equals(pointElements[selectedPoint])) ||
-                            (s.StartPoint.Equals(pointElements[selectedPoint]) && s.EndPoint.Equals(selectedPoints[^1].Item1))
+                            (s.StartPoint.Equals(lastPoint) && s.EndPoint.Equals(currentPoint)) ||
+                            (s.StartPoint.Equals(currentPoint) && s.EndPoint.Equals(lastPoint))
                     );
 
-                    if (segment != null && !selectedSegments.Contains(segment)) {
-                        selectedSegments.Add(segment);
-                        selectedPoints.Add((pointElements[selectedPoint], false));
+                    if (segment != null && !selectedSegments.Any(s => s.Item1.Equals(segment))) {
+                        bool isReverse = segment.StartPoint.Equals(currentPoint);
+
+                        selectedSegments.Add((segment, isReverse));
+                        selectedPoints.Add((currentPoint, false));
                         HighlightPoint(selectedPoint, false);
                     }
                 }
@@ -133,12 +145,16 @@ namespace WPFRouteBeheerUI {
             }
         }
 
+
         private void Canvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e) {
             if (addRouteClicked && selectedPoint != default) {
                 if (selectedPoints.Count == 0) {
                     selectedPoints.Add((pointElements[selectedPoint], true));
                     HighlightPoint(selectedPoint, true);
                 } else {
+                    var lastPoint = selectedPoints[^1].Item1;
+                    var currentPoint = pointElements[selectedPoint];
+
                     Segment? segment = segments
                         .FirstOrDefault(
                         s =>
@@ -147,9 +163,11 @@ namespace WPFRouteBeheerUI {
                     );
 
 
-                    if (segment != null && !selectedSegments.Contains(segment)) {
-                        selectedSegments.Add(segment);
-                        selectedPoints.Add((pointElements[selectedPoint], true));
+                    if (segment != null && !selectedSegments.Any(s => s.Item1.Equals(segment))) {
+                        bool isReverse = segment.StartPoint.Equals(currentPoint);
+
+                        selectedSegments.Add((segment, isReverse));
+                        selectedPoints.Add((currentPoint, true));
                         HighlightPoint(selectedPoint, true);
                     }
                 }
@@ -174,10 +192,13 @@ namespace WPFRouteBeheerUI {
         }
 
         private void BtnManageRoutes_Click(object sender, RoutedEventArgs e) {
-
+            RemoveAllCurrentHighLights();
+            RouteManagmentWindow window = new RouteManagmentWindow(routes);
+            window.Show();
         }
 
         private void BtnAddRoute_Click(object sender, RoutedEventArgs e) {
+            RemoveAllCurrentHighLights();
             if (!addRouteClicked) {
                 addRouteClicked = true;
                 buttonConfirmSelection = new() {
@@ -234,6 +255,7 @@ namespace WPFRouteBeheerUI {
         }
 
         private void BtnSelectRoute_Click(object sender, RoutedEventArgs e) {
+            RemoveAllCurrentHighLights();
             SelectRouteDialogWindow window = new(routes.ToList());
             bool? result = window.ShowDialog();
             if (result == true) {

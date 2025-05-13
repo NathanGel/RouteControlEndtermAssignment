@@ -15,7 +15,7 @@ namespace RouteBeheerDL {
         public int Add(Route route) {
             int routeId;
             string queryRoute = "INSERT INTO Routes(name) OUTPUT INSERTED.id VALUES(@name)";
-            string queryRouteSegments = "INSERT INTO Route_Segments(route_id, segment_id, sequenceNo) VALUES(@routeId, @segmentId, @sequenceNo)";
+            string queryRouteSegments = "INSERT INTO Route_Segments(route_id, segment_id, sequenceNo, isReverse) VALUES(@routeId, @segmentId, @sequenceNo, @isReverse)";
             string queryRouteNetworkPoints = "INSERT INTO Route_NetworkPoints(route_id, networkpoint_id, isStop) VALUES(@routeId, @networkpointId, @isStop)";
             using (SqlConnection connection = new(connectionstring))
             using (SqlCommand cmd = connection.CreateCommand()) {
@@ -32,8 +32,9 @@ namespace RouteBeheerDL {
                     for (int i = 0; i<route.Segments.Count; i++) {
                         cmd.Parameters.Clear();
                         cmd.Parameters.AddWithValue("@routeId", routeId);
-                        cmd.Parameters.AddWithValue("@segmentId", route.Segments[i].Id);
+                        cmd.Parameters.AddWithValue("@segmentId", route.Segments[i].Item1.Id);
                         cmd.Parameters.AddWithValue("@sequenceNo", i + 1);
+                        cmd.Parameters.AddWithValue("@isReverse", route.Segments[i].Item2);
                         cmd.ExecuteNonQuery();
                     }
 
@@ -122,58 +123,80 @@ namespace RouteBeheerDL {
         }
 
         public List<Route> GetAllRoutes() {
-            string query = "SELECT r.id AS RouteID,r.name AS RouteName, " +
-                           "rs.sequenceNo AS SegmentSequence, " +
-                           "s.id AS SegmentID, " +
-                           "npStart.id AS StartPointID, npStart.x_coordinate AS StartPoint_X, npStart.y_coordinate AS StartPoint_Y, rnpStart.isStop AS StartPointIsStop, " +
-                           "npStop.id AS StopPointID, npStop.x_coordinate AS StopPoint_X, npStop.y_coordinate AS StopPoint_Y, rnpStop.isStop AS StopPointIsStop " +
-                           "FROM Routes r " +
-                           "JOIN Route_Segments rs ON rs.route_id = r.id " +
-                           "JOIN Segments s ON s.id = rs.segment_id " +
-                           "JOIN NetworkPoints npStart ON npStart.id = s.start_id " +
-                           "JOIN NetworkPoints npStop ON npStop.id = s.stop_id " +
-                           "JOIN Route_NetworkPoints rnpStart ON rnpStart.route_id = r.id " +
-                           "AND rnpStart.networkpoint_id = s.start_id " +
-                           "JOIN Route_NetworkPoints rnpStop ON rnpStop.route_id = r.id " +
-                           "AND rnpStop.networkpoint_id = s.stop_id " +
-                           "ORDER BY r.id, rs.sequenceNo;";
+            string query = @"
+            SELECT 
+                r.id AS RouteID,
+                r.name AS RouteName,
+                rs.sequenceNo AS SegmentSequence,
+                rs.isReverse AS IsReverse,
+                s.id AS SegmentID,
+    
+                npStart.id AS StartPointID,
+                npStart.x_coordinate AS StartPoint_X,
+                npStart.y_coordinate AS StartPoint_Y,
+                rnpStart.isStop AS StartPointIsStop,
+    
+                npStop.id AS StopPointID,
+                npStop.x_coordinate AS StopPoint_X,
+                npStop.y_coordinate AS StopPoint_Y,
+                rnpStop.isStop AS StopPointIsStop
+            FROM Routes r
+            JOIN Route_Segments rs ON rs.route_id = r.id
+            JOIN Segments s ON s.id = rs.segment_id
+            JOIN NetworkPoints npStart ON npStart.id = s.start_id
+            JOIN NetworkPoints npStop ON npStop.id = s.stop_id
+            JOIN Route_NetworkPoints rnpStart ON rnpStart.route_id = r.id AND rnpStart.networkpoint_id = s.start_id
+            JOIN Route_NetworkPoints rnpStop ON rnpStop.route_id = r.id AND rnpStop.networkpoint_id = s.stop_id
+            ORDER BY r.id, rs.sequenceNo;";
+
             using (SqlConnection connection = new(connectionstring))
             using (SqlCommand cmd = connection.CreateCommand()) {
                 try {
-                    List<Route> routes = new ();
+                    List<Route> routes = new();
                     cmd.CommandText = query;
                     connection.Open();
                     SqlDataReader reader = cmd.ExecuteReader();
                     int currentRouteId = -1;
                     Route route = null;
-                    List<Segment> segments = new ();
-                    List < (NetworkPoint, bool)> stops = new ();
-                    HashSet<int> addedStops = new();
+                    List<(Segment, bool)> segments = new();
+                    List<(NetworkPoint, bool)> stops = new();
+
                     while (reader.Read()) {
-                        if ((int)reader["RouteID"] != currentRouteId) {
-                            currentRouteId = (int)reader["RouteId"];
+                        int routeId = (int)reader["RouteID"];
+
+                        if (routeId != currentRouteId) {
+                            currentRouteId = routeId;
                             if (route != null) {
                                 route.Segments = segments;
                                 route.Stops = stops;
                                 routes.Add(new Route(route.Id, route.Name, [.. route.Segments], [.. route.Stops]));
-                                route = null;
                                 segments.Clear();
                                 stops.Clear();
-                                addedStops.Clear();
                             }
-                            route = new();
-                            route.Id = currentRouteId;
-                            route.Name = (string)reader["RouteName"];
-                        }
-                        NetworkPoint start = new NetworkPoint((int)reader["StartPointID"], (double)reader["StartPoint_X"], (double)reader["StartPoint_Y"]);
-                        NetworkPoint stop = new NetworkPoint((int)reader["StopPointID"], (double)reader["StopPoint_X"], (double)reader["StopPoint_Y"]);
-                        
-                        if (addedStops.Add(start.Id))
-                            stops.Add((start, (bool)reader["StartPointIsStop"]));
-                        if (addedStops.Add(stop.Id))
-                            stops.Add((stop, (bool)reader["StopPointIsStop"]));
 
-                        segments.Add(new Segment((int)reader["SegmentID"], start, stop));
+                            route = new Route {
+                                Id = routeId,
+                                Name = (string)reader["RouteName"]
+                            };
+                        }
+
+                        NetworkPoint npStart = new((int)reader["StartPointID"], (double)reader["StartPoint_X"], (double)reader["StartPoint_Y"]);
+                        NetworkPoint npStop = new((int)reader["StopPointID"], (double)reader["StopPoint_X"], (double)reader["StopPoint_Y"]);
+                        Segment segment = new((int)reader["SegmentID"], npStart, npStop);
+                        bool isReverse = (bool)reader["IsReverse"];
+
+                        NetworkPoint first = isReverse ? npStop : npStart;
+                        NetworkPoint second = isReverse ? npStart : npStop;
+
+                        bool firstIsStop = isReverse ? (bool)reader["StopPointIsStop"] : (bool)reader["StartPointIsStop"];
+                        bool secondIsStop = isReverse ? (bool)reader["StartPointIsStop"] : (bool)reader["StopPointIsStop"];
+
+                        if (stops.Count == 0 || stops[^1].Item1.Id != first.Id)
+                            stops.Add((first, firstIsStop));
+                        if (stops.Count == 0 || stops[^1].Item1.Id != second.Id)
+                            stops.Add((second, secondIsStop));
+
+                        segments.Add((segment, isReverse));
                     }
 
                     if (route != null) {
@@ -184,8 +207,8 @@ namespace RouteBeheerDL {
 
                     return routes;
                 } catch (SqlException ex) {
-                    throw new ApplicationException("An error occured while retrieving all routes.");
-                } 
+                    throw new ApplicationException("An error occurred while retrieving all routes.", ex);
+                }
             }
         }
 

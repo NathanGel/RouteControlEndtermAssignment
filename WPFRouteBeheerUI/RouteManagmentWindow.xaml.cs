@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,14 +12,18 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using RouteBeheerBL.Model;
 
 namespace WPFRouteBeheerUI {
     /// <summary>
     /// Interaction logic for RouteManagmentWindow.xaml
     /// </summary>
     public partial class RouteManagmentWindow : Window {
-        public RouteManagmentWindow() {
+        private ObservableCollection<Route> routes;
+        public RouteManagmentWindow(ObservableCollection<Route> routes) {
             InitializeComponent();
+            this.routes = routes;
+            DataGridRoutes.ItemsSource = this.routes;
         }
         private void MinimizeButton_Click(object sender, RoutedEventArgs e) {
             WindowState = WindowState.Minimized;

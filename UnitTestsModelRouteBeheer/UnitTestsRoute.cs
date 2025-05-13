@@ -4,7 +4,7 @@ using System.Drawing;
 
 namespace UnitTestsModelRouteBeheer {
     public class UnitTestsRoute {
-        private List<Segment> _segmenten;
+        private List<(Segment, bool)> _segmenten;
         private List<Facility> _facilities;
         private List<NetworkPoint> _networkPoints;
         private List<(NetworkPoint, bool)> _stops;
@@ -30,10 +30,10 @@ namespace UnitTestsModelRouteBeheer {
                 (_networkPoints[4], true)
             };
             _segmenten = new() {
-                new Segment(1, _networkPoints[0], _networkPoints[1]),
-                new Segment(2, _networkPoints[1], _networkPoints[2]),
-                new Segment(3, _networkPoints[2], _networkPoints[3]),
-                new Segment(4, _networkPoints[3], _networkPoints[4]),
+                (new Segment(1, _networkPoints[0], _networkPoints[1]), true),
+                (new Segment(2, _networkPoints[1], _networkPoints[2]), false),
+                (new Segment(3, _networkPoints[2], _networkPoints[3]), true),
+                (new Segment(4, _networkPoints[3], _networkPoints[4]), false),
             };
         }
 
@@ -79,21 +79,21 @@ namespace UnitTestsModelRouteBeheer {
         [Fact]
         public void Test_Segments_Invalid_SegmentsEmpty() {
             Route r = new("Route1", _segmenten, _stops);
-            List<Segment> invalidSegments = new();
+            List<(Segment, bool)> invalidSegments = new();
             Assert.Throws<RouteException>(() => r.Segments = invalidSegments);
         }
 
         [Fact]
         public void Test_Segments_Invalid_SegmentsNull() {
             Route r = new("Route1", _segmenten, _stops);
-            List<Segment> invalidSegments = null;
+            List<(Segment, bool)> invalidSegments = null;
             Assert.Throws<RouteException>(() => r.Segments = invalidSegments);
         }
 
         [Fact]
         public void Test_Segments_Invalid_SegmentInListNull() {
             Route r = new("Route1", _segmenten, _stops);
-            List<Segment> invalidSegments = new() { null };
+            List<(Segment, bool)> invalidSegments = new() { (null, true) };
             Assert.Throws<RouteException>(() => r.Segments = invalidSegments);
         }
 
