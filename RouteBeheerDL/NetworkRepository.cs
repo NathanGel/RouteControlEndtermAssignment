@@ -324,7 +324,6 @@ namespace RouteBeheerDL {
                 }
             }
         }
-
         public bool CheckForExistingConnectionsBetweenFacilitiesAndNetworkPoints(Facility facility) {
             string query = "SELECT count(*) AS count FROM NetworkPoint_Facilities WHERE facility_id=@id";
             using (SqlConnection connection = new(connectionString))
@@ -338,6 +337,46 @@ namespace RouteBeheerDL {
                     return reader.Read() && (int)reader["count"] != 0 ? true : false;
                 } catch (SqlException) {
                     throw new ApplicationException("An error occured while checking for existing connections");
+                } catch (Exception) {
+                    throw new Exception();
+                }
+            }
+        }
+
+        public bool CheckForNetworkPointWithSameCoordinates(NetworkPoint point) {
+            string query = "SELECT count(*) AS count FROM NetworkPoints WHERE x_coordinate=@x AND y_coordinate=@y";
+            using (SqlConnection connection = new(connectionString))
+            using (SqlCommand cmd = connection.CreateCommand()) {
+                try {
+                    cmd.CommandText = query;
+                    cmd.Parameters.AddWithValue("@x", point.X);
+                    cmd.Parameters.AddWithValue("@y", point.Y);
+                    connection.Open();
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    return reader.Read() && (int)reader["count"] != 0 ? true : false;
+                } catch (SqlException) {
+                    throw new ApplicationException("An error occured while checking for points with the same coordinates");
+                } catch (Exception) {
+                    throw new Exception();
+                }
+            }
+        }
+
+        public bool CheckForSegmentWithSameNetworkPoints(Segment segment) {
+            string query = "SELECT count(*) AS count FROM Segments WHERE start_id=@startId AND stop_id=@stopId";
+            using (SqlConnection connection = new(connectionString))
+            using (SqlCommand cmd = connection.CreateCommand()) {
+                try {
+                    cmd.CommandText = query;
+                    cmd.Parameters.AddWithValue("@startId", segment.StartPoint.Id);
+                    cmd.Parameters.AddWithValue("@stopId", segment.EndPoint.Id);
+                    connection.Open();
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    return reader.Read() && (int)reader["count"] != 0 ? true : false;
+                } catch (SqlException) {
+                    throw new ApplicationException("An error occured while checking for points with the same coordinates");
                 } catch (Exception) {
                     throw new Exception();
                 }

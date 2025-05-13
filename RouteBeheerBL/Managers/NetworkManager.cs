@@ -14,6 +14,7 @@ namespace RouteBeheerBL.Managers {
 
         public int AddNetworkPoint(NetworkPoint point) {
             if (point == null) throw new NetworkException("Network point cannot be null");
+            if (repo.CheckForNetworkPointWithSameCoordinates(point)) throw new InvalidOperationException("Cannot add this point because one with the same x and y coordinate already exists");
             if (point.X == default || point.Y == default) throw new NetworkException("Network point coordinates cannot be default");
             if (point.X <= 0 || point.Y <= 0 || point.X > 1000 || point.Y > 1000) throw new NetworkException("Coordinates do not match requirements.");
             return repo.AddNetworkPoint(point);
@@ -28,6 +29,7 @@ namespace RouteBeheerBL.Managers {
 
         public void UpdateNetworkPoint(NetworkPoint point) {
             if (point == null) throw new NetworkException("Network point cannot be null");
+            if (repo.CheckForNetworkPointWithSameCoordinates(point)) throw new InvalidOperationException("Cannot alter this point because one with the same x and y coordinate already exists");
             if (point.X == default || point.Y == default) throw new NetworkException("Network point coordinates cannot be default");
             if (point.X <= 0 || point.Y <= 0 || point.X > 1000 || point.Y > 1000) throw new NetworkException("Coordinates do not match requirements.");
             repo.UpdateNetworkPoint(point);
@@ -35,6 +37,8 @@ namespace RouteBeheerBL.Managers {
 
         public int AddConnection(Segment segment) {
             if (segment == null) throw new NetworkException("Segment cannot be null");
+            if (repo.CheckForSegmentWithSameNetworkPoints(segment)) throw new InvalidOperationException("Cannot add segment because one with the same start and endopoint already exists");
+            if (segment.StartPoint.Equals(segment.EndPoint)) throw new NetworkException("Segment start and endpoint cannot be the same");
             return repo.AddConnection(segment);
         }
 

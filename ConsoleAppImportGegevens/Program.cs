@@ -20,10 +20,11 @@ namespace ConsoleAppImportGegevens {
             //const string pathFacilitiesLocations = @"C:\Users\natha\programmerenGevorderd\Eindopdracht\EindopdrachtProgrammerenGevorderdRouteBeheer\InitializationFiles\faciliteiten_locaties.txt";
 
             INetworkRepository networkRepository = new NetworkRepository(connectionString);
+            IRouteRepository routeRepository = new RouteRepository(connectionString);
             FileManager fm = new(pathFacilities, pathNetworkPoints, pathStretches, pathFacilitiesLocations, networkRepository);
             fm.InitializeNetwork();
 
-            NetworkManager nm = new(networkRepository);
+            NetworkManager nm = new(networkRepository, routeRepository);
         }
     }
 }

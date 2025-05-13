@@ -18,8 +18,8 @@ namespace RouteBeheerBL.Managers {
             _repo.Update(route);
         }
 
-        public void DeleteRoute(int routeId) {
-            _repo.Delete(routeId);
+        public void DeleteRoute(Route route) {
+            _repo.Delete(route);
         }
 
         public List<Route> GetAllRoutes() {

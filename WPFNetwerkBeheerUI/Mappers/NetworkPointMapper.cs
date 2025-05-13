@@ -6,7 +6,11 @@ namespace WPFNetwerkBeheerUI.Mappers {
     public static class NetworkPointMapper {
         public static NetworkPoint MapToDomain(NetworkPointUI networkPoint) {
             return new(networkPoint.Id, networkPoint.X, networkPoint.Y, networkPoint.Facilities.ToList());
-         }
+        }
+
+        public static NetworkPoint MapToDomainWithoutId(NetworkPointUI networkPoint) {
+            return new(networkPoint.X, networkPoint.Y, networkPoint.Facilities.ToList());
+        }
 
         public static NetworkPointUI MapFromDomain(NetworkPoint networkPoint) {
             ObservableCollection<Facility> facilities = new ObservableCollection<Facility>(networkPoint.Facilities);

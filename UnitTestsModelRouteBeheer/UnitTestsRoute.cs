@@ -38,6 +38,190 @@ namespace UnitTestsModelRouteBeheer {
         }
 
         [Fact]
+        public void Test_EmptyConstructor_Valid() {
+            Route route = new Route();
+            Assert.Equal(0, route.Id);
+            Assert.Equal(null, route.Name);
+            Assert.Empty(route.Segments);
+            Assert.Empty(route.Stops);
+        }
+
+        [Fact]
+        public void Test_ConstructorWithoutId_Valid() {
+            Route route = new Route("Route1", _segmenten, _stops);
+            Assert.Equal("Route1", route.Name);
+            Assert.Equal(_segmenten, route.Segments);
+            Assert.Equal(_stops, route.Stops);
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData(" ")]
+        [InlineData(null)]
+        [InlineData("Rt")]
+
+        public void Test_ConstructorWithoutId_InvalidName(string name) {
+            Assert.Throws<RouteException>( () => new Route(name, _segmenten, _stops));
+        }
+
+        [Fact]
+        public void Test_ConstructorWithoutId_InvalidSegmentsNull() {
+            Assert.Throws<RouteException>(() => new Route("Route1", null, _stops));
+        }
+
+        [Fact]
+        public void Test_ConstructorWithoutId_InvalidSegmentsEmpty() {
+            List<(Segment, bool)> invalidSegments = new();
+            Assert.Throws<RouteException>(() => new Route("Route1", invalidSegments, _stops));
+        }
+
+        [Fact]
+        public void Test_ConstructorWithoutId_InvalidSegmentsContainsNullValue() {
+            List<(Segment, bool)> invalidSegments = new() { (null, true) };
+            Assert.Throws<RouteException>(() => new Route("Route1", invalidSegments, _stops));
+        }
+
+        [Fact]
+        public void Test_ConstructorWithoutId_InvalidStops_Null() {
+            Assert.Throws<RouteException>(() => new Route("Route1", _segmenten, null));
+        }
+
+        [Fact]
+        public void Test_ConstructorWithoutId_InvalidStops_Empty() {
+            var invalidStops = new List<(NetworkPoint, bool)>();
+            Assert.Throws<RouteException>(() => new Route("Route1", _segmenten, invalidStops));
+        }
+
+        [Fact]
+        public void Test_ConstructorWithoutId_InvalidStops_ContainsNull() {
+            var invalidStops = new List<(NetworkPoint, bool)>
+            {
+                (null, true),
+                (new NetworkPoint(0, 0), true),
+                (new NetworkPoint(1, 1), true),
+                (new NetworkPoint(2, 2), true),
+                (new NetworkPoint(3, 3), true),
+            };
+            Assert.Throws<RouteException>(() => new Route("Route1", _segmenten, invalidStops));
+        }
+
+        [Fact]
+        public void Test_ConstructorWithoutId_InvalidStops_LessThanFive() {
+            var invalidStops = new List<(NetworkPoint, bool)>
+            {
+                (new NetworkPoint(0, 0), true),
+                (new NetworkPoint(1, 1), true),
+                (new NetworkPoint(2, 2), true),
+                (new NetworkPoint(3, 3), true),
+            };
+            Assert.Throws<RouteException>(() => new Route("Route1", _segmenten, invalidStops));
+        }
+
+        [Fact]
+        public void Test_ConstructorWithoutId_InvalidStops_StartNotStop() {
+            var invalidStops = new List<(NetworkPoint, bool)>
+            {
+                (new NetworkPoint(0, 0), false), // invalid start
+                (new NetworkPoint(1, 1), true),
+                (new NetworkPoint(2, 2), true),
+                (new NetworkPoint(3, 3), true),
+                (new NetworkPoint(4, 4), true),
+            };
+            Assert.Throws<RouteException>(() => new Route("Route1", _segmenten, invalidStops));
+        }
+
+        [Fact]
+        public void Test_ConstructorWithoutId_InvalidStops_EndNotStop() {
+            var invalidStops = new List<(NetworkPoint, bool)>
+            {
+                (new NetworkPoint(0, 0), true),
+                (new NetworkPoint(1, 1), true),
+                (new NetworkPoint(2, 2), true),
+                (new NetworkPoint(3, 3), true),
+                (new NetworkPoint(4, 4), false), // invalid end
+            };
+            Assert.Throws<RouteException>(() => new Route("Route1", _segmenten, invalidStops));
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(-1)]
+        [InlineData(-99)]
+        public void Test_ConstructorWithId_InvalidId(int id) {
+            Assert.Throws<RouteException>(() => new Route(id, "Route1", _segmenten, _stops));
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData(" ")]
+        [InlineData(null)]
+        [InlineData("Rt")]
+        public void Test_ConstructorWithId_InvalidName(string name) {
+            Assert.Throws<RouteException>(() => new Route(1, name, _segmenten, _stops));
+        }
+
+        [Fact]
+        public void Test_ConstructorWithId_InvalidSegmentsNull() {
+            Assert.Throws<RouteException>(() => new Route(1, "Route1", null, _stops));
+        }
+
+        [Fact]
+        public void Test_ConstructorWithId_InvalidSegmentsEmpty() {
+            List<(Segment, bool)> invalidSegments = new();
+            Assert.Throws<RouteException>(() => new Route(1, "Route1", invalidSegments, _stops));
+        }
+
+        [Fact]
+        public void Test_ConstructorWithId_InvalidSegmentsContainsNull() {
+            List<(Segment, bool)> invalidSegments = new() { (null, true) };
+            Assert.Throws<RouteException>(() => new Route(1, "Route1", invalidSegments, _stops));
+        }
+
+        [Fact]
+        public void Test_ConstructorWithId_InvalidStopsNull() {
+            Assert.Throws<RouteException>(() => new Route(1, "Route1", _segmenten, null));
+        }
+
+        [Fact]
+        public void Test_ConstructorWithId_InvalidStopsEmpty() {
+            List<(NetworkPoint, bool)> invalidStops = new();
+            Assert.Throws<RouteException>(() => new Route(1, "Route1", _segmenten, invalidStops));
+        }
+
+        [Fact]
+        public void Test_ConstructorWithId_InvalidStopsContainsNull() {
+            List<(NetworkPoint, bool)> invalidStops = new() {
+        (null, true),
+        (new NetworkPoint(1,1), true),
+        (new NetworkPoint(2,2), true),
+        (new NetworkPoint(3,3), true),
+        (new NetworkPoint(4,4), true),
+    };
+            Assert.Throws<RouteException>(() => new Route(1, "Route1", _segmenten, invalidStops));
+        }
+
+        [Fact]
+        public void Test_ConstructorWithId_InvalidStops_LessThanFive() {
+            List<(NetworkPoint, bool)> invalidStops = new() {
+        (new NetworkPoint(1,1), true),
+        (new NetworkPoint(2,2), true),
+        (new NetworkPoint(3,3), true),
+        (new NetworkPoint(4,4), true),
+    };
+            Assert.Throws<RouteException>(() => new Route(1, "Route1", _segmenten, invalidStops));
+        }
+
+
+        [Fact]
+        public void Test_ConstructorWithId_Valid() {
+            Route route = new Route(1, "Route1", _segmenten, _stops);
+            Assert.Equal(1, route.Id);
+            Assert.Equal("Route1", route.Name);
+            Assert.Equal(_segmenten, route.Segments);
+            Assert.Equal(_stops, route.Stops);
+        }
+
+        [Fact]
         public void Test_Id_Valid() {
             Route r = new("Route1", _segmenten, _stops);
             r.Id = 1;
@@ -156,7 +340,7 @@ namespace UnitTestsModelRouteBeheer {
 
         [Fact]
         public void Test_GetDistance_Valid() {
-            double distance = Route.GetDistance(new Point(1, 1), new Point(4, 5));
+            double distance = Route.GetDistance(new NetworkPoint(1, 1), new NetworkPoint(4, 5));
             Assert.Equal(5, distance);
         }
     }

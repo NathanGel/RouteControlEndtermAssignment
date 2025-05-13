@@ -305,7 +305,7 @@ namespace WPFNetwerkBeheerUI {
             try {
                 if (clickedLocation != default) {
                     NetworkPointUI newPoint = new(clickedLocation.X, clickedLocation.Y);
-                    newPoint.Id = nm.AddNetworkPoint(NetworkPointMapper.MapToDomain(newPoint));
+                    newPoint.Id = nm.AddNetworkPoint(NetworkPointMapper.MapToDomainWithoutId(newPoint));
                     points.Add(newPoint);
                     RemovePreviousHighlight();
                     clickedLocation = default;
@@ -314,6 +314,8 @@ namespace WPFNetwerkBeheerUI {
                 }
             } catch (NetworkException ex) { // Dit catch-blok vangt de exceptions op die gegooid worden in de manager AddNetworkPoint
                 MessageBox.Show("An error occured because the networkpoint does not meet the specified requirements", ex.Message, MessageBoxButton.OK, MessageBoxImage.Warning);
+            } catch (InvalidOperationException) {
+                MessageBox.Show("An error occured because there are existing connections between points and segments", "Adding Error", MessageBoxButton.OK, MessageBoxImage.Warning);
             } catch (ApplicationException ex) { // Dit catch-blok vangt de sql exceptions op die gegooid werden in de repo. De SqlException werd vertaald naar een ApplicationException
                 MessageBox.Show("An error occured while adding a networkpoint", ex.Message, MessageBoxButton.OK, MessageBoxImage.Error);
             } catch (Exception ex) { // dit catch-blok dient als fallback indien er ergens een exception gegooid word die onverwacht is
@@ -348,47 +350,56 @@ namespace WPFNetwerkBeheerUI {
                     double originalX = selectedPoint.X; //ik sla hier de originele x en y coordinaat op om fouten te vermijden
                     double originalY = selectedPoint.Y;
 
-                    NetworkPointWindow npWindow = new(selectedPoint);
+                    NetworkPointWindow npWindow = new(new(selectedPoint.Id, selectedPoint.X, selectedPoint.Y, selectedPoint.Facilities)); //doorgeven als nieuw punt zodat de waarden onaangepast blijven bij incorrecte data
                     bool? result = npWindow.ShowDialog();
                     if (result == true) {
                         nm.UpdateNetworkPoint(NetworkPointMapper.MapToDomain(npWindow.point));
 
                         // dit codeblok zoekt in de points collectie naar het geselecteerde punt om het daar aan te passen
-                        int index = points.IndexOf(selectedPoint);
+                        int index = points.IndexOf(npWindow.point);
                         if (index != -1) {
                             points[index] = npWindow.point;
                         }
 
-                        // dit codeblok past het networkpoint aan in de Ellipse/networkpoint dictionary
-                        var kvp = pointElements.FirstOrDefault(p => p.Value.Equals(selectedPoint));
+                        var kvp = pointElements.FirstOrDefault(p => p.Value.Equals(npWindow.point));
                         if (kvp.Key != null) {
-                            pointElements[kvp.Key] = npWindow.point; // vervang het punt in de dictionary
+                            pointElements[kvp.Key] = npWindow.point; // punt vervangen in de dictionary
 
-                            // Het punt opnieuw tekenen indien de coordinaten gewijzigd zijn
+                            // enkel hertekenen als de coordinaten veranderd zijn
                             if (npWindow.point.X != originalX || npWindow.point.Y != originalY) {
-                                canvas.Children.Remove(kvp.Key); // verwijder de oude ellipse van het canvas
-                                pointElements.Remove(kvp.Key);   // verwijder de oude ellipse/point uit de dictionary
+                                canvas.Children.Remove(kvp.Key); // oude ellipse verwijderen van het canvas
+                                pointElements.Remove(kvp.Key);   // oude ellipse verwijderen uit de dictionary
 
+                                // de lijst van segmenten ophalen waar het gewijzigde punt in voorkomt
                                 List<SegmentUI> segmentsToChange = segments.Where(s => s.StartPoint.Equals(kvp.Value) || s.EndPoint.Equals(kvp.Value)).ToList();
-                                foreach (SegmentUI segment in segmentsToChange) {
-                                    if (segment.StartPoint.Id == kvp.Value.Id)
-                                        segment.StartPoint = kvp.Value;
-                                    else if(segment.EndPoint.Id == kvp.Value.Id)
-                                        segment.EndPoint = kvp.Value;
 
-                                    canvas.Children.Remove(segmentElements[segment]);
-                                    segmentElements.Remove(segment);
-                                    DrawLine(segment);
+                                foreach (SegmentUI segment in segmentsToChange) {
+                                    //tijdelijke variabele met de waarde van het aangepaste punt
+                                    var updatedPoint = npWindow.point;
+
+                                    // Check of het punt een start of eindpunt is in het segment
+                                    if (segment.StartPoint.Equals(kvp.Value)) {
+                                        segment.StartPoint = updatedPoint;
+                                    } else if (segment.EndPoint.Equals(kvp.Value)) {
+                                        segment.EndPoint = updatedPoint;
+                                    }
+
+                                    canvas.Children.Remove(segmentElements[segment]); // oude Line verwijderen van het canvas
+                                    segmentElements.Remove(segment); // oude line verwijderen uit de dictionary
+                                    DrawLine(segment); // line opnieuw tekenen 
                                 }
-                                DrawPoint(npWindow.point);       // het punt opnieuw tekenen
+
+                                // punt hertekenen
+                                DrawPoint(npWindow.point);
                             }
                         }
-
                         RemovePreviousHighlight(); //zorgen dat de vorige highlight zeker weg is na het verloop van de dialogen
                         selectedPoint = default; //op default zetten zodat dit niet voor problemen kan zorgen bij de volgende method
                     }
                 } catch (NetworkException ex) { // Dit catch-blok vangt de exceptions op die gegooid worden in de manager UpdateNetworkPoint
                     MessageBox.Show("An error occured because the networkpoint does not meet the specified requirements", ex.Message, MessageBoxButton.OK, MessageBoxImage.Warning);
+                } catch (InvalidOperationException) {
+                    MessageBox.Show("An error occured because there are existing connections between points and segments", "Update Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 } catch (ApplicationException ex) { // Dit catch-blok vangt de sql exceptions op die gegooid werden in de repo. De SqlException werd vertaald naar een ApplicationException
                     MessageBox.Show("An error occured while updating a networkpoint", ex.Message, MessageBoxButton.OK, MessageBoxImage.Error);
                 } catch (Exception ex) { // dit catch-blok dient als fallback indien er ergens een exception gegooid word die onverwacht is
@@ -437,6 +448,8 @@ namespace WPFNetwerkBeheerUI {
                 }
             } catch (NetworkException ex) { // Dit catch-blok vangt de exceptions op die gegooid worden in de manager AddConnection
                 MessageBox.Show("An error occured because the connection did not meet the specified requirements", ex.Message, MessageBoxButton.OK, MessageBoxImage.Warning);
+            } catch (InvalidOperationException) {
+                MessageBox.Show("An error occured because there are existing connections between points and segments", "Adding Error", MessageBoxButton.OK, MessageBoxImage.Warning);
             } catch (ApplicationException ex) { // Dit catch-blok vangt de sql exceptions op die gegooid werden in de repo. De SqlException werd vertaald naar een ApplicationException
                 MessageBox.Show("An error occured while adding a connection", ex.Message, MessageBoxButton.OK, MessageBoxImage.Error);
             } catch (Exception ex) { // dit catch-blok dient als fallback indien er ergens een exception gegooid word die onverwacht is

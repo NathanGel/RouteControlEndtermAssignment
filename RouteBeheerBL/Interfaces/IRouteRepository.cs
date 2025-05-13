@@ -5,7 +5,7 @@ namespace RouteBeheerBL.Interfaces {
         bool CheckForExistingConnectionsWithinRoutes(NetworkPoint point);
         bool CheckForExistingConnectionsWithinRoutes(Segment segment);
         void Update(Route route);
-        void Delete(int routeId);
+        void Delete(Route route);
         List<Route> GetAllRoutes();
     }
 }

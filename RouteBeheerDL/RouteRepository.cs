@@ -93,33 +93,8 @@ namespace RouteBeheerDL {
             }
         }
 
-        public void Delete(int routeId) {
-            string queryRouteSegments = "DELETE FROM Route_Segments WHERE route_id=@routeId";
-            string queryRouteNetworkPoints = "DELETE FROM Route_NetworkPoints WHERE route_id=@routeId";
-            string queryRoute = "DELETE FROM Routes WHERE id=@routeId";
-            using (SqlConnection connection = new(connectionstring))
-            using (SqlCommand cmd = connection.CreateCommand()) {
-                connection.Open();
-                SqlTransaction transaction = connection.BeginTransaction();
-                cmd.Transaction = transaction;
-                try {
-                    cmd.CommandText = queryRouteSegments;
-                    cmd.Parameters.AddWithValue("@routeId", routeId);
-                    cmd.ExecuteNonQuery();
-
-                    cmd.CommandText = queryRouteNetworkPoints;
-                    cmd.ExecuteNonQuery();
-
-                    cmd.CommandText = queryRoute;
-                    cmd.ExecuteNonQuery();
-
-                    transaction.Commit();
-
-                } catch (SqlException) {
-                    transaction.Rollback();
-                    throw new ApplicationException();
-                }
-            }
+        public void Delete(Route route) {
+            throw new NotImplementedException();
         }
 
         public List<Route> GetAllRoutes() {
