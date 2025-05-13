@@ -27,9 +27,10 @@ namespace RouteBeheerBL.Managers {
             repo.RemoveNetworkPoint(point);
         }
 
-        public void UpdateNetworkPoint(NetworkPoint point) {
+        public void UpdateNetworkPoint(NetworkPoint point, bool coordinatesAltered) {
             if (point == null) throw new NetworkException("Network point cannot be null");
-            if (repo.CheckForNetworkPointWithSameCoordinates(point)) throw new InvalidOperationException("Cannot alter this point because one with the same x and y coordinate already exists");
+            if (coordinatesAltered)
+                if (repo.CheckForNetworkPointWithSameCoordinates(point)) throw new InvalidOperationException("Cannot alter this point because one with the same x and y coordinate already exists");
             if (point.X == default || point.Y == default) throw new NetworkException("Network point coordinates cannot be default");
             if (point.X <= 0 || point.Y <= 0 || point.X > 1000 || point.Y > 1000) throw new NetworkException("Coordinates do not match requirements.");
             repo.UpdateNetworkPoint(point);

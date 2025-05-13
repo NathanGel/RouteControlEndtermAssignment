@@ -12,6 +12,7 @@ using WPFNetwerkBeheerUI.Model;
 using Point = System.Windows.Point;
 using RouteBeheerBL.Exceptions;
 using System.Linq;
+using RouteBeheerBL.Model;
 
 namespace WPFNetwerkBeheerUI {
     /// <summary>
@@ -350,10 +351,14 @@ namespace WPFNetwerkBeheerUI {
                     double originalX = selectedPoint.X; //ik sla hier de originele x en y coordinaat op om fouten te vermijden
                     double originalY = selectedPoint.Y;
 
-                    NetworkPointWindow npWindow = new(new(selectedPoint.Id, selectedPoint.X, selectedPoint.Y, selectedPoint.Facilities)); //doorgeven als nieuw punt zodat de waarden onaangepast blijven bij incorrecte data
+                    NetworkPointWindow npWindow = new(new(selectedPoint.Id, selectedPoint.X, selectedPoint.Y, [.. selectedPoint.Facilities])); //doorgeven als nieuw punt zodat de waarden onaangepast blijven bij incorrecte data
                     bool? result = npWindow.ShowDialog();
                     if (result == true) {
-                        nm.UpdateNetworkPoint(NetworkPointMapper.MapToDomain(npWindow.point));
+                        if (npWindow.point.X != originalX || npWindow.point.Y != originalY)
+                            nm.UpdateNetworkPoint(NetworkPointMapper.MapToDomain(npWindow.point), true);
+                        else
+                            nm.UpdateNetworkPoint(NetworkPointMapper.MapToDomain(npWindow.point), false);
+
 
                         // dit codeblok zoekt in de points collectie naar het geselecteerde punt om het daar aan te passen
                         int index = points.IndexOf(npWindow.point);
