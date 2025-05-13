@@ -119,12 +119,14 @@ namespace WPFRouteBeheerUI {
         }
 
         private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
-            if (addRouteClicked && selectedPoint != default) {
-                if (selectedPoints.Count == 0) {
+            //rechtermuisklik in combinatie met addrouteclicked betekent dat je het punt niet wenst te selecteren als een stopplaats
+            // indien het gaat over het eerste punt is dit standaard ingebouwd dat dit wel een stopplaats is
+            if (addRouteClicked && selectedPoint != default) { //nakijken of er gelikt is op addroute en er effectief een punt geselecteerd is
+                if (selectedPoints.Count == 0) { // indien het het eerste punt is voeg ik dit toe als een stopplaats
                     selectedPoints.Add((pointElements[selectedPoint], true));
                     HighlightPoint(selectedPoint, true);
                 } else {
-                    var lastPoint = selectedPoints[^1].Item1;
+                    var lastPoint = selectedPoints[^1].Item1; //ik kijk na op basis van het vorig punt en het geselecteerde punt of deze ergens samen in een segment bestaan
                     var currentPoint = pointElements[selectedPoint];
 
                     Segment? segment = segments.FirstOrDefault(
@@ -133,26 +135,26 @@ namespace WPFRouteBeheerUI {
                             (s.StartPoint.Equals(currentPoint) && s.EndPoint.Equals(lastPoint))
                     );
 
-                    if (segment != null && !selectedSegments.Any(s => s.Item1.Equals(segment))) {
+                    if (segment != null && !selectedSegments.Any(s => s.Item1.Equals(segment))) { // zoja kijk ik of het gaat over een omgekeerd segment of niet
                         bool isReverse = segment.StartPoint.Equals(currentPoint);
 
-                        selectedSegments.Add((segment, isReverse));
-                        selectedPoints.Add((currentPoint, false));
-                        HighlightPoint(selectedPoint, false);
+                        selectedSegments.Add((segment, isReverse)); //toevoegen aan de lijst van segmenten
+                        selectedPoints.Add((currentPoint, false)); //toevoegen aan de lijst van stops
+                        HighlightPoint(selectedPoint, false); // aanduiden op canvas
                     }
                 }
                 selectedPoint = default;
             }
         }
 
-
         private void Canvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e) {
-            if (addRouteClicked && selectedPoint != default) {
-                if (selectedPoints.Count == 0) {
+            //rechtermuisklik in combinatie met addrouteclicked betekent dat je het punt wenst te selecteren als een stopplaats
+            if (addRouteClicked && selectedPoint != default) { //nakijken of er gelikt is op addroute en er effectief een punt geselecteerd is
+                if (selectedPoints.Count == 0) { // indien het het eerste punt is voeg ik dit toe als een stopplaats
                     selectedPoints.Add((pointElements[selectedPoint], true));
                     HighlightPoint(selectedPoint, true);
                 } else {
-                    var lastPoint = selectedPoints[^1].Item1;
+                    var lastPoint = selectedPoints[^1].Item1; //ik kijk na op basis van het vorig punt en het geselecteerde punt of deze ergens samen in een segment bestaan
                     var currentPoint = pointElements[selectedPoint];
 
                     Segment? segment = segments
@@ -163,12 +165,12 @@ namespace WPFRouteBeheerUI {
                     );
 
 
-                    if (segment != null && !selectedSegments.Any(s => s.Item1.Equals(segment))) {
+                    if (segment != null && !selectedSegments.Any(s => s.Item1.Equals(segment))) { // zoja kijk ik of het gaat over een omgekeerd segment of niet
                         bool isReverse = segment.StartPoint.Equals(currentPoint);
 
-                        selectedSegments.Add((segment, isReverse));
-                        selectedPoints.Add((currentPoint, true));
-                        HighlightPoint(selectedPoint, true);
+                        selectedSegments.Add((segment, isReverse));  //toevoegen aan de lijst van segmenten
+                        selectedPoints.Add((currentPoint, true)); //toevoegen aan de lijst van stops
+                        HighlightPoint(selectedPoint, true); // aanduiden op canvas
                     }
                 }
                 selectedPoint = default;

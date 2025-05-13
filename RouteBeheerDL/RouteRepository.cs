@@ -122,7 +122,7 @@ namespace RouteBeheerDL {
             JOIN NetworkPoints npStop ON npStop.id = s.stop_id
             JOIN Route_NetworkPoints rnpStart ON rnpStart.route_id = r.id AND rnpStart.networkpoint_id = s.start_id
             JOIN Route_NetworkPoints rnpStop ON rnpStop.route_id = r.id AND rnpStop.networkpoint_id = s.stop_id
-            ORDER BY r.id, rs.sequenceNo;";
+            ORDER BY r.id, rs.sequenceNo;"; // query om alles van een route te bemachtigen => points/segmenten/facilities
 
             using (SqlConnection connection = new(connectionstring))
             using (SqlCommand cmd = connection.CreateCommand()) {
@@ -133,13 +133,13 @@ namespace RouteBeheerDL {
                     SqlDataReader reader = cmd.ExecuteReader();
                     int currentRouteId = -1;
                     Route route = null;
-                    List<(Segment, bool)> segments = new();
-                    List<(NetworkPoint, bool)> stops = new();
+                    List<(Segment, bool)> segments = new(); // lijst om de uitgelezen segmenten bij te houden
+                    List<(NetworkPoint, bool)> stops = new(); //lijst om de uitgelezen punten bij te houden
 
                     while (reader.Read()) {
-                        int routeId = (int)reader["RouteID"];
+                        int routeId = (int)reader["RouteID"]; // de route id uitlezen
 
-                        if (routeId != currentRouteId) {
+                        if (routeId != currentRouteId) { //indien de route id niet dezelfde is als de huidige id schrijven we de route weg en beginnen we aan een nieuwe
                             currentRouteId = routeId;
                             if (route != null) {
                                 route.Segments = segments;
@@ -149,24 +149,24 @@ namespace RouteBeheerDL {
                                 stops.Clear();
                             }
 
-                            route = new Route {
+                            route = new Route { // de nieuwe route aanmaken met volgende id en naam
                                 Id = routeId,
                                 Name = (string)reader["RouteName"]
                             };
                         }
 
-                        NetworkPoint npStart = new((int)reader["StartPointID"], (double)reader["StartPoint_X"], (double)reader["StartPoint_Y"]);
-                        NetworkPoint npStop = new((int)reader["StopPointID"], (double)reader["StopPoint_X"], (double)reader["StopPoint_Y"]);
-                        Segment segment = new((int)reader["SegmentID"], npStart, npStop);
-                        bool isReverse = (bool)reader["IsReverse"];
+                        NetworkPoint npStart = new((int)reader["StartPointID"], (double)reader["StartPoint_X"], (double)reader["StartPoint_Y"]); //het startpunt van het segment
+                        NetworkPoint npStop = new((int)reader["StopPointID"], (double)reader["StopPoint_X"], (double)reader["StopPoint_Y"]); //het eindpunt van het segment
+                        Segment segment = new((int)reader["SegmentID"], npStart, npStop); //het segment aanmaken met start en stop
+                        bool isReverse = (bool)reader["IsReverse"]; //uitlezen of het over een omgedraaid segment gaat
 
-                        NetworkPoint first = isReverse ? npStop : npStart;
+                        NetworkPoint first = isReverse ? npStop : npStart; //indien omgedraaid wissel ik het start en eindpunt even om
                         NetworkPoint second = isReverse ? npStart : npStop;
 
-                        bool firstIsStop = isReverse ? (bool)reader["StopPointIsStop"] : (bool)reader["StartPointIsStop"];
+                        bool firstIsStop = isReverse ? (bool)reader["StopPointIsStop"] : (bool)reader["StartPointIsStop"]; //ik pas de boolean waarde van stops aan op basis van of het over een reverse gaat of niet
                         bool secondIsStop = isReverse ? (bool)reader["StartPointIsStop"] : (bool)reader["StopPointIsStop"];
 
-                        if (stops.Count == 0 || stops[^1].Item1.Id != first.Id)
+                        if (stops.Count == 0 || stops[^1].Item1.Id != first.Id) //ik voeg ze toe op basis van welke eerst komt in het segment. Indien ik dit niet doe komen er problemen met de requirements van een route
                             stops.Add((first, firstIsStop));
                         if (stops.Count == 0 || stops[^1].Item1.Id != second.Id)
                             stops.Add((second, secondIsStop));
@@ -174,7 +174,7 @@ namespace RouteBeheerDL {
                         segments.Add((segment, isReverse));
                     }
 
-                    if (route != null) {
+                    if (route != null) { //in geval van de laatste route deze nog toevoegen
                         route.Segments = segments;
                         route.Stops = stops;
                         routes.Add(new Route(route.Id, route.Name, [.. route.Segments], [.. route.Stops]));

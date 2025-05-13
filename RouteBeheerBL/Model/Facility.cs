@@ -14,7 +14,7 @@ namespace RouteBeheerBL.Model {
         public int Id {
             get {return _id;}
             set {
-                if (value <= 0) throw new NetworkException("Id Invalid");
+                if (value <= 0) throw new NetworkException("Id Invalid"); //een id kan niet kleiner of gelijk zijn dan 0 ivm DB identity spec
                 _id = value;
             }
         }
@@ -22,7 +22,7 @@ namespace RouteBeheerBL.Model {
         public string Name { 
             get {  return _name;}
             set {
-                if (string.IsNullOrWhiteSpace(value)) throw new NetworkException("Name Invalid");
+                if (string.IsNullOrWhiteSpace(value)) throw new NetworkException("Name Invalid"); //de naam van een faciliteit mag niet leeg zijn
                 _name = value;
             }
         }

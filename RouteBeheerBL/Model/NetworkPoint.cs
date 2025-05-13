@@ -29,7 +29,7 @@ namespace RouteBeheerBL.Model {
         public int Id {
             get {  return _id; }
             set {
-                if (value <= 0) throw new NetworkException("Id invalid equal to or smaller than 0");
+                if (value <= 0) throw new NetworkException("Id invalid equal to or smaller than 0"); //een id kan niet kleiner of gelijk zijn dan 0 ivm DB identity spec
                 _id = value;
             }
         }
@@ -38,7 +38,7 @@ namespace RouteBeheerBL.Model {
         public double X { 
             get { return _x; }
             set {
-                if (value < 0 || value > 1000) throw new NetworkException("X Invalid values don't lie within required range");
+                if (value < 0 || value > 1000) throw new NetworkException("X Invalid values don't lie within required range"); //coordinaten dienen tussen 0 en 1000 te zitten
                 _x = value;
             }
         }
@@ -47,7 +47,7 @@ namespace RouteBeheerBL.Model {
         public double Y {
             get { return _y; }
             set {
-                if (value < 0 || value > 1000) throw new NetworkException("X Invalid values don't lie within required range");
+                if (value < 0 || value > 1000) throw new NetworkException("X Invalid values don't lie within required range"); //coordinaten dienen tussen 0 en 1000 te zitten
                 _y = value;
             }
         }
