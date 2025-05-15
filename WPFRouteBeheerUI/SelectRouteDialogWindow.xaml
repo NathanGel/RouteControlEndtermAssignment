@@ -102,8 +102,10 @@
             </DataGrid.Resources>
 
             <DataGrid.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="Select Route" Click="SelectRoute_Click"/>
+                <ContextMenu Name="contextMenu">
+                    <MenuItem Name="SelectRoute" Header="Select Route" Click="SelectRoute_Click"/>
+                    <MenuItem Name="MoreInfo" Header="More Info" Click="MoreInfo_Click"/>
+                    <MenuItem Name="RemoveRoute"  Header="Remove Route" Click="RemoveRoute_Click"/>
                 </ContextMenu>
             </DataGrid.ContextMenu>
         </DataGrid>

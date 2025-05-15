@@ -275,8 +275,8 @@ namespace WPFNetwerkBeheerUI {
 
         private void HighlightPoint(NetworkPointUI p) {
             Ellipse highlightCircle = new Ellipse {
-                Width = 10,
-                Height = 10,
+                Width = 7.5,
+                Height = 7.5,
                 Fill = Brushes.Red,
                 Stroke = Brushes.Red,
                 StrokeThickness = 2
@@ -519,8 +519,8 @@ namespace WPFNetwerkBeheerUI {
 
             foreach (NetworkPointUI np in connections) {
                 Ellipse ellipse = new Ellipse() {
-                    Width = 10,
-                    Height = 10,
+                    Width = 7.5,
+                    Height = 7.5,
                     Fill = Brushes.Red,
                     Stroke = Brushes.Red,
                     StrokeThickness = 2

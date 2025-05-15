@@ -23,11 +23,18 @@ namespace WPFRouteBeheerUI
     {
         public RouteUI route;
         private List<RouteUI> routes = new();
-        public SelectRouteDialogWindow(List<RouteUI> routes)
+        public SelectRouteDialogWindow(List<RouteUI> routes, bool isRouteInfo )
         {
             InitializeComponent();
             this.routes = routes;
             DataGridRoutes.ItemsSource = routes;
+
+            if (isRouteInfo) {
+                SelectRoute.Visibility = Visibility.Collapsed;
+            } else {
+                MoreInfo.Visibility = Visibility.Collapsed;
+                RemoveRoute.Visibility = Visibility.Collapsed;
+            }
         }
         private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
             if (e.ClickCount == 2) {
@@ -63,6 +70,15 @@ namespace WPFRouteBeheerUI
             if (e.LeftButton == MouseButtonState.Pressed) {
                 DragMove();
             }
+        }
+
+        private void MoreInfo_Click(object sender, RoutedEventArgs e) {
+            RouteWindow routeWindow = new RouteWindow((RouteUI)DataGridRoutes.SelectedItem);
+            routeWindow.ShowDialog();
+        }
+
+        private void RemoveRoute_Click(object sender, RoutedEventArgs e) {
+            MessageBox.Show("OULEH DE KNOP WERKT INSHALLAH");
         }
     }
 }

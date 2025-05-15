@@ -1,0 +1,111 @@
+﻿<Window x:Class="WPFRouteBeheerUI.RouteWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WPFRouteBeheerUI"
+        mc:Ignorable="d"
+        Title="Route Info" Height="600" Width="900"
+        WindowStyle="None" AllowsTransparency="True" Background="#1F2129">
+
+    <Window.Resources>
+        <Style x:Key="WindowControlButton" TargetType="Button">
+            <Setter Property="Width" Value="46"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+
+        <Style TargetType="DataGrid">
+            <Setter Property="Foreground" Value="#F5F7FB"/>
+            <Setter Property="Background" Value="#1F2129"/>
+            <Setter Property="RowBackground" Value="#2A2D3E"/>
+            <Setter Property="AlternatingRowBackground" Value="#1F1F2D"/>
+            <Setter Property="GridLinesVisibility" Value="None"/>
+            <Setter Property="BorderBrush" Value="#252836"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="ColumnHeaderStyle">
+                <Setter.Value>
+                    <Style TargetType="DataGridColumnHeader">
+                        <Setter Property="Foreground" Value="#F5F7FB"/>
+                        <Setter Property="Background" Value="#252836"/>
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                    </Style>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Border BorderBrush="#252836" BorderThickness="1" Background="#1F2129" CornerRadius="4">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30"/>
+                <!-- Top Bar -->
+                <RowDefinition Height="*"/>
+                <!-- Content -->
+            </Grid.RowDefinitions>
+
+            <!-- Top Bar -->
+            <Grid Grid.Row="0" Background="#252836" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                <TextBlock Text="Route Info" Foreground="#F5F7FB" VerticalAlignment="Center" Margin="10,0,0,0" FontWeight="SemiBold"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Style="{StaticResource WindowControlButton}" Content="&#xE8BB;" Click="CloseButton_Click"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- Main Content -->
+            <Grid Grid.Row="1" Margin="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- ID and Name -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,0,10">
+                    <Label Content="ID:" Foreground="#F5F7FB" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                    <TextBox IsReadOnly="True" Width="60" Margin="0,0,20,0" Name="TxtId"
+                             Background="#2A2D3E" Foreground="#F5F7FB" BorderBrush="#252836"/>
+                    <Label Content="Name:" Foreground="#F5F7FB" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                    <TextBox Width="200" Name="TxtName"
+                             Background="#2A2D3E" Foreground="#F5F7FB" BorderBrush="#252836"/>
+                </StackPanel>
+
+                <!-- DataGrid -->
+                <DataGrid Grid.Row="1" Grid.Column="0" Name="DataGridStops" AutoGenerateColumns="False" Margin="0,0,10,0"
+                          HeadersVisibility="Column" CanUserAddRows="False" CanUserDeleteRows="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Point ID" Binding="{Binding Item1.Id}" IsReadOnly="True"/>
+                        <DataGridTemplateColumn Header="Stop">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox IsChecked="{Binding Item2, Mode=TwoWay}" HorizontalAlignment="Center"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- Facilities List -->
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="10,0,0,0">
+                    <Label Content="Facilities" Foreground="#F5F7FB" HorizontalAlignment="Center"/>
+                    <ListBox Name="ListBoxFacilities" Height="300" 
+                             DisplayMemberPath="Name" 
+                             Background="#2A2D3E" Foreground="#F5F7FB" BorderBrush="#252836"/>
+                </StackPanel>
+
+                <!-- Save Button -->
+                <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Content="Save" Height="35" Margin="0,10,0,0"
+                        Background="#6C5CE7" Foreground="#F5F7FB" BorderBrush="#252836"/>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

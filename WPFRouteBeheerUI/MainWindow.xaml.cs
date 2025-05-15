@@ -199,7 +199,7 @@ namespace WPFRouteBeheerUI {
 
         private void BtnManageRoutes_Click(object sender, RoutedEventArgs e) {
             RemoveAllCurrentHighLights();
-            RouteManagmentWindow window = new RouteManagmentWindow(routes);
+            SelectRouteDialogWindow window = new SelectRouteDialogWindow(routes.ToList(), true);
             window.Show();
         }
 
@@ -267,7 +267,7 @@ namespace WPFRouteBeheerUI {
 
         private void BtnSelectRoute_Click(object sender, RoutedEventArgs e) {
             RemoveAllCurrentHighLights();
-            SelectRouteDialogWindow window = new(routes.ToList());
+            SelectRouteDialogWindow window = new(routes.ToList(), false);
             bool? result = window.ShowDialog();
             if (result == true) {
                 HighLightSelectedRoute(window.route);
