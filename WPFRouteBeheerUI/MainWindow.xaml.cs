@@ -14,6 +14,8 @@ using RouteBeheerBL.Model;
 using System.Collections.ObjectModel;
 using System.Net;
 using RouteBeheerBL.Exceptions;
+using WPFRouteBeheerUI.Model;
+using WPFRouteBeheerUI.Mappers;
 
 namespace WPFRouteBeheerUI {
     /// <summary>
@@ -25,7 +27,7 @@ namespace WPFRouteBeheerUI {
         private Dictionary<NetworkPoint, Ellipse> elementPoints = new();
         private List<Segment> segments;
         private Dictionary<Segment, Line> segmentElements = new();
-        private ObservableCollection<Route> routes;
+        private ObservableCollection<RouteUI> routes;
         private readonly string connectionString = @"Data Source=nathan\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
         private NetworkManager nm;
         private RouteManager rm;
@@ -33,14 +35,14 @@ namespace WPFRouteBeheerUI {
         private List<(NetworkPoint, bool)> selectedPoints = new();
         private List<(Segment, bool)> selectedSegments = new();
         private Ellipse selectedPoint;
-        private Route selectedRoute;
+        private RouteUI selectedRoute;
         private bool calculateDistanceClicked = false;
         public MainWindow() {
             rm = new(new RouteRepository(connectionString));
             points = new List<NetworkPoint>();
             segments = new List<Segment>();
             try {
-                routes = new ObservableCollection<Route>(rm.GetAllRoutes());
+                routes = new ObservableCollection<RouteUI>(rm.GetAllRoutes().Select(r => RouteMapper.MapFromDomain(r)));
             } catch (RouteException ex) {
                 MessageBox.Show("An error occured because the route does not meet the specified requirements", ex.Message, MessageBoxButton.OK, MessageBoxImage.Warning);
             } catch (ApplicationException ex) {
@@ -227,8 +229,8 @@ namespace WPFRouteBeheerUI {
             bool? result = dialog.ShowDialog();
             if (result == true) {
                 try {
-                    Route route = new(dialog.RouteName, [.. selectedSegments], [.. selectedPoints]);
-                    route.Id = rm.AddRoute(route);
+                    RouteUI route = new(dialog.RouteName, [.. selectedSegments], [.. selectedPoints]);
+                    route.Id = rm.AddRoute(RouteMapper.MapToDomainWithoutId(route));
                     routes.Add(route);
                     //maybe something that shows the route was added???
                 } catch (RouteException ex) {
@@ -279,7 +281,7 @@ namespace WPFRouteBeheerUI {
                 Background = Brushes.Green,
                 BorderBrush = Brushes.Green,
                 Height = 30,
-                Margin = new Thickness(5, 5, 5, 5)
+                Margin = new Thickness(5, 0, 5, 0)
             };
 
             buttonCalculateDistance = new() {
@@ -288,13 +290,8 @@ namespace WPFRouteBeheerUI {
                 Background = Brushes.Green,
                 BorderBrush = Brushes.Green,
                 Height = 30,
-                Margin = new Thickness(5, 5, 5, 5)
+                Margin = new Thickness(5, 0, 5, 0)
             };
-
-            double distance = 0;
-            foreach (var segment in selectedRoute.Segments) {
-                distance += Route.GetDistance(segment.Item1.StartPoint, segment.Item1.EndPoint);
-            }
 
             buttonSaveRouteAsTXT.Click += BtnSaveRouteAsTXT_Click;
             buttonCalculateDistance.Click += BtnCalculateDistance_Click;
@@ -315,7 +312,7 @@ namespace WPFRouteBeheerUI {
             MessageBox.Show("Select the 2 point from the route for which you want to calculate the route", "Distance Calculation", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-        private void HighLightSelectedRoute(Route route) {
+        private void HighLightSelectedRoute(RouteUI route) {
             foreach (var point in route.Stops) {
                 Ellipse e = pointElements.FirstOrDefault(p => p.Value.Equals(point.Item1)).Key;
                 HighlightPoint(e, point.Item2);

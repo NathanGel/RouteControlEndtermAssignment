@@ -13,14 +13,15 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using RouteBeheerBL.Model;
+using WPFRouteBeheerUI.Model;
 
 namespace WPFRouteBeheerUI {
     /// <summary>
     /// Interaction logic for RouteManagmentWindow.xaml
     /// </summary>
     public partial class RouteManagmentWindow : Window {
-        private ObservableCollection<Route> routes;
-        public RouteManagmentWindow(ObservableCollection<Route> routes) {
+        private ObservableCollection<RouteUI> routes;
+        public RouteManagmentWindow(ObservableCollection<RouteUI> routes) {
             InitializeComponent();
             this.routes = routes;
             DataGridRoutes.ItemsSource = this.routes;

@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using RouteBeheerBL.Model;
+using WPFRouteBeheerUI.Model;
 
 namespace WPFRouteBeheerUI
 {
@@ -20,9 +21,9 @@ namespace WPFRouteBeheerUI
     /// </summary>
     public partial class SelectRouteDialogWindow : Window
     {
-        public Route route;
-        private List<Route> routes = new();
-        public SelectRouteDialogWindow(List<Route> routes)
+        public RouteUI route;
+        private List<RouteUI> routes = new();
+        public SelectRouteDialogWindow(List<RouteUI> routes)
         {
             InitializeComponent();
             this.routes = routes;
@@ -41,8 +42,13 @@ namespace WPFRouteBeheerUI
         }
 
         private void SelectRoute_Click(object sender, RoutedEventArgs e) {
-            route = (Route)DataGridRoutes.SelectedItem;
-            DialogResult = true;
+            if (DataGridRoutes.SelectedItem != null) {
+                route = (RouteUI)DataGridRoutes.SelectedItem;
+                DialogResult = true;
+                Close();
+            } else {
+                MessageBox.Show("Please select a route to display", "No route selected", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
 
         private void MinimizeButton_Click(object sender, RoutedEventArgs e) {
