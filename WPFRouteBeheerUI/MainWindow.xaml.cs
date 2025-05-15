@@ -80,10 +80,10 @@ namespace WPFRouteBeheerUI {
                 Line line = new Line {
                     Stroke = Brushes.OrangeRed,
                     StrokeThickness = 1,
-                    X1 = segment.StartPoint.X,
-                    Y1 = segment.StartPoint.Y,
-                    X2 = segment.EndPoint.X,
-                    Y2 = segment.EndPoint.Y
+                    X1 = segment.StartPoint.X * 0.75,
+                    Y1 = segment.StartPoint.Y * 0.75,
+                    X2 = segment.EndPoint.X * 0.75,
+                    Y2 = segment.EndPoint.Y * 0.75
                 };
 
                 canvas.Children.Add(line);
@@ -98,8 +98,8 @@ namespace WPFRouteBeheerUI {
                     StrokeThickness = 2,
                 };
 
-                Canvas.SetLeft(ellipse, point.X - (ellipse.Width / 2)); // de berekening die hier in plaats vind zorgt ervoor dat
-                Canvas.SetTop(ellipse, point.Y - (ellipse.Width / 2));   // het midden van de ellipse overeenstemt met de exacte coordinaten
+                Canvas.SetLeft(ellipse, point.X * 0.75 - (ellipse.Width / 2)); // de berekening die hier in plaats vind zorgt ervoor dat
+                Canvas.SetTop(ellipse, point.Y * 0.75 - (ellipse.Width / 2));   // het midden van de ellipse overeenstemt met de exacte coordinaten
                                                                          // van het punt eerder zorgde dit voor problemen met de lijnen 
                 ellipse.MouseLeftButtonDown += Ellipse_MouseLeftButtonDown;
                 ellipse.MouseRightButtonDown += Ellipse_MouseRightButtonDown;

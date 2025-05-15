@@ -130,8 +130,8 @@ namespace WPFNetwerkBeheerUI {
             };
 
             Canvas.SetZIndex(ellipse, 1);
-            Canvas.SetLeft(ellipse, point.X - (ellipse.Width / 2)); // de berekening die hier in plaats vind zorgt ervoor dat
-            Canvas.SetTop(ellipse, point.Y - (ellipse.Width / 2));   // het midden van de ellipse overeenstemt met de exacte coordinaten
+            Canvas.SetLeft(ellipse, point.X * 0.75 - (ellipse.Width / 2)); // de berekening die hier in plaats vind zorgt ervoor dat
+            Canvas.SetTop(ellipse, point.Y * 0.75 - (ellipse.Width / 2));   // het midden van de ellipse overeenstemt met de exacte coordinaten
                                                                      // van het punt eerder zorgde dit voor problemen met de lijnen 
             ellipse.MouseLeftButtonDown += Ellipse_MouseLeftButtonDown;
             ellipse.MouseRightButtonDown += Ellipse_MouseRightButtonDown;
@@ -155,10 +155,10 @@ namespace WPFNetwerkBeheerUI {
             Line line = new Line {
                 Stroke = Brushes.OrangeRed,
                 StrokeThickness = 1,
-                X1 = segment.StartPoint.X,     
-                Y1 = segment.StartPoint.Y,     
-                X2 = segment.EndPoint.X,     
-                Y2 = segment.EndPoint.Y
+                X1 = segment.StartPoint.X * 0.75,     
+                Y1 = segment.StartPoint.Y * 0.75,     
+                X2 = segment.EndPoint.X * 0.75,     
+                Y2 = segment.EndPoint.Y *0.75
             };
             Canvas.SetZIndex(line, 0);
             canvas.Children.Add(line);
@@ -230,7 +230,7 @@ namespace WPFNetwerkBeheerUI {
                 MenuItemUpdateNetworkPoint.Visibility = Visibility.Visible;
             } else {
                 TextBlockConnection.Text = null;
-                NetworkPointUI mousePos = new(mousePosPoint.X, mousePosPoint.Y);
+                NetworkPointUI mousePos = new(mousePosPoint.X / 0.75, mousePosPoint.Y / 0.75);
                 clickedLocation = mousePos;
                 HighlightPoint(clickedLocation);
                 MenuItemRemoveNetworkPoint.Visibility = Visibility.Collapsed;
@@ -258,8 +258,8 @@ namespace WPFNetwerkBeheerUI {
             double maxX = canvas.ActualWidth - 250; // het aantal px dat word opgeschoven naar rechts om te vermijden dat het coordinaten blok buiten het canvas valt
             double maxY = canvas.ActualHeight - 20; //het aantal px dat word opgeschoven naar boven om te vermijden dat het coordinaten blok buiten het canvas valt
 
-            double x = Math.Min(point.X, maxX);
-            double y = Math.Min(point.Y, maxY);
+            double x = Math.Min(point.X * 0.75, maxX);
+            double y = Math.Min(point.Y * 0.75, maxY);
 
             Canvas.SetZIndex(coordinatesTextBlock, 2);
             Canvas.SetLeft(coordinatesTextBlock, x);
@@ -282,8 +282,8 @@ namespace WPFNetwerkBeheerUI {
                 StrokeThickness = 2
             };
             Canvas.SetZIndex(highlightCircle, 2);
-            Canvas.SetLeft(highlightCircle, p.X - highlightCircle.Width / 2);
-            Canvas.SetTop(highlightCircle, p.Y - highlightCircle.Height / 2);
+            Canvas.SetLeft(highlightCircle, p.X * 0.75 - highlightCircle.Width / 2);
+            Canvas.SetTop(highlightCircle, p.Y * 0.75 - highlightCircle.Height / 2);
 
             // Remove any previous highlight
             RemovePreviousHighlight();
@@ -426,6 +426,7 @@ namespace WPFNetwerkBeheerUI {
         }
 
         private void RemoveConnection_Click(object sender, RoutedEventArgs e) {
+            RemoveDisplayedConnections();
             RemovePreviousHighlight();
             RemovePreviousCoordinates();
             addConnectionClicked = false;
@@ -527,8 +528,8 @@ namespace WPFNetwerkBeheerUI {
 
                 ellipse.MouseLeftButtonDown += Ellipse_MouseLeftButtonDownConnection;
                 Canvas.SetZIndex(ellipse, 2);
-                Canvas.SetLeft(ellipse, np.X - ellipse.Width / 2);
-                Canvas.SetTop(ellipse, np.Y - ellipse.Height / 2);
+                Canvas.SetLeft(ellipse, np.X * 0.75 - ellipse.Width / 2);
+                Canvas.SetTop(ellipse, np.Y * 0.75 - ellipse.Height / 2);
 
                 canvas.Children.Add(ellipse);
                 existingConnections.Add(ellipse,np);

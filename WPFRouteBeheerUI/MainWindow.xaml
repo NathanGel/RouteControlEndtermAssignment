@@ -5,7 +5,7 @@
        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
        xmlns:local="clr-namespace:WPFRouteBeheerUI"
        mc:Ignorable="d"
-       Title="Route Management" Height="1110" Width="1020"
+       Title="Route Management" Height="860" Width="771"
        WindowStyle="None" AllowsTransparency="True" Background="Transparent">
 
     <Window.Resources>
@@ -83,7 +83,7 @@
             
             <!-- Main Content -->
             <Grid Grid.Row="2">
-                <Canvas Name="canvas" Width="1000" Height="1000"
+                <Canvas Name="canvas" Width="750" Height="750"
                         Background="#2A2D3E" Margin="10"
                         MouseLeftButtonDown="Canvas_MouseLeftButtonDown"
                         MouseRightButtonDown="Canvas_MouseRightButtonDown">
