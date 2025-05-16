@@ -28,7 +28,7 @@ namespace WPFRouteBeheerUI {
         private List<Segment> segments;
         private Dictionary<Segment, Line> segmentElements = new();
         private ObservableCollection<RouteUI> routes;
-        private readonly string connectionString = @"Data Source=nathan\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
+        private readonly string connectionString = @"Data Source=nathans-laptop\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
         private NetworkManager nm;
         private RouteManager rm;
         private bool addRouteClicked;
@@ -80,10 +80,10 @@ namespace WPFRouteBeheerUI {
                 Line line = new Line {
                     Stroke = Brushes.OrangeRed,
                     StrokeThickness = 1,
-                    X1 = segment.StartPoint.X * 0.75,
-                    Y1 = segment.StartPoint.Y * 0.75,
-                    X2 = segment.EndPoint.X * 0.75,
-                    Y2 = segment.EndPoint.Y * 0.75
+                    X1 = segment.StartPoint.X * 0.55,
+                    Y1 = segment.StartPoint.Y * 0.55,
+                    X2 = segment.EndPoint.X * 0.55,
+                    Y2 = segment.EndPoint.Y * 0.55
                 };
 
                 canvas.Children.Add(line);
@@ -92,14 +92,14 @@ namespace WPFRouteBeheerUI {
             foreach (var point in points) {
                 Ellipse ellipse = new Ellipse {
                     Fill = Brushes.MediumTurquoise,
-                    Width = 8,
-                    Height = 8,
+                    Width = 7,
+                    Height = 7,
                     Stroke = Brushes.Black,
                     StrokeThickness = 2,
                 };
 
-                Canvas.SetLeft(ellipse, point.X * 0.75 - (ellipse.Width / 2)); // de berekening die hier in plaats vind zorgt ervoor dat
-                Canvas.SetTop(ellipse, point.Y * 0.75 - (ellipse.Width / 2));   // het midden van de ellipse overeenstemt met de exacte coordinaten
+                Canvas.SetLeft(ellipse, point.X * 0.55 - (ellipse.Width / 2)); // de berekening die hier in plaats vind zorgt ervoor dat
+                Canvas.SetTop(ellipse, point.Y * 0.55 - (ellipse.Width / 2));   // het midden van de ellipse overeenstemt met de exacte coordinaten
                                                                          // van het punt eerder zorgde dit voor problemen met de lijnen 
                 ellipse.MouseLeftButtonDown += Ellipse_MouseLeftButtonDown;
                 ellipse.MouseRightButtonDown += Ellipse_MouseRightButtonDown;
@@ -261,7 +261,6 @@ namespace WPFRouteBeheerUI {
             selectedRoute = null;
             contextTop.Children.Clear();
             buttonSaveRouteAsTXT = null;
-            buttonCalculateDistance = null;
             DrawNetwork();
         }
 
@@ -284,24 +283,12 @@ namespace WPFRouteBeheerUI {
                 Margin = new Thickness(5, 0, 5, 0)
             };
 
-            buttonCalculateDistance = new() {
-                Content = "Calculate Distance",
-                Foreground = Brushes.White,
-                Background = Brushes.Green,
-                BorderBrush = Brushes.Green,
-                Height = 30,
-                Margin = new Thickness(5, 0, 5, 0)
-            };
-
             buttonSaveRouteAsTXT.Click += BtnSaveRouteAsTXT_Click;
-            buttonCalculateDistance.Click += BtnCalculateDistance_Click;
 
             contextTop.Children.Add(buttonSaveRouteAsTXT);
-            contextTop.Children.Add(buttonCalculateDistance);
         }
 
         private Button buttonSaveRouteAsTXT;
-        private Button buttonCalculateDistance;
 
         private void BtnSaveRouteAsTXT_Click(object sender, RoutedEventArgs e) {
             // Implement the logic to save the route as TXT
