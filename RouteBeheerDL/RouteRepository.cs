@@ -213,7 +213,58 @@ namespace RouteBeheerDL {
         }
 
         public void Update(Route route) {
-            throw new NotImplementedException();
+            string queryRemoveCurrentNetworkPoints = "DELETE FROM Route_NetworkPoints WHERE route_id=@routeId";
+            string queryRemoveCurrentSegments = "DELETE FROM Route_Segments WHERE route_id=@routeId";
+            string queryNetworkPoints = "INSERT INTO Route_NetworkPoints(route_id, networkpoint_id, isStop) VALUES(@routeId, @networkpointId, @isStop)";
+            string querySegments = "INSERT INTO Route_Segments(route_id, segment_id, sequenceNo, isReverse) VALUES(@routeId, @segmentId, @sequenceNo, @isReverse)";
+            string queryRoute = "UPDATE Routes SET name=@name WHERE id=@routeId";
+            using (SqlConnection connection = new(connectionstring))
+            using (SqlCommand cmd = connection.CreateCommand()) {
+                connection.Open();
+                SqlTransaction transaction = connection.BeginTransaction();
+                cmd.Transaction = transaction;
+                try {
+                    cmd.CommandText = queryRemoveCurrentNetworkPoints;
+                    cmd.Parameters.AddWithValue("@routeId", route.Id);
+                    cmd.ExecuteNonQuery();
+                    cmd.CommandText = queryRemoveCurrentSegments;
+                    cmd.Parameters.Clear();
+                    cmd.Parameters.AddWithValue("@routeId", route.Id);
+                    cmd.ExecuteNonQuery();
+
+                    cmd.CommandText = queryNetworkPoints;
+                    cmd.Parameters.Clear();
+                    foreach (var point in route.Stops) {
+                        cmd.Parameters.Clear();
+                        cmd.Parameters.AddWithValue("@routeId", route.Id);
+                        cmd.Parameters.AddWithValue("@networkpointId", point.Item1.Id);
+                        cmd.Parameters.AddWithValue("@isStop", point.Item2);
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    cmd.CommandText = querySegments;
+                    cmd.Parameters.Clear();
+                    for (int i = 0; i < route.Segments.Count; i++) {
+                        cmd.Parameters.Clear();
+                        cmd.Parameters.AddWithValue("@routeId", route.Id);
+                        cmd.Parameters.AddWithValue("@segmentId", route.Segments[i].Item1.Id);
+                        cmd.Parameters.AddWithValue("@sequenceNo", i + 1);
+                        cmd.Parameters.AddWithValue("@isReverse", route.Segments[i].Item2);
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    cmd.CommandText = queryRoute;
+                    cmd.Parameters.Clear();
+                    cmd.Parameters.AddWithValue("@name", route.Name);
+                    cmd.Parameters.AddWithValue("@routeId", route.Id);
+                    cmd.ExecuteNonQuery();
+
+                    transaction.Commit();
+                } catch (SqlException) {
+                    transaction.Rollback();
+                    throw new ApplicationException();
+                }
+            }
         }
     }
 }

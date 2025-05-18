@@ -19,7 +19,8 @@ namespace WPFRouteBeheerUI {
     public partial class RouteWindow : Window {
         private RouteUI _currentRoute;
         private RouteManager _routeManager;
-        private ObservableCollection<(NetworkPoint, bool)> _stopsCollection;
+        private ObservableCollection<NetworkPointStopsUI> _stopsCollection;
+        private RouteUI routeReference;
 
         public RouteWindow(RouteManager rm, RouteUI route) {
             _routeManager = rm;
@@ -28,12 +29,15 @@ namespace WPFRouteBeheerUI {
         }
 
         private void LoadRoute(RouteUI route) {
-            _currentRoute = route;
-            TxtId.Text = route.Id.ToString();
-            TxtName.Text = route.Name;
+            _currentRoute = new(route.Id, route.Name, route.Segments, route.Stops); // ik maak hier een nieuw aan ipv op reference te werken zodat ik wanneer
+                                                                                    // de route aanpast maar op een foutieve manier controle heb over wat er
+                                                                                    // in de applicatie getoont wordt
+            routeReference = route;
+            TxtId.Text = _currentRoute.Id.ToString();
+            TxtName.Text = _currentRoute.Name;
 
-            _stopsCollection = route.Stops;
-            DataGridStops.ItemsSource = NetworkPointStopsMapper.MapToUIModel(route.Stops.ToList());
+            _stopsCollection = new (NetworkPointStopsMapper.MapToUIModel(route.Stops.ToList()));
+            DataGridStops.ItemsSource = _stopsCollection;
 
             CalculateAndDisplayTotalDistance();
         }
@@ -55,15 +59,18 @@ namespace WPFRouteBeheerUI {
             }
         }
 
-        private void DataGridRow_Selected(object sender, RoutedEventArgs e) {
-            // This is handled by DataGridStops_SelectionChanged
-        }
-
         private void SaveChanges_Click(object sender, RoutedEventArgs e) {
             try {
-                _currentRoute.Name = TxtName.Text;
-                _currentRoute.Stops = _stopsCollection;
+                _currentRoute.Name = TxtName.Text; // de naam van de route aanpassen
+                _currentRoute.Stops = new (NetworkPointStopsMapper.MapFromUIModel(_stopsCollection)); // de stops van de route aanpassen
 
+                _routeManager.UpdateRoute(RouteMapper.MapToDomain(_currentRoute)); // de route in de database aanpassen
+
+
+                // hireonder volgt de code waarbij het UImodel overal in memery aangepast is na validatie van de waarden
+                routeReference.Name = TxtName.Text; // de naam van de route aanpassen
+                routeReference.Segments = _currentRoute.Segments; // de segmenten van de route aanpassen
+                routeReference.Stops = _currentRoute.Stops; // de stops van de route aanpassen
                 MessageBox.Show("Changes saved successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             } catch (RouteException ex) {
                 MessageBox.Show(ex.Message, "Validation Error", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -119,12 +126,47 @@ namespace WPFRouteBeheerUI {
         }
 
         private void StopIndicator_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
-
+            if (sender is Border border && border.DataContext is NetworkPointStopsUI stop) {
+                // Toggle the IsStop property
+                stop.IsStop = !stop.IsStop;
+            }
         }
 
         private void RemovePoint_Click(object sender, RoutedEventArgs e) {
             if (DataGridStops.SelectedItem is NetworkPointStopsUI selectedStop) {
-                // Implement removal logic
+
+                if (_stopsCollection.Count > 0) {
+                    int index = _stopsCollection.IndexOf(selectedStop);
+                    if (index == 0 || index == _stopsCollection.Count - 1) {
+                        _stopsCollection.Remove(selectedStop);
+
+                        var segmentsList = _currentRoute.Segments.ToList(); // or access as List
+
+                        // Find segments connected to the selected stop
+                        var connectedSegments = segmentsList
+                            .Where(s => s.Item1.StartPoint.Id == selectedStop.Id || s.Item1.EndPoint.Id == selectedStop.Id)
+                            .ToList();
+
+                        if (connectedSegments.Count == 0) {
+                            // No connected segments found, nothing to remove
+                            return;
+                        }
+
+                        // Now check if the segment is the first or last segment in the route's segments list
+                        var firstSegment = segmentsList.First();
+                        var lastSegment = segmentsList.Last();
+
+                        // Remove segment only if it is the first or last
+                        foreach (var seg in connectedSegments) {
+                            if (seg.Item1.Id == firstSegment.Item1.Id || seg.Item1.Id == lastSegment.Item1.Id) {
+                                _currentRoute.Segments.Remove(seg);
+                                break;
+                            }
+                        }
+                    } else {
+                        MessageBox.Show("Only the first or last point can be removed.", "Remove Stop", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+                }
             }
         }
 

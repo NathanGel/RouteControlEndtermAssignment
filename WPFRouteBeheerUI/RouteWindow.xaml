@@ -59,7 +59,6 @@
                 <Setter.Value>
                     <Style TargetType="DataGridRow">
                         <Setter Property="Cursor" Value="Hand"/>
-                        <EventSetter Event="Selected" Handler="DataGridRow_Selected"/>
                     </Style>
                 </Setter.Value>
             </Setter>

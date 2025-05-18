@@ -14,7 +14,7 @@ namespace WPFRouteBeheerUI.Mappers {
 
         public static List<(NetworkPoint point, bool isStop)> MapFromUIModel(IEnumerable<NetworkPointStopsUI> entries) {
             return entries.Select(e => (
-                new NetworkPoint(e.Id, e.X, e.Y),
+                e.point,
                 e.IsStop
             )).ToList();
         }
