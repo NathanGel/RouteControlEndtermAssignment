@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RouteBeheerBL.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,14 +12,61 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using WPFRouteBeheerUI.Model;
 
 namespace WPFRouteBeheerUI {
     /// <summary>
     /// Interaction logic for AddPointDialogWindow.xaml
     /// </summary>
     public partial class AddPointDialogWindow : Window {
-        public AddPointDialogWindow() {
+        public Segment segmentToAdd;
+        public NetworkPoint selectedPoint;
+        private NetworkPointStopsUI pointFromWhereToCheck;
+        private List<Segment> _segments;
+        public AddPointDialogWindow( List<Segment> segments, NetworkPointStopsUI pointFromWhereToCheck, RouteUI route) {
             InitializeComponent();
+            _segments = segments;
+            this.pointFromWhereToCheck = pointFromWhereToCheck;
+            var existingRouteSegments = route.Segments.Select(t => t.Item1).ToList();
+
+            // Filter out segments already in the route
+            var filteredSegments = _segments
+                .Where(s => !existingRouteSegments.Any(rs => rs.Id == s.Id))  // exclude already in route
+                .Where(s => s.StartPoint.Id == pointFromWhereToCheck.Id || s.EndPoint.Id == pointFromWhereToCheck.Id) // connected to the reference point
+                .ToList();
+
+            // Select the point on the segment that is NOT the pointFromWhereToCheck
+            var pointsToDisplay = filteredSegments
+                .Select(s => s.StartPoint.Id == pointFromWhereToCheck.Id ? s.EndPoint : s.StartPoint)
+                .Distinct()
+                .ToList();
+
+            // Bind to ListBox
+            ListBoxPoints.ItemsSource = pointsToDisplay;
         }
+        private void SelectButton_Click(object sender, RoutedEventArgs e) {
+            // Get selected point from ListBox
+            if (ListBoxPoints.SelectedItem is NetworkPoint selectedPoint) {
+                this.selectedPoint = selectedPoint;
+                // Find the segment in _segments that connects pointFromWhereToCheck and selectedPoint
+                var segment = _segments.FirstOrDefault(s =>
+                    (s.StartPoint.Id == pointFromWhereToCheck.Id && s.EndPoint.Id == selectedPoint.Id) ||
+                    (s.EndPoint.Id == pointFromWhereToCheck.Id && s.StartPoint.Id == selectedPoint.Id)
+                );
+
+                if (segment != null) {
+                    DialogResult = true;
+                } 
+            }
+        }
+
+        private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
+            this.DragMove();
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e) {
+            this.Close();
+        }
+
     }
 }

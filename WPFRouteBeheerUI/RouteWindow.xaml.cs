@@ -21,9 +21,11 @@ namespace WPFRouteBeheerUI {
         private RouteManager _routeManager;
         private ObservableCollection<NetworkPointStopsUI> _stopsCollection;
         private RouteUI routeReference;
+        private List<Segment> segments;
 
-        public RouteWindow(RouteManager rm, RouteUI route) {
+        public RouteWindow(RouteManager rm, RouteUI route, List<Segment> segments) {
             _routeManager = rm;
+            this.segments = segments;
             InitializeComponent();
             LoadRoute(route);
         }
@@ -171,14 +173,22 @@ namespace WPFRouteBeheerUI {
         }
 
         private void AddToFront_Click(object sender, RoutedEventArgs e) {
-            if (DataGridStops.SelectedItem is NetworkPointStopsUI selectedStop) {
-                // Implement logic to add to front
+            AddPointDialogWindow window = new AddPointDialogWindow(segments, _stopsCollection.First(), _currentRoute);
+            bool? result = window.ShowDialog();
+            if (result == true) {
+                var newStop = (window.selectedPoint, true);
+                _stopsCollection.Insert(0, NetworkPointStopsMapper.MapToUIModel(newStop));
+                _currentRoute.Segments.Insert(0, (window.segmentToAdd, false));
             }
         }
 
         private void AddToEnd_Click(object sender, RoutedEventArgs e) {
-            if (DataGridStops.SelectedItem is NetworkPointStopsUI selectedStop) {
-                // Implement logic to add to end
+            AddPointDialogWindow window = new AddPointDialogWindow(segments, _stopsCollection.Last(), _currentRoute);
+            bool? result = window.ShowDialog();
+            if (result == true) {
+                var newStop = (window.selectedPoint, true);
+                _stopsCollection.Add(NetworkPointStopsMapper.MapToUIModel(newStop));
+                _currentRoute.Segments.Add((window.segmentToAdd, false));
             }
         }
 

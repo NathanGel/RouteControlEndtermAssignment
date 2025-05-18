@@ -207,7 +207,7 @@ namespace WPFRouteBeheerUI {
 
         private void BtnManageRoutes_Click(object sender, RoutedEventArgs e) {
             RemoveAllCurrentHighLights();
-            SelectRouteDialogWindow window = new SelectRouteDialogWindow(routes, true, rm);
+            SelectRouteDialogWindow window = new SelectRouteDialogWindow(routes, true, rm, segments);
             window.Show();
         }
 

@@ -27,12 +27,27 @@ namespace WPFRouteBeheerUI
         public RouteUI route;
         private RouteManager _routeManager;
         private ObservableCollection<RouteUI> routes = new();
+        private List<Segment> segments;
         public SelectRouteDialogWindow(ObservableCollection<RouteUI> routes, bool isRouteInfo, RouteManager mn)
         {
             InitializeComponent();
             this.routes = routes;
             _routeManager = mn;
             DataGridRoutes.ItemsSource = routes;
+
+            if (isRouteInfo) {
+                SelectRoute.Visibility = Visibility.Collapsed;
+            } else {
+                MoreInfo.Visibility = Visibility.Collapsed;
+                RemoveRoute.Visibility = Visibility.Collapsed;
+            }
+        }
+        public SelectRouteDialogWindow(ObservableCollection<RouteUI> routes, bool isRouteInfo, RouteManager mn, List<Segment> segments) {
+            InitializeComponent();
+            this.routes = routes;
+            _routeManager = mn;
+            DataGridRoutes.ItemsSource = routes;
+            this.segments = segments;
 
             if (isRouteInfo) {
                 SelectRoute.Visibility = Visibility.Collapsed;
@@ -78,7 +93,7 @@ namespace WPFRouteBeheerUI
         }
 
         private void MoreInfo_Click(object sender, RoutedEventArgs e) {
-            RouteWindow routeWindow = new RouteWindow(_routeManager, (RouteUI)DataGridRoutes.SelectedItem);
+            RouteWindow routeWindow = new RouteWindow(_routeManager, (RouteUI)DataGridRoutes.SelectedItem, segments);
             routeWindow.ShowDialog();
         }
 

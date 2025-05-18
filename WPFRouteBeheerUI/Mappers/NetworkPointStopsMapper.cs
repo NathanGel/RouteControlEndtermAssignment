@@ -12,6 +12,13 @@ namespace WPFRouteBeheerUI.Mappers {
             )).ToList();
         }
 
+        public static NetworkPointStopsUI MapToUIModel((NetworkPoint point, bool isStop) entry) {
+            return new NetworkPointStopsUI(
+                entry.point,
+                entry.isStop
+            );
+        }
+
         public static List<(NetworkPoint point, bool isStop)> MapFromUIModel(IEnumerable<NetworkPointStopsUI> entries) {
             return entries.Select(e => (
                 e.point,
