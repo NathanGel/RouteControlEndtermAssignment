@@ -143,15 +143,58 @@
           CanUserDeleteRows="False" SelectionMode="Single"
           SelectionChanged="DataGridStops_SelectionChanged"
           ItemsSource="{Binding Stops}">
+
+                    <!-- Context menu for entire DataGrid -->
+                    <DataGrid.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Remove Point" Click="RemovePoint_Click"/>
+                            <MenuItem Header="Add Point to front" Click="AddToFront_Click"/>
+                            <MenuItem Header="Add Point to end" Click="AddToEnd_Click"/>
+                        </ContextMenu>
+                    </DataGrid.ContextMenu>
+
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Point ID" Binding="{Binding Id}" IsReadOnly="True" Width="80"/>
-                        <DataGridTextColumn Header="X" Binding="{Binding X}" IsReadOnly="True" Width="80"/>
-                        <DataGridTextColumn Header="Y" Binding="{Binding Y}" IsReadOnly="True" Width="80"/>
+                        <!-- Centered Point ID -->
+                        <DataGridTextColumn Header="Point ID" Binding="{Binding Id}" IsReadOnly="True" Width="auto">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="TextAlignment" Value="Center"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <!-- Centered X -->
+                        <DataGridTextColumn Header="X" Binding="{Binding X}" IsReadOnly="True" Width="*">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="TextAlignment" Value="Center"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <!-- Centered Y -->
+                        <DataGridTextColumn Header="Y" Binding="{Binding Y}" IsReadOnly="True" Width="*">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="TextAlignment" Value="Center"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <!-- Stop indicator with colored circle -->
                         <DataGridTemplateColumn Header="Is Stop" Width="*">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <Border Name="StopIndicator" Width="20" Height="20" CornerRadius="10" 
-                            HorizontalAlignment="Center" MouseLeftButtonDown="StopIndicator_MouseLeftButtonDown">
+                                    <Border Name="StopIndicator"
+                            Width="20" Height="20" CornerRadius="10"
+                            HorizontalAlignment="Center"
+                            MouseLeftButtonDown="StopIndicator_MouseLeftButtonDown">
                                         <Border.Style>
                                             <Style TargetType="Border">
                                                 <Style.Triggers>

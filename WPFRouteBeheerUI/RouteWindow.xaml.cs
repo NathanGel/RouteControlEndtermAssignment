@@ -14,7 +14,6 @@ using WPFRouteBeheerUI.Model;
 using RouteBeheerBL.Managers;
 using WPFRouteBeheerUI.Mappers;
 using System.Text.Json;
-using Microsoft.Win32;
 
 namespace WPFRouteBeheerUI {
     public partial class RouteWindow : Window {
@@ -46,19 +45,14 @@ namespace WPFRouteBeheerUI {
                 totalDistance += Route.GetDistance(segment.Item1.StartPoint, segment.Item1.EndPoint);
             }
 
-            TxtDistance.Text = $"{totalDistance.ToString()} km";
-        }
-
-        private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
-            this.DragMove();
-        }
-
-        private void CloseButton_Click(object sender, RoutedEventArgs e) {
-            this.Close();
+            TxtDistance.Text = $"{totalDistance.ToString("F2")} km";
         }
 
         private void DataGridStops_SelectionChanged(object sender, SelectionChangedEventArgs e) {
-            
+            if (DataGridStops.SelectedItem is NetworkPointStopsUI) {
+                NetworkPointStopsUI uiStops = (NetworkPointStopsUI)DataGridStops.SelectedItem;
+                ListBoxFacilities.ItemsSource = _currentRoute.Stops.FirstOrDefault(s => s.Item1.Equals(uiStops.point)).Item1.Facilities;
+            }
         }
 
         private void DataGridRow_Selected(object sender, RoutedEventArgs e) {
@@ -126,6 +120,32 @@ namespace WPFRouteBeheerUI {
 
         private void StopIndicator_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
 
+        }
+
+        private void RemovePoint_Click(object sender, RoutedEventArgs e) {
+            if (DataGridStops.SelectedItem is NetworkPointStopsUI selectedStop) {
+                // Implement removal logic
+            }
+        }
+
+        private void AddToFront_Click(object sender, RoutedEventArgs e) {
+            if (DataGridStops.SelectedItem is NetworkPointStopsUI selectedStop) {
+                // Implement logic to add to front
+            }
+        }
+
+        private void AddToEnd_Click(object sender, RoutedEventArgs e) {
+            if (DataGridStops.SelectedItem is NetworkPointStopsUI selectedStop) {
+                // Implement logic to add to end
+            }
+        }
+
+        private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
+            this.DragMove();
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e) {
+            this.Close();
         }
     }
 }
