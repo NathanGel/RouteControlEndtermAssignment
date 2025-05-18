@@ -55,6 +55,7 @@ namespace WPFRouteBeheerUI {
                 );
 
                 if (segment != null) {
+                    segmentToAdd = segment;
                     DialogResult = true;
                 } 
             }

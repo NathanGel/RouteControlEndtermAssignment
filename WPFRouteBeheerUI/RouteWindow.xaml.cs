@@ -58,6 +58,7 @@ namespace WPFRouteBeheerUI {
             if (DataGridStops.SelectedItem is NetworkPointStopsUI) {
                 NetworkPointStopsUI uiStops = (NetworkPointStopsUI)DataGridStops.SelectedItem;
                 ListBoxFacilities.ItemsSource = _currentRoute.Stops.FirstOrDefault(s => s.Item1.Equals(uiStops.point)).Item1.Facilities;
+                //nog zorgen dat een nieuw punt ook zijn facilities heeft enzo
             }
         }
 

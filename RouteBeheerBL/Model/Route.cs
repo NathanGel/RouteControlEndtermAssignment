@@ -42,7 +42,7 @@ namespace RouteBeheerBL.Model {
             get { return _segments;}
             set {
                 if (value == null || value.Count == 0) throw new RouteException("Segments Invalid Null"); //segmenten mogen niet leeg of 0 segmenten bevatten
-                if (value.Any(s => s.Item1 == null)) throw new RouteException("Segments Invalid Null"); // er mag geen segment in segmenten zitten dat null is
+                if (value.Any(s => s.Item1 == null)) throw new RouteException("Segments Includes Null Value"); // er mag geen segment in segmenten zitten dat null is
                 _segments = value;
             }
         }
