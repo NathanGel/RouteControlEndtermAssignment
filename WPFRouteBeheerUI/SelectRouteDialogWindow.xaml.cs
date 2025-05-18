@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,7 +12,9 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using RouteBeheerBL.Managers;
 using RouteBeheerBL.Model;
+using WPFRouteBeheerUI.Mappers;
 using WPFRouteBeheerUI.Model;
 
 namespace WPFRouteBeheerUI
@@ -22,11 +25,13 @@ namespace WPFRouteBeheerUI
     public partial class SelectRouteDialogWindow : Window
     {
         public RouteUI route;
-        private List<RouteUI> routes = new();
-        public SelectRouteDialogWindow(List<RouteUI> routes, bool isRouteInfo )
+        private RouteManager _routeManager;
+        private ObservableCollection<RouteUI> routes = new();
+        public SelectRouteDialogWindow(ObservableCollection<RouteUI> routes, bool isRouteInfo, RouteManager mn)
         {
             InitializeComponent();
             this.routes = routes;
+            _routeManager = mn;
             DataGridRoutes.ItemsSource = routes;
 
             if (isRouteInfo) {
@@ -73,12 +78,23 @@ namespace WPFRouteBeheerUI
         }
 
         private void MoreInfo_Click(object sender, RoutedEventArgs e) {
-            RouteWindow routeWindow = new RouteWindow((RouteUI)DataGridRoutes.SelectedItem);
+            RouteWindow routeWindow = new RouteWindow(_routeManager, (RouteUI)DataGridRoutes.SelectedItem);
             routeWindow.ShowDialog();
         }
 
         private void RemoveRoute_Click(object sender, RoutedEventArgs e) {
-            MessageBox.Show("OULEH DE KNOP WERKT INSHALLAH");
+            try {
+                if (DataGridRoutes.SelectedItem == null) {
+                    MessageBox.Show("Please select a route to remove", "No route selected", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                _routeManager.DeleteRoute(RouteMapper.MapToDomain((RouteUI)DataGridRoutes.SelectedItem));
+                routes.Remove((RouteUI)DataGridRoutes.SelectedItem);
+            } catch (ApplicationException ex) {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            } catch (Exception ex) {
+                MessageBox.Show("An unexpected error occurred: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }

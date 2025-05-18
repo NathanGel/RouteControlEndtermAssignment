@@ -28,21 +28,32 @@ namespace WPFRouteBeheerUI {
         private List<Segment> segments;
         private Dictionary<Segment, Line> segmentElements = new();
         private ObservableCollection<RouteUI> routes;
-        private readonly string connectionString = @"Data Source=nathans-laptop\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
+        private readonly string connectionString = @"Data Source=nathan\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
         private NetworkManager nm;
         private RouteManager rm;
         private bool addRouteClicked;
         private List<(NetworkPoint, bool)> selectedPoints = new();
         private List<(Segment, bool)> selectedSegments = new();
         private Ellipse selectedPoint;
-        private RouteUI selectedRoute;
-        private bool calculateDistanceClicked = false;
+
         public MainWindow() {
             rm = new(new RouteRepository(connectionString));
             points = new List<NetworkPoint>();
             segments = new List<Segment>();
+            InitializeComponent();
+            ReadFromDatabase();
+            DrawNetwork();
             try {
                 routes = new ObservableCollection<RouteUI>(rm.GetAllRoutes().Select(r => RouteMapper.MapFromDomain(r)));
+                foreach (var route in routes) {
+                    foreach (var (point, _) in route.Stops) {
+                        var matchingPoint = points.FirstOrDefault(p => p.Equals(point));
+                        if (matchingPoint != null) {
+                            point.Facilities = matchingPoint.Facilities;
+                        }
+                    }
+                }
+
             } catch (RouteException ex) {
                 MessageBox.Show("An error occured because the route does not meet the specified requirements", ex.Message, MessageBoxButton.OK, MessageBoxImage.Warning);
             } catch (ApplicationException ex) {
@@ -50,9 +61,6 @@ namespace WPFRouteBeheerUI {
             } catch (Exception ex) { 
                 MessageBox.Show("An unexpected error occured:  " + ex.Message, "System Exception", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            InitializeComponent();
-            ReadFromDatabase();
-            DrawNetwork();
         }
 
         public void ReadFromDatabase() {
@@ -199,7 +207,7 @@ namespace WPFRouteBeheerUI {
 
         private void BtnManageRoutes_Click(object sender, RoutedEventArgs e) {
             RemoveAllCurrentHighLights();
-            SelectRouteDialogWindow window = new SelectRouteDialogWindow(routes.ToList(), true);
+            SelectRouteDialogWindow window = new SelectRouteDialogWindow(routes, true, rm);
             window.Show();
         }
 
@@ -258,45 +266,18 @@ namespace WPFRouteBeheerUI {
             selectedPoints.Clear();
             selectedSegments.Clear();
             selectedPoint = null;
-            selectedRoute = null;
             contextTop.Children.Clear();
-            buttonSaveRouteAsTXT = null;
             DrawNetwork();
         }
 
         private void BtnSelectRoute_Click(object sender, RoutedEventArgs e) {
             RemoveAllCurrentHighLights();
-            SelectRouteDialogWindow window = new(routes.ToList(), false);
+            SelectRouteDialogWindow window = new(routes, false, rm);
             bool? result = window.ShowDialog();
             if (result == true) {
                 HighLightSelectedRoute(window.route);
-                selectedRoute = window.route;
+                //selectedRoute = window.route;
             }
-            addRouteClicked = true;
-
-            buttonSaveRouteAsTXT = new() {
-                Content = "Save to File",
-                Foreground = Brushes.White,
-                Background = Brushes.Green,
-                BorderBrush = Brushes.Green,
-                Height = 30,
-                Margin = new Thickness(5, 0, 5, 0)
-            };
-
-            buttonSaveRouteAsTXT.Click += BtnSaveRouteAsTXT_Click;
-
-            contextTop.Children.Add(buttonSaveRouteAsTXT);
-        }
-
-        private Button buttonSaveRouteAsTXT;
-
-        private void BtnSaveRouteAsTXT_Click(object sender, RoutedEventArgs e) {
-            // Implement the logic to save the route as TXT
-        }
-
-        private void BtnCalculateDistance_Click(object sender, RoutedEventArgs e) {
-            calculateDistanceClicked = true;
-            MessageBox.Show("Select the 2 point from the route for which you want to calculate the route", "Distance Calculation", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void HighLightSelectedRoute(RouteUI route) {

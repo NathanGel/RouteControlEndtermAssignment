@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WPFRouteBeheerUI"
         mc:Ignorable="d"
-        Title="Route Info" Height="600" Width="900"
+        Title="Route Management" Height="600" Width="900"
         WindowStyle="None" AllowsTransparency="True" Background="#1F2129">
 
     <Window.Resources>
@@ -17,6 +17,24 @@
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
             <Setter Property="FontSize" Value="12"/>
+        </Style>
+
+        <Style TargetType="Button" x:Key="ActionButton">
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="Background" Value="#6C5CE7"/>
+            <Setter Property="Foreground" Value="#F5F7FB"/>
+            <Setter Property="BorderBrush" Value="#252836"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <Style TargetType="DataGrid">
@@ -37,6 +55,34 @@
                     </Style>
                 </Setter.Value>
             </Setter>
+            <Setter Property="RowStyle">
+                <Setter.Value>
+                    <Style TargetType="DataGridRow">
+                        <Setter Property="Cursor" Value="Hand"/>
+                        <EventSetter Event="Selected" Handler="DataGridRow_Selected"/>
+                    </Style>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="Label">
+            <Setter Property="Foreground" Value="#F5F7FB"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="#2A2D3E"/>
+            <Setter Property="Foreground" Value="#F5F7FB"/>
+            <Setter Property="BorderBrush" Value="#252836"/>
+            <Setter Property="Height" Value="25"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="5,0"/>
+        </Style>
+
+        <Style TargetType="ListBox">
+            <Setter Property="Background" Value="#2A2D3E"/>
+            <Setter Property="Foreground" Value="#F5F7FB"/>
+            <Setter Property="BorderBrush" Value="#252836"/>
         </Style>
     </Window.Resources>
 
@@ -51,7 +97,7 @@
 
             <!-- Top Bar -->
             <Grid Grid.Row="0" Background="#252836" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
-                <TextBlock Text="Route Info" Foreground="#F5F7FB" VerticalAlignment="Center" Margin="10,0,0,0" FontWeight="SemiBold"/>
+                <TextBlock Text="Route Management" Foreground="#F5F7FB" VerticalAlignment="Center" Margin="10,0,0,0" FontWeight="SemiBold"/>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Style="{StaticResource WindowControlButton}" Content="&#xE8BB;" Click="CloseButton_Click"/>
                 </StackPanel>
@@ -69,42 +115,85 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- ID and Name -->
-                <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,0,10">
-                    <Label Content="ID:" Foreground="#F5F7FB" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                    <TextBox IsReadOnly="True" Width="60" Margin="0,0,20,0" Name="TxtId"
-                             Background="#2A2D3E" Foreground="#F5F7FB" BorderBrush="#252836"/>
-                    <Label Content="Name:" Foreground="#F5F7FB" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                    <TextBox Width="200" Name="TxtName"
-                             Background="#2A2D3E" Foreground="#F5F7FB" BorderBrush="#252836"/>
-                </StackPanel>
+                <!-- Route Details -->
+                <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="120"/>
+                    </Grid.ColumnDefinitions>
 
-                <!-- DataGrid -->
-                <DataGrid Grid.Row="1" Grid.Column="0" Name="DataGridStops" AutoGenerateColumns="False" Margin="0,0,10,0"
-                          HeadersVisibility="Column" CanUserAddRows="False" CanUserDeleteRows="False">
+                    <Label Grid.Column="0" Content="ID:" Margin="0,0,5,0"/>
+                    <TextBox Grid.Column="1" Name="TxtId" IsReadOnly="True"/>
+
+                    <Label Grid.Column="2" Content="Name:" Margin="20,0,5,0"/>
+                    <TextBox Grid.Column="3" Name="TxtName"/>
+
+                    <Label Grid.Column="4" Content="Full Distance:" Margin="20,0,5,0"/>
+                    <TextBox Grid.Column="5" Name="TxtDistance" IsReadOnly="True"/>
+                </Grid>
+
+                <!-- Network Points and Stops DataGrid -->
+                <DataGrid Grid.Row="1" Grid.Column="0" Name="DataGridStops" 
+          AutoGenerateColumns="False" Margin="0,0,10,0"
+          HeadersVisibility="Column" CanUserAddRows="False" 
+          CanUserDeleteRows="False" SelectionMode="Single"
+          SelectionChanged="DataGridStops_SelectionChanged"
+          ItemsSource="{Binding Stops}">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Point ID" Binding="{Binding Item1.Id}" IsReadOnly="True"/>
-                        <DataGridTemplateColumn Header="Stop">
+                        <DataGridTextColumn Header="Point ID" Binding="{Binding Id}" IsReadOnly="True" Width="80"/>
+                        <DataGridTextColumn Header="X" Binding="{Binding X}" IsReadOnly="True" Width="80"/>
+                        <DataGridTextColumn Header="Y" Binding="{Binding Y}" IsReadOnly="True" Width="80"/>
+                        <DataGridTemplateColumn Header="Is Stop" Width="*">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <CheckBox IsChecked="{Binding Item2, Mode=TwoWay}" HorizontalAlignment="Center"/>
+                                    <Border Name="StopIndicator" Width="20" Height="20" CornerRadius="10" 
+                            HorizontalAlignment="Center" MouseLeftButtonDown="StopIndicator_MouseLeftButtonDown">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsStop}" Value="True">
+                                                        <Setter Property="Background" Value="#4CD137"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsStop}" Value="False">
+                                                        <Setter Property="Background" Value="#E84118"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                    </Border>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
 
-                <!-- Facilities List -->
-                <StackPanel Grid.Row="1" Grid.Column="1" Margin="10,0,0,0">
-                    <Label Content="Facilities" Foreground="#F5F7FB" HorizontalAlignment="Center"/>
-                    <ListBox Name="ListBoxFacilities" Height="300" 
-                             DisplayMemberPath="Name" 
-                             Background="#2A2D3E" Foreground="#F5F7FB" BorderBrush="#252836"/>
-                </StackPanel>
 
-                <!-- Save Button -->
-                <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Content="Save" Height="35" Margin="0,10,0,0"
-                        Background="#6C5CE7" Foreground="#F5F7FB" BorderBrush="#252836"/>
+
+                <!-- Facilities List -->
+                <Grid Grid.Row="1" Grid.Column="1" Margin="10,0,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Label Grid.Row="0" Content="Facilities at Selected Point" HorizontalAlignment="Center" FontWeight="SemiBold"/>
+                    <ListBox Grid.Row="1" Name="ListBoxFacilities" DisplayMemberPath="Name"/>
+                </Grid>
+
+                <!-- Buttons -->
+                <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,15,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Column="0" Content="Save Changes" Style="{StaticResource ActionButton}" Click="SaveChanges_Click"/>
+                    <Button Grid.Column="1" Content="Save to File" Style="{StaticResource ActionButton}" Click="SaveToFile_Click"/>
+                </Grid>
             </Grid>
         </Grid>
     </Border>

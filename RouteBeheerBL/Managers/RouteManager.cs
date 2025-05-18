@@ -19,6 +19,7 @@ namespace RouteBeheerBL.Managers {
         }
 
         public void DeleteRoute(Route route) {
+            if (route == null) throw new InvalidOperationException();
             _repo.Delete(route);
         }
 

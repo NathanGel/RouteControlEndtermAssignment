@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -8,17 +9,20 @@ using RouteBeheerBL.Model;
 
 namespace WPFRouteBeheerUI.Model {
     public class RouteUI : INotifyPropertyChanged {
-        public RouteUI(string name, List<(Segment, bool)> segments, List<(NetworkPoint, bool)> stops) {
+        public RouteUI(string name, ObservableCollection<(Segment, bool)> segments, ObservableCollection<(NetworkPoint, bool)> stops) {
             Name = name;
             Segments = segments;
             Stops = stops;
         }
 
-        public RouteUI(int id, string name, List<(Segment, bool)> segments, List<(NetworkPoint, bool)> stops) {
+        public RouteUI(int id, string name, ObservableCollection<(Segment, bool)> segments, ObservableCollection<(NetworkPoint, bool)> stops) {
             Id = id;
             Name = name;
             Segments = segments;
             Stops = stops;
+        }
+
+        public RouteUI() {
         }
 
         public int Id { get; set; }
@@ -30,16 +34,16 @@ namespace WPFRouteBeheerUI.Model {
                 OnPropertyChanged(nameof(Name));
             }
         }
-        private List<(Segment, bool)> _segments = new();
-        public List<(Segment, bool)> Segments { 
+        private ObservableCollection<(Segment, bool)> _segments = new();
+        public ObservableCollection<(Segment, bool)> Segments { 
             get { return _segments; }
             set {
                 _segments = value;
                 OnPropertyChanged(nameof(Segments));
             }
         }
-        private List<(NetworkPoint, bool)> _stops = new();
-        public List<(NetworkPoint, bool)> Stops { 
+        private ObservableCollection<(NetworkPoint, bool)> _stops = new();
+        public ObservableCollection<(NetworkPoint, bool)> Stops { 
             get { return _stops; }
             set {
                 _stops = value;

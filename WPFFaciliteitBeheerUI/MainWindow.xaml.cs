@@ -13,7 +13,7 @@ namespace WPFFaciliteitBeheerUI {
     /// </summary>
     public partial class MainWindow : Window {
         private NetworkManager networkManager;
-        private readonly string connectionString = @"Data Source=nathans-laptop\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
+        private readonly string connectionString = @"Data Source=nathan\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
         public ObservableCollection<FacilityUI> Facilities;
         public MainWindow() {
             InitializeComponent();
