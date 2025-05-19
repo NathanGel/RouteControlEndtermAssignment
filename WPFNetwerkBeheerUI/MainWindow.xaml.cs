@@ -351,7 +351,7 @@ namespace WPFNetwerkBeheerUI {
                     double originalX = selectedPoint.X; //ik sla hier de originele x en y coordinaat op om fouten te vermijden
                     double originalY = selectedPoint.Y;
 
-                    NetworkPointWindow npWindow = new(new(selectedPoint.Id, selectedPoint.X, selectedPoint.Y, [.. selectedPoint.Facilities])); //doorgeven als nieuw punt zodat de waarden onaangepast blijven bij incorrecte data
+                    NetworkPointWindow npWindow = new(new(selectedPoint.Id, selectedPoint.X, selectedPoint.Y, [.. selectedPoint.Facilities]), nm); //doorgeven als nieuw punt zodat de waarden onaangepast blijven bij incorrecte data
                     bool? result = npWindow.ShowDialog();
                     if (result == true) {
                         if (npWindow.point.X != originalX || npWindow.point.Y != originalY)

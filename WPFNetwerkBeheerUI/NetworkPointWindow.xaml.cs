@@ -1,4 +1,5 @@
-﻿using RouteBeheerBL.Model;
+﻿using RouteBeheerBL.Managers;
+using RouteBeheerBL.Model;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
@@ -11,8 +12,10 @@ namespace WPFNetwerkBeheerUI {
     public partial class NetworkPointWindow : Window {
         public NetworkPointUI point;
         private ObservableCollection<Facility> facilities;
-        public NetworkPointWindow(NetworkPointUI point) {
+        private NetworkManager nm;
+        public NetworkPointWindow(NetworkPointUI point, NetworkManager nm) {
             InitializeComponent();
+            this.nm = nm;
             facilities = point.Facilities;
             this.point = point;
             textBoxId.Text = point.Id.ToString();
@@ -30,7 +33,7 @@ namespace WPFNetwerkBeheerUI {
         }
 
         private void BtnFacilities_Click(object sender, RoutedEventArgs e) {
-            FacilitiesWindow fWindow = new(facilities);
+            FacilitiesWindow fWindow = new(facilities, nm);
             bool? result = fWindow.ShowDialog();
             if (result == true) { 
                 facilities = fWindow.selectedFacilities;

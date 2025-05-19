@@ -93,9 +93,13 @@ namespace WPFRouteBeheerUI
         }
 
         private void MoreInfo_Click(object sender, RoutedEventArgs e) {
-            RouteWindow routeWindow = new RouteWindow(_routeManager, (RouteUI)DataGridRoutes.SelectedItem, segments);
-            routeWindow.ShowDialog();
-        }
+            if (DataGridRoutes.SelectedItem != null) {
+                RouteWindow routeWindow = new RouteWindow(_routeManager, (RouteUI)DataGridRoutes.SelectedItem, segments);
+                routeWindow.ShowDialog();
+            } else {
+                MessageBox.Show("Please select a route to view it's info", "No route selected", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        } 
 
         private void RemoveRoute_Click(object sender, RoutedEventArgs e) {
             try {

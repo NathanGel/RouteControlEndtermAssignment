@@ -13,11 +13,10 @@ namespace WPFNetwerkBeheerUI {
         // make sure theres no doubles between selected and all
         public ObservableCollection<Facility> selectedFacilities;
         private ObservableCollection<Facility> allFacilities;
-        private NetworkManager nm;
-        private readonly string connectionString = @"Data Source=nathan\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
-        public FacilitiesWindow(ObservableCollection<Facility> facilities) {
+        private readonly NetworkManager nm;
+        public FacilitiesWindow(ObservableCollection<Facility> facilities, NetworkManager nm) {
             InitializeComponent();
-            nm = new(new NetworkRepository(connectionString), new RouteRepository(connectionString));
+            this.nm = nm;
             selectedFacilities = facilities;
 
             var selectedIds = new HashSet<int>(selectedFacilities.Select(f => f.Id));
