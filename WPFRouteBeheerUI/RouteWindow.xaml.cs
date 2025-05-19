@@ -65,7 +65,7 @@ namespace WPFRouteBeheerUI {
         private void SaveChanges_Click(object sender, RoutedEventArgs e) {
             try {
                 _currentRoute.Name = TxtName.Text; // de naam van de route aanpassen
-                _currentRoute.Stops = new (NetworkPointStopsMapper.MapFromUIModel(_stopsCollection)); // de stops van de route aanpassen
+                _currentRoute.Stops = new(NetworkPointStopsMapper.MapFromUIModel(_stopsCollection)); // de stops van de route aanpassen
 
                 _routeManager.UpdateRoute(RouteMapper.MapToDomain(_currentRoute)); // de route in de database aanpassen
 
@@ -75,10 +75,13 @@ namespace WPFRouteBeheerUI {
                 routeReference.Segments = _currentRoute.Segments; // de segmenten van de route aanpassen
                 routeReference.Stops = _currentRoute.Stops; // de stops van de route aanpassen
                 MessageBox.Show("Changes saved successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+
             } catch (RouteException ex) {
-                MessageBox.Show(ex.Message, "Validation Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(ex.Message, "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            } catch (ApplicationException ex) {
+                MessageBox.Show("An error occured while updating a route", "Update Error", MessageBoxButton.OK, MessageBoxImage.Error);
             } catch (Exception ex) {
-                MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"An unexpected error occurred: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -87,50 +90,53 @@ namespace WPFRouteBeheerUI {
                 Filter = "JSON files (*.json)|*.json",
                 FileName = $"{_currentRoute.Name}_Route.json"
             };
+            try {
+                if (dialog.ShowDialog() == true) {
+                    var stopsSet = new HashSet<int>( //ik kijk hier eerst of het punt een stop is in de route
+                        _currentRoute.Stops
+                            .Where(s => s.Item2 == true)
+                            .Select(s => s.Item1.Id)
+                    );
 
-            if (dialog.ShowDialog() == true) {
-                var stopsSet = new HashSet<int>( //ik kijk hier eerst of het punt een stop is in de route
-                    _currentRoute.Stops
-                        .Where(s => s.Item2 == true)
-                        .Select(s => s.Item1.Id)
-                );
+                    var mergedJson = new { // hier leg ik de vorm van de json vast 
+                        _currentRoute.Id,
+                        _currentRoute.Name,
+                        FullDistance = TxtDistance.Text, //de full distance uit het textblock in de ui halen
+                        Segments = _currentRoute.Segments.Select(s => new {
+                            s.Item1.Id,
+                            Distance = $"{Route.GetDistance(s.Item1.StartPoint, s.Item1.EndPoint)} km", // afstand per segment berekenen
+                            StartPoint = new {
+                                s.Item1.StartPoint.Id,
+                                s.Item1.StartPoint.X,
+                                s.Item1.StartPoint.Y,
+                                Facilities = s.Item1.StartPoint.Facilities.Select(f => new { f.Id, f.Name }), // alle facilities van het punt
+                                IsStop = stopsSet.Contains(s.Item1.StartPoint.Id) // indien de hashset het punt bevat is het een stop
+                            },
+                            EndPoint = new {
+                                s.Item1.EndPoint.Id,
+                                s.Item1.EndPoint.X,
+                                s.Item1.EndPoint.Y,
+                                Facilities = s.Item1.EndPoint.Facilities.Select(f => new { f.Id, f.Name }), // alle facilities van het punt
+                                IsStop = stopsSet.Contains(s.Item1.EndPoint.Id) // indien de hashset het punt bevat is het een stop
+                            }
+                        })
+                    };
 
-                var mergedJson = new { // hier leg ik de vorm van de json vast 
-                    _currentRoute.Id,
-                    _currentRoute.Name,
-                    FullDistance = TxtDistance.Text, //de full distance uit het textblock in de ui halen
-                    Segments = _currentRoute.Segments.Select(s => new {
-                        s.Item1.Id,
-                        Distance = $"{Route.GetDistance(s.Item1.StartPoint, s.Item1.EndPoint)} km", // afstand per segment berekenen
-                        StartPoint = new {
-                            s.Item1.StartPoint.Id,
-                            s.Item1.StartPoint.X,
-                            s.Item1.StartPoint.Y,
-                            Facilities = s.Item1.StartPoint.Facilities.Select(f => new { f.Id, f.Name }), // alle facilities van het punt
-                            IsStop = stopsSet.Contains(s.Item1.StartPoint.Id) // indien de hashset het punt bevat is het een stop
-                        },
-                        EndPoint = new {
-                            s.Item1.EndPoint.Id,
-                            s.Item1.EndPoint.X,
-                            s.Item1.EndPoint.Y,
-                            Facilities = s.Item1.EndPoint.Facilities.Select(f => new { f.Id, f.Name }), // alle facilities van het punt
-                            IsStop = stopsSet.Contains(s.Item1.EndPoint.Id) // indien de hashset het punt bevat is het een stop
-                        }
-                    })
-                };
+                    var options = new JsonSerializerOptions {
+                        WriteIndented = true //de property true toevoegen als optie ivm indentation. Anders is de output in de file 1 lange lijn zonder structuur
+                    };
 
-                var options = new JsonSerializerOptions {
-                    WriteIndented = true //de property true toevoegen als optie ivm indentation. Anders is de output in de file 1 lange lijn zonder structuur
-                };
-
-                string json = JsonSerializer.Serialize(mergedJson, options); //de jsonstring aanmaken met de vooraf vastgelegde serialization options
-                File.WriteAllText(dialog.FileName, json); // wegschrijven naar de file
+                    string json = JsonSerializer.Serialize(mergedJson, options); //de jsonstring aanmaken met de vooraf vastgelegde serialization options
+                    File.WriteAllText(dialog.FileName, json); // wegschrijven naar de file
+                }
+            } catch (Exception ex) {
+                MessageBox.Show($"An error occurred while saving the route to file: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         private void StopIndicator_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
             if (sender is Border border && border.DataContext is NetworkPointStopsUI stop) {
-                // Toggle the IsStop property
+                // toggle de IsStop property van het geselecteerde stop object
                 stop.IsStop = !stop.IsStop;
             }
         }
@@ -177,9 +183,9 @@ namespace WPFRouteBeheerUI {
             AddPointDialogWindow window = new AddPointDialogWindow(segments, _stopsCollection.First(), _currentRoute);
             bool? result = window.ShowDialog();
             if (result == true) {
-                var newStop = (window.selectedPoint, true);
+                var newStop = (window.selectedPoint, true); // ik maak hier een tuple aan met het punt en true want een punt toevoegen vooraan of achteraan is verplicht een stop
                 _stopsCollection.Insert(0, NetworkPointStopsMapper.MapToUIModel(newStop));
-                _currentRoute.Segments.Insert(0, (window.segmentToAdd, false));
+                _currentRoute.Segments.Insert(0, (window.segmentToAdd, false)); // hier moet ik nog op checken want dit is uiteraard niet altijd zomaar false..
             }
         }
 
@@ -187,9 +193,9 @@ namespace WPFRouteBeheerUI {
             AddPointDialogWindow window = new AddPointDialogWindow(segments, _stopsCollection.Last(), _currentRoute);
             bool? result = window.ShowDialog();
             if (result == true) {
-                var newStop = (window.selectedPoint, true);
+                var newStop = (window.selectedPoint, true); // ik maak hier een tuple aan met het punt en true want een punt toevoegen vooraan of achteraan is verplicht een stop
                 _stopsCollection.Add(NetworkPointStopsMapper.MapToUIModel(newStop));
-                _currentRoute.Segments.Add((window.segmentToAdd, false));
+                _currentRoute.Segments.Add((window.segmentToAdd, false)); // hier moet ik nog op checken want dit is uiteraard niet altijd zomaar false..
             }
         }
 

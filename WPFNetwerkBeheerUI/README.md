@@ -27,6 +27,7 @@ De Netwerkbeheer Applicatie is een op WPF gebaseerde desktop applicatie ontworpe
 ### Gebruikersinterface Componenten
 - **MainWindow.xaml**: Het hoofdvenster van de applicatie met het canvas en de bedieningselementen.
 - **NetworkPointWindow**: Een dialoogvenster voor het bewerken van netwerkpunt eigenschappen.
+- **FacilitiesWindwo**: Een dialoogvenster voor het beheren van netwerkfaciliteiten.
 
 ### Gegevensvisualisatie
 - **Punten**: Weergegeven als turkooizen cirkels op het canvas.
