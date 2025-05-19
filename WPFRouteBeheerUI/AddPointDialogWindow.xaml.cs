@@ -23,10 +23,13 @@ namespace WPFRouteBeheerUI {
         public NetworkPoint selectedPoint;
         private NetworkPointStopsUI pointFromWhereToCheck;
         private List<Segment> _segments;
-        public AddPointDialogWindow( List<Segment> segments, NetworkPointStopsUI pointFromWhereToCheck, RouteUI route) {
+        private bool frontOrEnd; //front is true, end is false
+        public bool orientation; //true is reversed, false is not reversed
+        public AddPointDialogWindow( List<Segment> segments, NetworkPointStopsUI pointFromWhereToCheck, RouteUI route, bool frontOrEnd) {
             InitializeComponent();
             _segments = segments;
             this.pointFromWhereToCheck = pointFromWhereToCheck;
+            this.frontOrEnd = frontOrEnd;
             var existingRouteSegments = route.Segments.Select(t => t.Item1).ToList();
 
             // Filter out segments already in the route
@@ -57,7 +60,25 @@ namespace WPFRouteBeheerUI {
                 if (segment != null) {
                     segmentToAdd = segment;
                     DialogResult = true;
-                } 
+                }
+
+                if (frontOrEnd) { // deze check dient om te kijken wanneer we een punt vooraan toevoegen dat de orientatie normaal is of nier
+                                  // vb. A-b b-c c-d en ik voeg een punt toe voor A. Dan zou A het eindpunt moeten zijn van dat segment
+                                  // dus de orientatie is normaal. Indien dit niet is dan is de orientatie reversed (true)
+                    if (segment.EndPoint.Id == pointFromWhereToCheck.Id) {
+                        orientation = false;
+                    } else {
+                        orientation = true;
+                    }
+                } else { // deze check dient om te kijken wanneer we een punt vooraan toevoegen dat de orientatie normaal is of nier
+                         // vb. A-b b-c c-d en ik voeg een punt toe na d. Dan zou d het startpunt moeten zijn van dat segment
+                         // dus de orientatie is normaal. Indien dit niet is dan is de orientatie reversed (true)
+                    if (segment.StartPoint.Id == pointFromWhereToCheck.Id) {
+                        orientation = false;
+                    } else {
+                        orientation = true;
+                    }
+                }
             }
         }
 

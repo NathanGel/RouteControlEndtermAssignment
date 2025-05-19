@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Input;
 using WPFFaciliteitBeheerUI.Mappers;
 using WPFFaciliteitBeheerUI.Model;
+using System.Configuration;
 
 namespace WPFFaciliteitBeheerUI {
     /// <summary>
@@ -13,10 +14,11 @@ namespace WPFFaciliteitBeheerUI {
     /// </summary>
     public partial class MainWindow : Window {
         private NetworkManager networkManager;
-        private readonly string connectionString = @"Data Source=nathan\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
+        private readonly string connectionString;
         public ObservableCollection<FacilityUI> Facilities;
         public MainWindow() {
             InitializeComponent();
+            connectionString = ConfigurationManager.ConnectionStrings["dbConnection"].ConnectionString;
             networkManager = new NetworkManager(new NetworkRepository(connectionString), new RouteRepository(connectionString));
             Facilities = new(networkManager.GetAllFacilities().Select( s => FacilityMapper.MapFromDomain(s)));
             DataGridFacilities.ItemsSource = Facilities;

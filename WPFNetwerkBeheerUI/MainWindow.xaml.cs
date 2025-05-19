@@ -13,6 +13,7 @@ using Point = System.Windows.Point;
 using RouteBeheerBL.Exceptions;
 using System.Linq;
 using RouteBeheerBL.Model;
+using System.Configuration;
 
 namespace WPFNetwerkBeheerUI {
     /// <summary>
@@ -49,12 +50,13 @@ namespace WPFNetwerkBeheerUI {
 
         private SegmentUI connection;
 
-        private readonly string connectionString = @"Data Source=nathan\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
+        private readonly string connectionString;
 
         private NetworkManager nm;
 
         public MainWindow() {
             InitializeComponent();
+            connectionString = ConfigurationManager.ConnectionStrings["dbConnection"].ConnectionString;
             points.CollectionChanged += Points_CollectionChanged; // de points collection abboneren op de CollectionChanged event
             segments.CollectionChanged += Segments_CollectionChanged;
             ReadFromDatabase();

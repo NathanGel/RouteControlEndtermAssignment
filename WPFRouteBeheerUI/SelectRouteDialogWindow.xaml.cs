@@ -28,8 +28,8 @@ namespace WPFRouteBeheerUI
         private RouteManager _routeManager;
         private ObservableCollection<RouteUI> routes = new();
         private List<Segment> segments;
-        public SelectRouteDialogWindow(ObservableCollection<RouteUI> routes, bool isRouteInfo, RouteManager mn)
-        {
+        private List<NetworkPoint> points;
+        public SelectRouteDialogWindow(ObservableCollection<RouteUI> routes, bool isRouteInfo, RouteManager mn){
             InitializeComponent();
             this.routes = routes;
             _routeManager = mn;
@@ -42,12 +42,13 @@ namespace WPFRouteBeheerUI
                 RemoveRoute.Visibility = Visibility.Collapsed;
             }
         }
-        public SelectRouteDialogWindow(ObservableCollection<RouteUI> routes, bool isRouteInfo, RouteManager mn, List<Segment> segments) {
+        public SelectRouteDialogWindow(ObservableCollection<RouteUI> routes, bool isRouteInfo, RouteManager mn, List<Segment> segments, List<NetworkPoint> points) {
             InitializeComponent();
             this.routes = routes;
             _routeManager = mn;
             DataGridRoutes.ItemsSource = routes;
             this.segments = segments;
+            this.points = points;
 
             if (isRouteInfo) {
                 SelectRoute.Visibility = Visibility.Collapsed;
@@ -55,17 +56,7 @@ namespace WPFRouteBeheerUI
                 MoreInfo.Visibility = Visibility.Collapsed;
                 RemoveRoute.Visibility = Visibility.Collapsed;
             }
-        }
-        private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
-            if (e.ClickCount == 2) {
-                if (WindowState == WindowState.Maximized) {
-                    WindowState = WindowState.Normal;
-                } else {
-                    WindowState = WindowState.Maximized;
-                }
-            } else {
-                DragMove();
-            }
+
         }
 
         private void SelectRoute_Click(object sender, RoutedEventArgs e) {
@@ -82,6 +73,18 @@ namespace WPFRouteBeheerUI
             WindowState = WindowState.Minimized;
         }
 
+        private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
+            if (e.ClickCount == 2) {
+                if (WindowState == WindowState.Maximized) {
+                    WindowState = WindowState.Normal;
+                } else {
+                    WindowState = WindowState.Maximized;
+                }
+            } else {
+                DragMove();
+            }
+        }
+
         private void CloseButton_Click(object sender, RoutedEventArgs e) {
             Close();
         }
@@ -94,7 +97,7 @@ namespace WPFRouteBeheerUI
 
         private void MoreInfo_Click(object sender, RoutedEventArgs e) {
             if (DataGridRoutes.SelectedItem != null) {
-                RouteWindow routeWindow = new RouteWindow(_routeManager, (RouteUI)DataGridRoutes.SelectedItem, segments);
+                RouteWindow routeWindow = new RouteWindow(_routeManager, (RouteUI)DataGridRoutes.SelectedItem, segments, points);
                 routeWindow.ShowDialog();
             } else {
                 MessageBox.Show("Please select a route to view it's info", "No route selected", MessageBoxButton.OK, MessageBoxImage.Warning);

@@ -16,6 +16,7 @@ using System.Net;
 using RouteBeheerBL.Exceptions;
 using WPFRouteBeheerUI.Model;
 using WPFRouteBeheerUI.Mappers;
+using System.Configuration;
 
 namespace WPFRouteBeheerUI {
     /// <summary>
@@ -28,7 +29,7 @@ namespace WPFRouteBeheerUI {
         private List<Segment> segments;
         private Dictionary<Segment, Line> segmentElements = new();
         private ObservableCollection<RouteUI> routes;
-        private readonly string connectionString = @"Data Source=nathan\SQLExpress;Initial Catalog=NetworkControlTesting;Integrated Security=True;Trust Server Certificate=True";
+        private readonly string connectionString;
         private NetworkManager nm;
         private RouteManager rm;
         private bool addRouteClicked;
@@ -37,13 +38,15 @@ namespace WPFRouteBeheerUI {
         private Ellipse selectedPoint;
 
         public MainWindow() {
-            rm = new(new RouteRepository(connectionString));
-            points = new List<NetworkPoint>();
-            segments = new List<Segment>();
-            InitializeComponent();
-            ReadFromDatabase();
-            DrawNetwork();
-            try {
+            try { 
+                InitializeComponent();
+                connectionString = ConfigurationManager.ConnectionStrings["dbConnection"].ConnectionString;
+                rm = new(new RouteRepository(connectionString));
+                points = new List<NetworkPoint>();
+                segments = new List<Segment>();
+                ReadFromDatabase();
+                DrawNetwork();
+                // in dit blok verbind ik de faciliteiten aan het juiste punt binnen een route
                 routes = new ObservableCollection<RouteUI>(rm.GetAllRoutes().Select(r => RouteMapper.MapFromDomain(r)));
                 foreach (var route in routes) {
                     foreach (var (point, _) in route.Stops) {
@@ -141,7 +144,7 @@ namespace WPFRouteBeheerUI {
                     var lastPoint = selectedPoints[^1].Item1; //ik kijk na op basis van het vorig punt en het geselecteerde punt of deze ergens samen in een segment bestaan
                     var currentPoint = pointElements[selectedPoint];
 
-                    Segment? segment = segments.FirstOrDefault(
+                    Segment? segment = segments.FirstOrDefault( // dit blok zoekt naar een segment met de twee punten
                         s =>
                             (s.StartPoint.Equals(lastPoint) && s.EndPoint.Equals(currentPoint)) ||
                             (s.StartPoint.Equals(currentPoint) && s.EndPoint.Equals(lastPoint))
@@ -169,7 +172,7 @@ namespace WPFRouteBeheerUI {
                     var lastPoint = selectedPoints[^1].Item1; //ik kijk na op basis van het vorig punt en het geselecteerde punt of deze ergens samen in een segment bestaan
                     var currentPoint = pointElements[selectedPoint];
 
-                    Segment? segment = segments
+                    Segment? segment = segments // dit blok zoekt naar een segment met de twee punten
                         .FirstOrDefault(
                         s =>
                             (s.StartPoint.Equals(selectedPoints[^1].Item1) && s.EndPoint.Equals(pointElements[selectedPoint])) ||
@@ -207,7 +210,7 @@ namespace WPFRouteBeheerUI {
 
         private void BtnManageRoutes_Click(object sender, RoutedEventArgs e) {
             RemoveAllCurrentHighLights();
-            SelectRouteDialogWindow window = new SelectRouteDialogWindow(routes, true, rm, segments);
+            SelectRouteDialogWindow window = new SelectRouteDialogWindow(routes, true, rm, segments, points);
             window.Show();
         }
 

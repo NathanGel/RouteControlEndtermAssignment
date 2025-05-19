@@ -14,6 +14,7 @@ using WPFRouteBeheerUI.Model;
 using RouteBeheerBL.Managers;
 using WPFRouteBeheerUI.Mappers;
 using System.Text.Json;
+using System.Drawing;
 
 namespace WPFRouteBeheerUI {
     public partial class RouteWindow : Window {
@@ -22,10 +23,11 @@ namespace WPFRouteBeheerUI {
         private ObservableCollection<NetworkPointStopsUI> _stopsCollection;
         private RouteUI routeReference;
         private List<Segment> segments;
-
-        public RouteWindow(RouteManager rm, RouteUI route, List<Segment> segments) {
+        private List<NetworkPoint> points; 
+        public RouteWindow(RouteManager rm, RouteUI route, List<Segment> segments, List<NetworkPoint> points) {
             _routeManager = rm;
             this.segments = segments;
+            this.points = points;
             InitializeComponent();
             LoadRoute(route);
         }
@@ -38,7 +40,8 @@ namespace WPFRouteBeheerUI {
             TxtId.Text = _currentRoute.Id.ToString();
             TxtName.Text = _currentRoute.Name;
 
-            _stopsCollection = new (NetworkPointStopsMapper.MapToUIModel(route.Stops.ToList()));
+            _stopsCollection = new (NetworkPointStopsMapper.MapToUIModel(route.Stops.ToList())); // ik map de stops naar een collectie die ik kan gebruiken in de UI
+                                                                                                 // aangezien tuples niet echt UI vriendelijk zijn
             DataGridStops.ItemsSource = _stopsCollection;
 
             CalculateAndDisplayTotalDistance();
@@ -57,8 +60,8 @@ namespace WPFRouteBeheerUI {
         private void DataGridStops_SelectionChanged(object sender, SelectionChangedEventArgs e) {
             if (DataGridStops.SelectedItem is NetworkPointStopsUI) {
                 NetworkPointStopsUI uiStops = (NetworkPointStopsUI)DataGridStops.SelectedItem;
+                // Hier haal ik de faciliteiten van het geselecteerde punt op
                 ListBoxFacilities.ItemsSource = _currentRoute.Stops.FirstOrDefault(s => s.Item1.Equals(uiStops.point)).Item1.Facilities;
-                //nog zorgen dat een nieuw punt ook zijn facilities heeft enzo
             }
         }
 
@@ -149,23 +152,23 @@ namespace WPFRouteBeheerUI {
                     if (index == 0 || index == _stopsCollection.Count - 1) {
                         _stopsCollection.Remove(selectedStop);
 
-                        var segmentsList = _currentRoute.Segments.ToList(); // or access as List
+                        var segmentsList = _currentRoute.Segments.ToList();
 
-                        // Find segments connected to the selected stop
+                        // de segmenten ophalen die verbonden zijn met de geselecteerde stop
                         var connectedSegments = segmentsList
                             .Where(s => s.Item1.StartPoint.Id == selectedStop.Id || s.Item1.EndPoint.Id == selectedStop.Id)
                             .ToList();
 
                         if (connectedSegments.Count == 0) {
-                            // No connected segments found, nothing to remove
+                            // geen segmenten verbonden met de geselecteerde stop
                             return;
                         }
 
-                        // Now check if the segment is the first or last segment in the route's segments list
+                        // check of de geselecteerde stop de eerste of laatste is
                         var firstSegment = segmentsList.First();
                         var lastSegment = segmentsList.Last();
 
-                        // Remove segment only if it is the first or last
+                        // enkel verwijderen indien het gaat over het eerste of laatste punt
                         foreach (var seg in connectedSegments) {
                             if (seg.Item1.Id == firstSegment.Item1.Id || seg.Item1.Id == lastSegment.Item1.Id) {
                                 _currentRoute.Segments.Remove(seg);
@@ -176,26 +179,40 @@ namespace WPFRouteBeheerUI {
                         MessageBox.Show("Only the first or last point can be removed.", "Remove Stop", MessageBoxButton.OK, MessageBoxImage.Warning);
                     }
                 }
+            } else {
+                MessageBox.Show("Please select a stop to remove.", "Remove Stop", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
         private void AddToFront_Click(object sender, RoutedEventArgs e) {
-            AddPointDialogWindow window = new AddPointDialogWindow(segments, _stopsCollection.First(), _currentRoute);
+            AddPointDialogWindow window = new AddPointDialogWindow(segments, _stopsCollection.First(), _currentRoute, true);
             bool? result = window.ShowDialog();
             if (result == true) {
-                var newStop = (window.selectedPoint, true); // ik maak hier een tuple aan met het punt en true want een punt toevoegen vooraan of achteraan is verplicht een stop
+                var point = window.selectedPoint;
+                var matchingPoint = points.FirstOrDefault(p => p.Equals(point));
+                if (matchingPoint != null) {
+                    point.Facilities = matchingPoint.Facilities;
+                }
+                var newStop = (matchingPoint, true); // ik maak hier een tuple aan met het punt en true want een punt toevoegen vooraan of achteraan is verplicht een stop
                 _stopsCollection.Insert(0, NetworkPointStopsMapper.MapToUIModel(newStop));
-                _currentRoute.Segments.Insert(0, (window.segmentToAdd, false)); // hier moet ik nog op checken want dit is uiteraard niet altijd zomaar false..
+                _currentRoute.Stops.Insert(0, newStop); //ik voeg het punt toe aan de stops van de route zodat de faciliteiten beschikbaar zijn in de ui
+                _currentRoute.Segments.Insert(0, (window.segmentToAdd, window.orientation)); // ik haal de orientatie van de segmenten uit de window
             }
         }
 
         private void AddToEnd_Click(object sender, RoutedEventArgs e) {
-            AddPointDialogWindow window = new AddPointDialogWindow(segments, _stopsCollection.Last(), _currentRoute);
+            AddPointDialogWindow window = new AddPointDialogWindow(segments, _stopsCollection.Last(), _currentRoute, false);
             bool? result = window.ShowDialog();
             if (result == true) {
-                var newStop = (window.selectedPoint, true); // ik maak hier een tuple aan met het punt en true want een punt toevoegen vooraan of achteraan is verplicht een stop
+                var point = window.selectedPoint;
+                var matchingPoint = points.FirstOrDefault(p => p.Equals(point));
+                if (matchingPoint != null) {
+                    point.Facilities = matchingPoint.Facilities;
+                }
+                var newStop = (matchingPoint, true); // ik maak hier een tuple aan met het punt en true want een punt toevoegen vooraan of achteraan is verplicht een stop
                 _stopsCollection.Add(NetworkPointStopsMapper.MapToUIModel(newStop));
-                _currentRoute.Segments.Add((window.segmentToAdd, false)); // hier moet ik nog op checken want dit is uiteraard niet altijd zomaar false..
+                _currentRoute.Stops.Add(newStop); //ik voeg het punt toe aan de stops van de route zodat de faciliteiten beschikbaar zijn in de ui
+                _currentRoute.Segments.Add((window.segmentToAdd, window.orientation)); // ik haal de orientatie van de segmenten uit de window
             }
         }
 
