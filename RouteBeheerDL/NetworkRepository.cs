@@ -65,7 +65,11 @@ namespace RouteBeheerDL {
                     transaction.Rollback();
                     throw new InvalidOperationException("Cannot initialize the network because of a foreign key constraint conflict");
                 } catch (SqlException) {
+                    transaction.Rollback();
                     throw new ApplicationException("An error occured while initializing the network");
+                } catch (Exception) {
+                    transaction.Rollback();
+                    throw new Exception();
                 }
             }
         }
