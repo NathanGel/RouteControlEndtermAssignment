@@ -15,6 +15,7 @@ using RouteBeheerBL.Managers;
 using WPFRouteBeheerUI.Mappers;
 using System.Text.Json;
 using System.Drawing;
+using System.Diagnostics;
 
 namespace WPFRouteBeheerUI {
     public partial class RouteWindow : Window {
@@ -178,7 +179,7 @@ namespace WPFRouteBeheerUI {
                     } else {
                         MessageBox.Show("Only the first or last point can be removed.", "Remove Stop", MessageBoxButton.OK, MessageBoxImage.Warning);
                     }
-                }
+                } CalculateAndDisplayTotalDistance();
             } else {
                 MessageBox.Show("Please select a stop to remove.", "Remove Stop", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
@@ -198,6 +199,7 @@ namespace WPFRouteBeheerUI {
                 _currentRoute.Stops.Insert(0, newStop); //ik voeg het punt toe aan de stops van de route zodat de faciliteiten beschikbaar zijn in de ui
                 _currentRoute.Segments.Insert(0, (window.segmentToAdd, window.orientation)); // ik haal de orientatie van de segmenten uit de window
             }
+            CalculateAndDisplayTotalDistance();
         }
 
         private void AddToEnd_Click(object sender, RoutedEventArgs e) {
@@ -214,6 +216,7 @@ namespace WPFRouteBeheerUI {
                 _currentRoute.Stops.Add(newStop); //ik voeg het punt toe aan de stops van de route zodat de faciliteiten beschikbaar zijn in de ui
                 _currentRoute.Segments.Add((window.segmentToAdd, window.orientation)); // ik haal de orientatie van de segmenten uit de window
             }
+            CalculateAndDisplayTotalDistance();
         }
 
         private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
