@@ -32,19 +32,18 @@ namespace WPFRouteBeheerUI {
             this.frontOrEnd = frontOrEnd;
             var existingRouteSegments = route.Segments.Select(t => t.Item1).ToList();
 
-            // Filter out segments already in the route
+            // Filter segments zodat het enkel de segmenten zijn die nog niet in de route zitten en verbonden zijn met het punt van waaruit we de connectie maken
             var filteredSegments = _segments
-                .Where(s => !existingRouteSegments.Any(rs => rs.Id == s.Id))  // exclude already in route
-                .Where(s => s.StartPoint.Id == pointFromWhereToCheck.Id || s.EndPoint.Id == pointFromWhereToCheck.Id) // connected to the reference point
+                .Where(s => !existingRouteSegments.Any(rs => rs.Id == s.Id))  // excludeer degene die al in de route zitten
+                .Where(s => s.StartPoint.Id == pointFromWhereToCheck.Id || s.EndPoint.Id == pointFromWhereToCheck.Id) // filter op segmenten die verbonden zijn met het punt van waaruit we de connectie maken
                 .ToList();
 
-            // Select the point on the segment that is NOT the pointFromWhereToCheck
+            // Selecteer het punt dat niet gelijk is aan het punt van waaruit we de connectie maken
             var pointsToDisplay = filteredSegments
                 .Select(s => s.StartPoint.Id == pointFromWhereToCheck.Id ? s.EndPoint : s.StartPoint)
                 .Distinct()
                 .ToList();
 
-            // Bind to ListBox
             ListBoxPoints.ItemsSource = pointsToDisplay;
         }
         private void SelectButton_Click(object sender, RoutedEventArgs e) {
