@@ -26,7 +26,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Title Bar -->
+        <!-- De Custom Top Bar -->
         <Grid Grid.Row="0" Background="#252836" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
             <TextBlock Text="Select Route" Foreground="#F5F7FB" Margin="10,0,0,0"
                        VerticalAlignment="Center" HorizontalAlignment="Left" FontWeight="SemiBold"/>
@@ -56,7 +56,6 @@
             </StackPanel>
         </Grid>
 
-        <!-- DataGrid for Routes -->
         <DataGrid Grid.Row="1" Name="DataGridRoutes" Margin="5"
                   Background="#2A2D3E"
                   Foreground="#F5F7FB"

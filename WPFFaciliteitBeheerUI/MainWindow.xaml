@@ -19,6 +19,7 @@
         </Style>
     </Window.Resources>
 
+    <!--De custom top bar-->
     <Grid Margin="0">
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
@@ -57,7 +58,7 @@
                     </Button.Triggers>
                 </Button>
             </StackPanel>
-        </Grid>
+    </Grid>
 
         <DataGrid Grid.Row="1" Name="DataGridFacilities" Margin="5"
                   Background="#2A2D3E"

@@ -27,7 +27,7 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- Top Bar -->
+            <!-- De custom TopBar -->
             <Grid Grid.Row="0" Background="#252836" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
                 <TextBlock x:Name="TopBarTitle" Text="Facility" 
                            Foreground="#F5F7FB" 
@@ -59,7 +59,7 @@
                 </StackPanel>
             </Grid>
 
-            <!-- Content Area -->
+            <!-- De content area -->
             <Grid Grid.Row="1" Margin="10">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>

@@ -27,7 +27,7 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- Custom Title Bar -->
+            <!-- De Custom Top Bar -->
             <Grid Grid.Row="0" Background="#252836" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
                 <TextBlock x:Name="TopBarTitle" Text="Network Point" 
                            Foreground="#F5F7FB" 
@@ -58,7 +58,6 @@
                 </StackPanel>
             </Grid>
 
-            <!-- Content -->
             <Grid Grid.Row="1" Margin="10">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>

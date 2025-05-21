@@ -24,14 +24,11 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="30"/>
-                <!-- Top Bar -->
                 <RowDefinition Height="Auto"/>
-                <!-- Button Bar -->
                 <RowDefinition Height="*"/>
-                <!-- Main Content -->
             </Grid.RowDefinitions>
 
-            <!-- Top Bar -->
+            <!-- De custom top Bar -->
             <Grid Background="#252836" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
                 <TextBlock Text="Network Management" Foreground="#F5F7FB" Margin="10,0,0,0"
                            VerticalAlignment="Center" HorizontalAlignment="Left" FontWeight="SemiBold"/>
@@ -64,7 +61,6 @@
                 </StackPanel>
             </Grid>
 
-            <!-- Button Bar -->
             <Grid Grid.Row="1" Margin="10">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -87,7 +83,6 @@
                 </StackPanel>
             </Grid>
 
-            <!-- Main Content -->
             <Grid Grid.Row="2">
                 <Canvas Name="canvas" Width="550" Height="550"
                         Background="#2A2D3E" Margin="10"

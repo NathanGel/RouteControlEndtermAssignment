@@ -24,12 +24,10 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="30"/>
-                <!-- Top Bar -->
                 <RowDefinition Height="*"/>
-                <!-- Content -->
             </Grid.RowDefinitions>
 
-            <!-- Top Bar -->
+            <!-- De custom Top Bar -->
             <Grid Grid.Row="0" Background="#252836" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
                 <TextBlock Text="Facilities" Foreground="#F5F7FB" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,0,0" FontWeight="SemiBold"/>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -37,7 +35,6 @@
                 </StackPanel>
             </Grid>
 
-            <!-- Main Content -->
             <Grid Grid.Row="1" Margin="10">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>

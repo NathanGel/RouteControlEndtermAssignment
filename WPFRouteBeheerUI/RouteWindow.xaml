@@ -89,12 +89,10 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="30"/>
-                <!-- Top Bar -->
                 <RowDefinition Height="*"/>
-                <!-- Content -->
             </Grid.RowDefinitions>
 
-            <!-- Top Bar -->
+            <!--De Custom Top Bar-->
             <Grid Grid.Row="0" Background="#252836" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
                 <TextBlock Text="Route Management" Foreground="#F5F7FB" VerticalAlignment="Center" Margin="10,0,0,0" FontWeight="SemiBold"/>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -102,7 +100,6 @@
                 </StackPanel>
             </Grid>
 
-            <!-- Main Content -->
             <Grid Grid.Row="1" Margin="10">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -114,7 +111,6 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Route Details -->
                 <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,15">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -135,7 +131,6 @@
                     <TextBox Grid.Column="5" Name="TxtDistance" IsReadOnly="True"/>
                 </Grid>
 
-                <!-- Network Points and Stops DataGrid -->
                 <DataGrid Grid.Row="1" Grid.Column="0" Name="DataGridStops" 
           AutoGenerateColumns="False" Margin="0,0,10,0"
           HeadersVisibility="Column" CanUserAddRows="False" 
@@ -143,7 +138,6 @@
           SelectionChanged="DataGridStops_SelectionChanged"
           ItemsSource="{Binding Stops}">
 
-                    <!-- Context menu for entire DataGrid -->
                     <DataGrid.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="Remove Point" Click="RemovePoint_Click"/>
@@ -153,7 +147,6 @@
                     </DataGrid.ContextMenu>
 
                     <DataGrid.Columns>
-                        <!-- Centered Point ID -->
                         <DataGridTextColumn Header="Point ID" Binding="{Binding Id}" IsReadOnly="True" Width="auto">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
@@ -164,7 +157,6 @@
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
 
-                        <!-- Centered X -->
                         <DataGridTextColumn Header="X" Binding="{Binding X}" IsReadOnly="True" Width="*">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
@@ -175,7 +167,6 @@
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
 
-                        <!-- Centered Y -->
                         <DataGridTextColumn Header="Y" Binding="{Binding Y}" IsReadOnly="True" Width="*">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
@@ -186,7 +177,6 @@
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
 
-                        <!-- Stop indicator with colored circle -->
                         <DataGridTemplateColumn Header="Is Stop" Width="*">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -215,7 +205,6 @@
 
 
 
-                <!-- Facilities List -->
                 <Grid Grid.Row="1" Grid.Column="1" Margin="10,0,0,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -226,7 +215,6 @@
                     <ListBox Grid.Row="1" Name="ListBoxFacilities" DisplayMemberPath="Name"/>
                 </Grid>
 
-                <!-- Buttons -->
                 <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,15,0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
