@@ -244,6 +244,8 @@ namespace WPFRouteBeheerUI {
                     route.Id = rm.AddRoute(RouteMapper.MapToDomainWithoutId(route));
                     routes.Add(route);
                     //maybe something that shows the route was added???
+                } catch (InvalidOperationException){ 
+                    MessageBox.Show("An error occured while adding a route", "Route already exists", MessageBoxButton.OK, MessageBoxImage.Warning);
                 } catch (RouteException ex) {
                     MessageBox.Show("An error occured because the route does not meet the specified requirements", ex.Message, MessageBoxButton.OK, MessageBoxImage.Warning);
                 } catch (ApplicationException ex) {

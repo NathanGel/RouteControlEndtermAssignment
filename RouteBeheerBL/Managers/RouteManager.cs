@@ -10,11 +10,14 @@ namespace RouteBeheerBL.Managers {
         }
 
         public int AddRoute(Route route) {
+            if (_repo.DoesRouteNameExist(route.Name)) throw new InvalidOperationException("Route name already exists");
             if (route == null) throw new RouteException("Route invalid cannot be null");
             return _repo.Add(route);
         }
 
         public void UpdateRoute(Route route) {
+            if (_repo.DoesRouteNameExist(route.Name)) throw new InvalidOperationException("Route name already exists");
+            if (route == null) throw new RouteException("Route invalid cannot be null");
             _repo.Update(route);
         }
 

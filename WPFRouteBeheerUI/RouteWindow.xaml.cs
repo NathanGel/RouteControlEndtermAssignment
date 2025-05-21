@@ -79,7 +79,8 @@ namespace WPFRouteBeheerUI {
                 routeReference.Segments = _currentRoute.Segments; // de segmenten van de route aanpassen
                 routeReference.Stops = _currentRoute.Stops; // de stops van de route aanpassen
                 MessageBox.Show("Changes saved successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-
+            } catch (InvalidOperationException) {
+                MessageBox.Show("The route is not valid. Please check the route and try again.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
             } catch (RouteException ex) {
                 MessageBox.Show(ex.Message, "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
             } catch (ApplicationException ex) {

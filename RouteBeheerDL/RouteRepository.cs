@@ -92,6 +92,23 @@ namespace RouteBeheerDL {
                 }
             }
         }
+        public bool DoesRouteNameExist(string name) {
+            string query = "SELECT COUNT(*) AS count FROM Routes WHERE name=@name";
+            using (SqlConnection connection = new(connectionstring))
+            using (SqlCommand cmd = connection.CreateCommand()) {
+                try {
+                    cmd.CommandText = query;
+                    cmd.Parameters.AddWithValue("@name", name);
+                    connection.Open();
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    return reader.Read() && (int)reader["count"] != 0 ? true : false;
+                } catch (SqlException) {
+                    throw new ApplicationException("An error occurred while checking for existing route names.");
+                } catch (Exception) {
+                    throw new Exception();
+                }
+            }
+        }
 
         public void Delete(Route route) {
             string queryRouteNetworkPoints = "DELETE FROM Route_NetworkPoints WHERE route_id=@routeId";
