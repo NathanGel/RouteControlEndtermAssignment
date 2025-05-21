@@ -47,10 +47,9 @@ namespace WPFRouteBeheerUI {
             ListBoxPoints.ItemsSource = pointsToDisplay;
         }
         private void SelectButton_Click(object sender, RoutedEventArgs e) {
-            // Get selected point from ListBox
             if (ListBoxPoints.SelectedItem is NetworkPoint selectedPoint) {
                 this.selectedPoint = selectedPoint;
-                // Find the segment in _segments that connects pointFromWhereToCheck and selectedPoint
+                // zoek het segment dat overeenkomt met het geselecteerde punt
                 var segment = _segments.FirstOrDefault(s =>
                     (s.StartPoint.Id == pointFromWhereToCheck.Id && s.EndPoint.Id == selectedPoint.Id) ||
                     (s.EndPoint.Id == pointFromWhereToCheck.Id && s.StartPoint.Id == selectedPoint.Id)
