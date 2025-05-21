@@ -58,6 +58,7 @@ namespace RouteBeheerBL.Managers {
         }
 
         public int AddFacility(Facility facility) {
+            if (repo.DoesFacilityNameExist(facility.Name, 0)) throw new InvalidOperationException("Cannot add facility because one with the same name already exists");
             if (facility == null) throw new NetworkException("AddFacility Invalid Null");
             return repo.AddFacility(facility);
         }
@@ -69,6 +70,7 @@ namespace RouteBeheerBL.Managers {
         }
 
         public void UpdateFacility(Facility facility) {
+            if (repo.DoesFacilityNameExist(facility.Name, facility.Id)) throw new InvalidOperationException("Cannot update facility because one with the same name already exists");
             if (facility == null) throw new NetworkException("UpdateFacility Invalid Null");
             repo.UpdateFacility(facility);
         }

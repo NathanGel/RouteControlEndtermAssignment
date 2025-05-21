@@ -310,6 +310,24 @@ namespace RouteBeheerDL {
                 }
             }
         }
+        public bool DoesFacilityNameExist(string name, int excludedId) {
+            string query = "SELECT count(*) AS count FROM Facilities WHERE name=@name AND id != @excludedId";
+            using (SqlConnection connection = new(connectionString))
+            using (SqlCommand cmd = connection.CreateCommand()) {
+                try {
+                    cmd.CommandText = query;
+                    cmd.Parameters.AddWithValue("@name", name);
+                    cmd.Parameters.AddWithValue("@excludedId", excludedId);
+                    connection.Open();
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    return reader.Read() && (int)reader["count"] != 0 ? true : false;
+                } catch (SqlException) {
+                    throw new ApplicationException("An error occured while checking for existing facilities");
+                } catch (Exception) {
+                    throw new Exception();
+                }
+            }
+        }
         public bool CheckForExistingConnectionsWithinSegments(NetworkPoint point) {
             string query = "SELECT count(*) AS count FROM Segments WHERE start_id=@id OR stop_id=@id";
             using (SqlConnection connection = new(connectionString))

@@ -92,13 +92,15 @@ namespace RouteBeheerDL {
                 }
             }
         }
-        public bool DoesRouteNameExist(string name) {
-            string query = "SELECT COUNT(*) AS count FROM Routes WHERE name=@name";
+
+        public bool DoesRouteNameExist(string name, int excludedId) {
+            string query = "SELECT COUNT(*) AS count FROM Routes WHERE name=@name AND id!=@id";
             using (SqlConnection connection = new(connectionstring))
             using (SqlCommand cmd = connection.CreateCommand()) {
                 try {
                     cmd.CommandText = query;
                     cmd.Parameters.AddWithValue("@name", name);
+                    cmd.Parameters.AddWithValue("@id", excludedId);
                     connection.Open();
                     SqlDataReader reader = cmd.ExecuteReader();
                     return reader.Read() && (int)reader["count"] != 0 ? true : false;

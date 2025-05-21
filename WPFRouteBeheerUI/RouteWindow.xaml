@@ -122,13 +122,13 @@
                     </Grid.ColumnDefinitions>
 
                     <Label Grid.Column="0" Content="ID:" Margin="0,0,5,0"/>
-                    <TextBox Grid.Column="1" Name="TxtId" IsReadOnly="True"/>
+                    <TextBox Grid.Column="1" Name="TxtId" IsEnabled="False"/>
 
                     <Label Grid.Column="2" Content="Name:" Margin="20,0,5,0"/>
                     <TextBox Grid.Column="3" Name="TxtName"/>
 
                     <Label Grid.Column="4" Content="Full Distance:" Margin="20,0,5,0"/>
-                    <TextBox Grid.Column="5" Name="TxtDistance" IsReadOnly="True"/>
+                    <TextBox Grid.Column="5" Name="TxtDistance" IsEnabled="False"/>
                 </Grid>
 
                 <DataGrid Grid.Row="1" Grid.Column="0" Name="DataGridStops" 

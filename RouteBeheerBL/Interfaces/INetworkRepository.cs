@@ -15,6 +15,7 @@ namespace RouteBeheerBL.Interfaces {
         List<NetworkPoint> GetNetworkPoints();
         List<Segment> GetSegments();
         int AddFacility(Facility facility);
+        bool DoesFacilityNameExist(string name, int excludedId);
         void RemoveFacility(Facility facility);
         void UpdateFacility(Facility facility);
         List<Facility> GetAllFacilities();
